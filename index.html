@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Corridex – App para Motorista Uber e 99 | Calcule Valor por KM em Tempo Real</title>
+    <meta
+      name="description"
+      content="Corridex é o app para motoristas Uber Driver e 99 Motorista que calcula automaticamente o valor por km e ganho por hora de cada corrida. Saiba se vale a pena antes de aceitar. Baixe grátis para iPhone."
+    />
+    <meta name="keywords" content="app motorista uber, app motorista 99, calcular valor por km uber, ganhar mais no uber, corrida lucrativa, calculadora uber, rentabilidade corrida, app para motorista iphone" />
+    <meta name="author" content="Corridex" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://corridex.app/" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="images/logo.jpeg" />
+    <link rel="apple-touch-icon" href="images/logo.jpeg" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Corridex – App para Motorista Uber e 99" />
+    <meta property="og:description" content="Calcule automaticamente o valor por km e ganho por hora de cada corrida. Saiba se vale a pena antes de aceitar." />
+    <meta property="og:image" content="images/logo.jpeg" />
+    <meta property="og:locale" content="pt_BR" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Corridex – App para Motorista Uber e 99" />
+    <meta name="twitter:description" content="Calcule automaticamente o valor por km e ganho por hora de cada corrida." />
+    
+    <!-- App Store Smart Banner -->
+    <meta name="apple-itunes-app" content="app-id=6756681755" />
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MobileApplication",
+      "name": "Corridex",
+      "operatingSystem": "iOS",
+      "applicationCategory": "UtilitiesApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "BRL"
+      },
+      "description": "App para motoristas Uber Driver e 99 Motorista que calcula automaticamente o valor por km e ganho por hora de cada corrida em tempo real.",
+      "downloadUrl": "https://apps.apple.com/br/app/corridex/id6756681755",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5",
+        "ratingCount": "1"
+      }
+    }
+    </script>
+
+    <style>
+      /* Variáveis CSS */
+      :root {
+        --bg: #ffffff;
+        --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --text: #1a1a1a;
+        --muted: #666666;
+        --accent: #007aff;
+        --accent-hover: #0051d5;
+        --border: #e5e5e5;
+        --card-bg: #f9f9f9;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Reset e base */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        font-size: 16px;
+      }
+
+      /* Container principal */
+      header,
+      section,
+      footer {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem;
+      }
+
+      /* Hero Section */
+      header {
+        text-align: center;
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 0 0 30px 30px;
+        margin-bottom: 2rem;
+      }
+
+      /* Logo do App */
+      .logo {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 2rem;
+        border-radius: 26px;
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+  
+      }
+
+      /* Placeholder para logo quando imagem não carregar */
+      .logo::before {
+        content: "📱";
+        font-size: 4rem;
+        position: absolute;
+        display: none;
+      }
+
+      .logo img[src=""],
+      .logo:has(img[src=""])::before,
+      .logo:not(:has(img[src]))::before {
+        display: block;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.3;
+        color: var(--text);
+      }
+
+      header p {
+        font-size: 1.125rem;
+        color: var(--muted);
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* Badge da App Store */
+      .badge {
+        display: inline-block;
+        margin-top: 1.5rem;
+      }
+
+      .badge a {
+        display: inline-block;
+        text-decoration: none;
+        transition: transform 0.2s, opacity 0.2s;
+      }
+
+      .badge a:hover {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+
+      .badge img {
+        height: 60px;
+        width: auto;
+        display: block;
+      }
+
+      /* Seções */
+      section {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+      }
+
+      h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: var(--text);
+        text-align: center;
+      }
+
+      /* Lista de problemas */
+      .problem-list {
+        list-style: none;
+        margin-top: 1rem;
+        display: grid;
+        gap: 1rem;
+      }
+
+      .problem-list li {
+        padding: 1.25rem;
+        padding-left: 2.5rem;
+        position: relative;
+        color: var(--text);
+        font-size: 1.125rem;
+        background: var(--card-bg);
+        border-radius: 12px;
+        border-left: 4px solid var(--accent);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .problem-list li:hover {
+        transform: translateX(5px);
+        box-shadow: var(--shadow);
+      }
+
+      .problem-list li::before {
+        content: "⚠";
+        position: absolute;
+        left: 1rem;
+        font-size: 1.25rem;
+      }
+
+      /* Box de conteúdo */
+      .box {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-top: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: box-shadow 0.3s;
+      }
+
+      .box:hover {
+        box-shadow: var(--shadow-lg);
+      }
+
+      .box p {
+        color: var(--text);
+        margin-bottom: 1.5rem;
+        font-size: 1.125rem;
+        line-height: 1.8;
+      }
+
+      .box ul {
+        list-style: none;
+        margin-top: 1rem;
+      }
+
+      .box ul li {
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+        position: relative;
+        color: var(--text);
+        font-size: 1.125rem;
+      }
+
+      .box ul li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #22c55e;
+        font-weight: bold;
+        font-size: 1.25rem;
+      }
+
+      /* Seção de Screenshots */
+      .screenshots {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      .screenshot-item {
+        text-align: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .screenshot-item img {
+        width: 100%;
+        max-width: 280px;
+        height: auto;
+        aspect-ratio: 9 / 19.5;
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        transition: transform 0.3s;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        object-fit: cover;
+        display: block;
+      }
+
+      .screenshot-item img:hover {
+        transform: scale(1.05);
+      }
+
+      /* Placeholder para screenshots quando imagem não carregar */
+      .screenshot-item img::after {
+        content: "📸";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3rem;
+        opacity: 0.5;
+      }
+
+      .screenshot-item p {
+        color: var(--text);
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+
+      .screenshot-item span {
+        color: var(--muted);
+        font-size: 0.875rem;
+      }
+
+      /* CTA Section */
+      .cta-section {
+        text-align: center;
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 30px;
+        margin-top: 2rem;
+      }
+
+      .cta-section h2 {
+        margin-bottom: 1rem;
+      }
+
+      .cta-section p {
+        color: var(--muted);
+        margin-bottom: 1.5rem;
+        font-size: 1.125rem;
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        font-size: 0.875rem;
+        color: var(--muted);
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        margin-top: 2rem;
+      }
+
+      /* Responsividade - Tablet e Desktop */
+      @media (min-width: 768px) {
+        header,
+        section,
+        footer {
+          padding-left: 2rem;
+          padding-right: 2rem;
+        }
+
+        header {
+          padding-top: 5rem;
+          padding-bottom: 5rem;
+        }
+
+        .logo {
+          width: 150px;
+          height: 150px;
+        }
+
+        h1 {
+          font-size: 2.5rem;
+        }
+
+        h2 {
+          font-size: 2rem;
+        }
+
+        header p {
+          font-size: 1.25rem;
+        }
+
+        .badge img {
+          height: 60px;
+        }
+
+        .screenshots {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* Responsividade - Desktop grande */
+      @media (min-width: 1024px) {
+        .screenshots {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      /* Responsividade - Mobile pequeno */
+      @media (max-width: 480px) {
+        header {
+          padding-top: 2rem;
+          padding-bottom: 2rem;
+          border-radius: 0 0 20px 20px;
+        }
+
+        .logo {
+          width: 100px;
+          height: 100px;
+          margin-bottom: 1.5rem;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        h2 {
+          font-size: 1.5rem;
+        }
+
+        header p {
+          font-size: 1rem;
+        }
+
+        .badge img {
+          height: 50px;
+        }
+
+        section {
+          padding-top: 2rem;
+          padding-bottom: 2rem;
+        }
+
+        .box {
+          padding: 1.5rem;
+        }
+
+        .screenshots {
+          grid-template-columns: 1fr;
+          gap: 2rem;
+          justify-items: center;
+        }
+
+        .screenshot-item img {
+          max-width: 250px;
+        }
+
+        .screenshot-item p {
+          font-size: 0.9rem;
+        }
+
+        .screenshot-item span {
+          font-size: 0.8rem;
+        }
+
+        .cta-section {
+          border-radius: 20px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Hero Section -->
+    <header>
+      <div class="logo">
+        <img
+          src="images/logo.jpeg"
+          alt="Corridex - App para calcular valor por km de corridas Uber e 99"
+        />
+      </div>
+      <h1>Calcule o valor por km das corridas Uber e 99 automaticamente</h1>
+      <p>
+        O Corridex é o <strong>app para motoristas</strong> que analisa ofertas do 
+        <strong>Uber Driver</strong> e <strong>99 Motorista</strong> em tempo real. 
+        Saiba o <strong>ganho por hora</strong> e decida se a corrida é lucrativa antes de aceitar.
+      </p>
+
+      <div class="badge">
+        <a
+          href="https://apps.apple.com/br/app/corridex/id6756681755"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/pt-br?size=250x83"
+            alt="Baixar na App Store"
+          />
+        </a>
+      </div>
+    </header>
+
+    <!-- Seção de Problema -->
+    <section>
+      <h2>Problemas comuns de motoristas Uber e 99</h2>
+      <ul class="problem-list">
+        <li>Já aceitou uma corrida que não compensava financeiramente?</li>
+        <li>Difícil calcular o valor por km enquanto está dirigindo?</li>
+        <li>Falta tempo para analisar se a corrida é rentável?</li>
+      </ul>
+    </section>
+
+    <!-- Seção de Solução -->
+    <section>
+      <h2>Como o Corridex ajuda você a ganhar mais</h2>
+      <div class="box">
+        <p>
+          O Corridex funciona como uma <strong>calculadora de corridas</strong> inteligente. 
+          Ele lê automaticamente a oferta exibida no Uber Driver ou 99 Motorista e faz 
+          todos os cálculos de rentabilidade por você, em tempo real.
+        </p>
+        <ul>
+          <li><strong>Valor por km</strong> calculado automaticamente (R$/km)</li>
+          <li><strong>Ganho estimado por hora</strong> para cada corrida</li>
+          <li>Decisão rápida e segura, sem distração no trânsito</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Seção de Screenshots -->
+    <section>
+      <h2>Veja o app funcionando no iPhone</h2>
+      <div class="screenshots">
+        <div class="screenshot-item">
+          <img
+            src="images/screenshot-onboarding.png"
+            alt="App Corridex para motoristas Uber e 99 - Tela inicial de configuração"
+            onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'375\' height=\'812\'%3E%3Crect width=\'375\' height=\'812\' fill=\'%23f5f7fa\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\' font-size=\'24\' fill=\'%23666\'%3E📱 Screenshot%3C/text%3E%3C/svg%3E'"
+          />
+          <p>Configure em segundos</p>
+          <span>Defina seu valor mínimo por km e ganho por hora</span>
+        </div>
+        <div class="screenshot-item">
+          <img
+            src="images/screenshot-monitoring.png"
+            alt="Corridex monitorando corridas do Uber Driver e 99 Motorista em tempo real"
+            onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'375\' height=\'812\'%3E%3Crect width=\'375\' height=\'812\' fill=\'%23f5f7fa\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\' font-size=\'24\' fill=\'%23666\'%3E📱 Screenshot%3C/text%3E%3C/svg%3E'"
+          />
+          <p>Monitoramento automático</p>
+          <span>Funciona em segundo plano enquanto você dirige</span>
+        </div>
+        <div class="screenshot-item">
+          <img
+            src="images/screenshot-notification-uber.png"
+            alt="Notificação mostrando valor por km e ganho por hora da corrida Uber"
+            onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'375\' height=\'812\'%3E%3Crect width=\'375\' height=\'812\' fill=\'%23f5f7fa\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\' font-size=\'24\' fill=\'%23666\'%3E📱 Screenshot%3C/text%3E%3C/svg%3E'"
+          />
+          <p>Notificação instantânea</p>
+          <span>Veja R$/km e ganho/hora antes de aceitar</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção de Funcionamento -->
+    <section>
+      <h2>Como funciona o app para motoristas</h2>
+      <div class="box">
+        <ul>
+          <li>Monitoramento de tela em tempo real via ReplayKit</li>
+          <li>Análise das ofertas de corrida diretamente no seu iPhone</li>
+          <li>Notificação instantânea quando a corrida atende seus critérios de rentabilidade</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Seção de Privacidade -->
+    <section>
+      <h2>Sua privacidade garantida</h2>
+      <div class="box">
+        <ul>
+          <li>Processamento 100% local no seu iPhone</li>
+          <li>Nenhum dado de corrida enviado para servidores externos</li>
+          <li>Nenhuma gravação de tela salva ou armazenada</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CTA Final -->
+    <section class="cta-section">
+      <h2>Baixe grátis para iPhone</h2>
+      <p>Comece a calcular o valor por km das suas corridas Uber e 99 agora mesmo.</p>
+
+      <div class="badge">
+        <a
+          href="https://apps.apple.com/br/app/corridex/id6756681755"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Baixar app Corridex na App Store"
+        >
+          <img
+            src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/pt-br?size=250x83"
+            alt="Baixar Corridex na App Store - App gratuito para motoristas Uber e 99"
+          />
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>Corridex © 2025 – App para motoristas Uber Driver e 99 Motorista</p>
+    </footer>
+  </body>
+</html>
