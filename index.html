@@ -151,8 +151,40 @@
         padding: 2rem 1.25rem;
       }
 
+      /* Language switcher */
+      .lang-switcher {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 0.25rem;
+        z-index: 10;
+      }
+      .lang-switcher button {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.35rem 0.65rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .lang-switcher button:hover {
+        background: var(--card-bg);
+      }
+      .lang-switcher button.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+      }
+
       /* Hero Section */
       header {
+        position: relative;
         text-align: center;
         padding-top: 4rem;
         padding-bottom: 4rem;
@@ -575,14 +607,27 @@
     <!-- End Google Tag Manager (noscript) -->
     <!-- Hero Section -->
     <header>
+      <nav
+        class="lang-switcher"
+        aria-label="Seleção de idioma"
+        data-i18n-aria-label="langSwitcher.ariaLabel"
+      >
+        <button type="button" id="lang-pt" aria-current="true">PT</button>
+        <button type="button" id="lang-en">EN</button>
+      </nav>
       <div class="brand-logo">
         <h1>Corridex</h1>
       </div>
       <div class="app-icon">
-        <img src="images/logo.png" alt="Corridex - Ícone do app" />
+        <img
+          src="images/logo.png"
+          alt="Corridex - Ícone do app"
+          data-i18n-alt="hero.iconAlt"
+          data-i18n-src="images/logo.png"
+        />
       </div>
-      <h1>App para Motorista Uber Driver e 99 no iPhone</h1>
-      <p>
+      <h1 data-i18n="hero.h1">App para Motorista Uber Driver e 99 no iPhone</h1>
+      <p data-i18n-html="hero.p">
         O Corridex é o <strong>primeiro app para iPhone</strong> que monitora
         ofertas do <strong>Uber Driver</strong> e
         <strong>99 Motorista</strong> em tempo real. Calcule o
@@ -593,13 +638,16 @@
 
       <div class="badge">
         <a
+          id="badge-hero"
           href="https://apps.apple.com/br/app/corridex/id6756681755?utm_source=google&utm_medium=search&utm_campaign=landing_corridex"
           target="_blank"
           rel="noopener noreferrer"
         >
           <img
+            id="badge-hero-img"
             src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/pt-br?size=250x83"
             alt="Baixar na App Store"
+            data-i18n-alt="hero.badgeAlt"
           />
         </a>
       </div>
@@ -607,19 +655,25 @@
 
     <!-- Seção de Problema -->
     <section>
-      <h2>Problemas comuns de motoristas Uber e 99</h2>
+      <h2 data-i18n="problems.h2">Problemas comuns de motoristas Uber e 99</h2>
       <ul class="problem-list">
-        <li>Já aceitou uma corrida que não compensava financeiramente?</li>
-        <li>Difícil calcular o valor por km enquanto está dirigindo?</li>
-        <li>Falta tempo para analisar se a corrida é rentável?</li>
+        <li data-i18n="problems.li1">
+          Já aceitou uma corrida que não compensava financeiramente?
+        </li>
+        <li data-i18n="problems.li2">
+          Difícil calcular o valor por km enquanto está dirigindo?
+        </li>
+        <li data-i18n="problems.li3">
+          Falta tempo para analisar se a corrida é rentável?
+        </li>
       </ul>
     </section>
 
     <!-- Seção de Solução -->
     <section>
-      <h2>Como o Corridex ajuda você a ganhar mais</h2>
+      <h2 data-i18n="solution.h2">Como o Corridex ajuda você a ganhar mais</h2>
       <div class="box">
-        <p>
+        <p data-i18n-html="solution.p">
           O Corridex é o <strong>primeiro aplicativo para iPhone</strong> que
           oferece <strong>monitoramento de corridas Uber e 99</strong>. Funciona
           como uma calculadora inteligente que lê automaticamente a oferta
@@ -627,81 +681,101 @@
           rentabilidade por você, em tempo real.
         </p>
         <ul>
-          <li>
+          <li data-i18n-html="solution.li1">
             <strong>Valor por km</strong> calculado automaticamente (R$/km)
           </li>
-          <li><strong>Ganho estimado por hora</strong> para cada corrida</li>
-          <li>Decisão rápida e segura, sem distração no trânsito</li>
+          <li data-i18n-html="solution.li2">
+            <strong>Ganho estimado por hora</strong> para cada corrida
+          </li>
+          <li data-i18n="solution.li3">
+            Decisão rápida e segura, sem distração no trânsito
+          </li>
         </ul>
       </div>
     </section>
 
     <!-- Seção de Screenshots -->
     <section>
-      <h2>Exclusivo para iPhone – Veja como funciona</h2>
+      <h2 data-i18n="screenshots.h2">
+        Exclusivo para iPhone – Veja como funciona
+      </h2>
       <div class="screenshots">
         <div class="screenshot-item">
           <img
             src="images/screenshot-onboarding.png"
             alt="App Corridex para motoristas Uber e 99 - Tela inicial de configuração"
+            data-i18n-src="images/screenshot-onboarding.png"
+            data-i18n-alt="screenshots.alt1"
             onerror="
               this.onerror = null;
               this.src =
                 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'375\' height=\'812\'%3E%3Crect width=\'375\' height=\'812\' fill=\'%23f5f7fa\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\' font-size=\'24\' fill=\'%23666\'%3E📱 Screenshot%3C/text%3E%3C/svg%3E';
             "
           />
-          <p>Configure em segundos</p>
-          <span>Defina seu valor mínimo por km e ganho por hora</span>
+          <p data-i18n="screenshots.title1">Configure em segundos</p>
+          <span data-i18n="screenshots.caption1"
+            >Defina seu valor mínimo por km e ganho por hora</span
+          >
         </div>
         <div class="screenshot-item">
           <img
             src="images/screenshot-monitoring.png"
             alt="Corridex monitorando corridas do Uber Driver e 99 Motorista em tempo real"
+            data-i18n-src="images/screenshot-monitoring.png"
+            data-i18n-alt="screenshots.alt2"
             onerror="
               this.onerror = null;
               this.src =
                 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'375\' height=\'812\'%3E%3Crect width=\'375\' height=\'812\' fill=\'%23f5f7fa\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\' font-size=\'24\' fill=\'%23666\'%3E📱 Screenshot%3C/text%3E%3C/svg%3E';
             "
           />
-          <p>Monitoramento automático</p>
-          <span>Funciona em segundo plano enquanto você dirige</span>
+          <p data-i18n="screenshots.title2">Monitoramento automático</p>
+          <span data-i18n="screenshots.caption2"
+            >Funciona em segundo plano enquanto você dirige</span
+          >
         </div>
         <div class="screenshot-item">
           <img
             src="images/screenshot-notification-uber.png"
             alt="Notificação mostrando valor por km e ganho por hora da corrida Uber"
+            data-i18n-src="images/screenshot-notification-uber.png"
+            data-i18n-alt="screenshots.alt3"
             onerror="
               this.onerror = null;
               this.src =
                 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'375\' height=\'812\'%3E%3Crect width=\'375\' height=\'812\' fill=\'%23f5f7fa\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\' font-size=\'24\' fill=\'%23666\'%3E📱 Screenshot%3C/text%3E%3C/svg%3E';
             "
           />
-          <p>Notificação instantânea</p>
-          <span>Veja R$/km e ganho/hora antes de aceitar</span>
+          <p data-i18n="screenshots.title3">Notificação instantânea</p>
+          <span data-i18n="screenshots.caption3"
+            >Veja R$/km e ganho/hora antes de aceitar</span
+          >
         </div>
       </div>
     </section>
 
     <!-- Seção de Funcionamento -->
     <section>
-      <h2>Tecnologia pioneira para iPhone</h2>
+      <h2 data-i18n="tech.h2">Tecnologia pioneira para iPhone</h2>
       <div class="box">
-        <p>
+        <p data-i18n-html="tech.p">
           O Corridex é o <strong>primeiro app para iPhone</strong> a oferecer
           monitoramento automático de corridas Uber e 99. Usando tecnologia
           exclusiva, conseguimos trazer para o iOS uma funcionalidade que antes
           só existia em Android.
         </p>
         <ul>
-          <li>
+          <li data-i18n="tech.li1">
             Monitoramento de tela em tempo real via ReplayKit (exclusivo iOS)
           </li>
-          <li>Análise das ofertas de corrida diretamente no seu iPhone</li>
-          <li>
+          <li data-i18n="tech.li2">
+            Análise das ofertas de corrida diretamente no seu iPhone
+          </li>
+          <li data-i18n="tech.li3">
             Notificação instantânea quando a corrida atende seus critérios de
             rentabilidade
           </li>
-          <li>
+          <li data-i18n-html="tech.li4">
             <strong>Único app para iPhone</strong> com suporte a Uber Driver e
             99 Motorista
           </li>
@@ -711,34 +785,44 @@
 
     <!-- Seção de Privacidade -->
     <section>
-      <h2>Sua privacidade garantida</h2>
+      <h2 data-i18n="privacy.h2">Sua privacidade garantida</h2>
       <div class="box">
         <ul>
-          <li>Processamento 100% local no seu iPhone</li>
-          <li>Nenhum dado de corrida enviado para servidores externos</li>
-          <li>Nenhuma gravação de tela salva ou armazenada</li>
+          <li data-i18n="privacy.li1">
+            Processamento 100% local no seu iPhone
+          </li>
+          <li data-i18n="privacy.li2">
+            Nenhum dado de corrida enviado para servidores externos
+          </li>
+          <li data-i18n="privacy.li3">
+            Nenhuma gravação de tela salva ou armazenada
+          </li>
         </ul>
       </div>
     </section>
 
     <!-- CTA Final -->
     <section class="cta-section">
-      <h2>Baixe grátis – Exclusivo para iPhone</h2>
-      <p>
+      <h2 data-i18n="cta.h2">Baixe grátis – Exclusivo para iPhone</h2>
+      <p data-i18n="cta.p">
         O primeiro app que monitora corridas Uber e 99 no iPhone. Comece a
         calcular o valor por km agora mesmo.
       </p>
 
       <div class="badge">
         <a
+          id="badge-cta"
           href="https://apps.apple.com/br/app/corridex/id6756681755?utm_source=google&utm_medium=search&utm_campaign=landing_corridex"
           target="_blank"
           rel="noopener noreferrer"
+          data-i18n-aria-label="cta.badgeAriaLabel"
           aria-label="Baixar app Corridex na App Store"
         >
           <img
+            id="badge-cta-img"
             src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/pt-br?size=250x83"
             alt="Baixar Corridex na App Store - App gratuito para motoristas Uber e 99"
+            data-i18n-alt="cta.badgeAlt"
           />
         </a>
       </div>
@@ -746,7 +830,295 @@
 
     <!-- Footer -->
     <footer>
-      <p>Corridex © 2026 – Todos os direitos reservados.</p>
+      <p data-i18n="footer.copyright">
+        Corridex © 2026 – Todos os direitos reservados.
+      </p>
     </footer>
+
+    <script>
+      (function () {
+        const STORAGE_KEY = "corridex-lang";
+        const APP_STORE_URL_PT =
+          "https://apps.apple.com/br/app/corridex/id6756681755?utm_source=google&utm_medium=search&utm_campaign=landing_corridex";
+        const APP_STORE_URL_EN =
+          "https://apps.apple.com/app/corridex/id6756681755?utm_source=google&utm_medium=search&utm_campaign=landing_corridex";
+        const BADGE_URL_PT =
+          "https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/pt-br?size=250x83";
+        const BADGE_URL_EN =
+          "https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en?size=250x83";
+
+        const translations = {
+          pt: {
+            "meta.title":
+              "App para Motorista Uber Driver e 99 no iPhone | Corridex",
+            "meta.description":
+              "App para motorista Uber Driver e 99 no iPhone. Calcule valor por km e saiba se a corrida vale a pena antes de aceitar.",
+            "meta.keywords":
+              "app motorista uber, app motorista 99, calcular valor por km uber, ganhar mais no uber, corrida lucrativa, calculadora uber, rentabilidade corrida, app para motorista iphone",
+            "meta.ogTitle":
+              "Corridex – Primeiro App para iPhone que Monitora Uber e 99",
+            "meta.ogDescription":
+              "O primeiro app para iPhone que monitora corridas Uber e 99. Calcule valor por km e ganho por hora automaticamente.",
+            "meta.ogLocale": "pt_BR",
+            "meta.twitterTitle":
+              "Corridex – Primeiro App para iPhone que Monitora Uber e 99",
+            "meta.twitterDescription":
+              "O primeiro app para iPhone que monitora corridas Uber e 99 em tempo real.",
+            "meta.schemaDescription":
+              "O primeiro app para iPhone que monitora corridas Uber Driver e 99 Motorista. Calcula automaticamente o valor por km e ganho por hora em tempo real.",
+            "langSwitcher.ariaLabel": "Seleção de idioma",
+            "hero.h1": "App para Motorista Uber Driver e 99 no iPhone",
+            "hero.p":
+              "O Corridex é o <strong>primeiro app para iPhone</strong> que monitora ofertas do <strong>Uber Driver</strong> e <strong>99 Motorista</strong> em tempo real. Calcule o <strong>valor por km</strong> e <strong>ganho por hora</strong> automaticamente e decida se a corrida vale a pena antes de aceitar.",
+            "hero.iconAlt": "Corridex - Ícone do app",
+            "hero.badgeAlt": "Baixar na App Store",
+            "problems.h2": "Problemas comuns de motoristas Uber e 99",
+            "problems.li1":
+              "Já aceitou uma corrida que não compensava financeiramente?",
+            "problems.li2":
+              "Difícil calcular o valor por km enquanto está dirigindo?",
+            "problems.li3":
+              "Falta tempo para analisar se a corrida é rentável?",
+            "solution.h2": "Como o Corridex ajuda você a ganhar mais",
+            "solution.p":
+              "O Corridex é o <strong>primeiro aplicativo para iPhone</strong> que oferece <strong>monitoramento de corridas Uber e 99</strong>. Funciona como uma calculadora inteligente que lê automaticamente a oferta exibida no Uber Driver ou 99 Motorista e faz todos os cálculos de rentabilidade por você, em tempo real.",
+            "solution.li1":
+              "<strong>Valor por km</strong> calculado automaticamente (R$/km)",
+            "solution.li2":
+              "<strong>Ganho estimado por hora</strong> para cada corrida",
+            "solution.li3":
+              "Decisão rápida e segura, sem distração no trânsito",
+            "screenshots.h2": "Exclusivo para iPhone – Veja como funciona",
+            "screenshots.alt1":
+              "App Corridex para motoristas Uber e 99 - Tela inicial de configuração",
+            "screenshots.alt2":
+              "Corridex monitorando corridas do Uber Driver e 99 Motorista em tempo real",
+            "screenshots.alt3":
+              "Notificação mostrando valor por km e ganho por hora da corrida Uber",
+            "screenshots.title1": "Configure em segundos",
+            "screenshots.title2": "Monitoramento automático",
+            "screenshots.title3": "Notificação instantânea",
+            "screenshots.caption1":
+              "Defina seu valor mínimo por km e ganho por hora",
+            "screenshots.caption2":
+              "Funciona em segundo plano enquanto você dirige",
+            "screenshots.caption3": "Veja R$/km e ganho/hora antes de aceitar",
+            "tech.h2": "Tecnologia pioneira para iPhone",
+            "tech.p":
+              "O Corridex é o <strong>primeiro app para iPhone</strong> a oferecer monitoramento automático de corridas Uber e 99. Usando tecnologia exclusiva, conseguimos trazer para o iOS uma funcionalidade que antes só existia em Android.",
+            "tech.li1":
+              "Monitoramento de tela em tempo real via ReplayKit (exclusivo iOS)",
+            "tech.li2":
+              "Análise das ofertas de corrida diretamente no seu iPhone",
+            "tech.li3":
+              "Notificação instantânea quando a corrida atende seus critérios de rentabilidade",
+            "tech.li4":
+              "<strong>Único app para iPhone</strong> com suporte a Uber Driver e 99 Motorista",
+            "privacy.h2": "Sua privacidade garantida",
+            "privacy.li1": "Processamento 100% local no seu iPhone",
+            "privacy.li2":
+              "Nenhum dado de corrida enviado para servidores externos",
+            "privacy.li3": "Nenhuma gravação de tela salva ou armazenada",
+            "cta.h2": "Baixe grátis – Exclusivo para iPhone",
+            "cta.p":
+              "O primeiro app que monitora corridas Uber e 99 no iPhone. Comece a calcular o valor por km agora mesmo.",
+            "cta.badgeAriaLabel": "Baixar app Corridex na App Store",
+            "cta.badgeAlt":
+              "Baixar Corridex na App Store - App gratuito para motoristas Uber e 99",
+            "footer.copyright":
+              "Corridex © 2026 – Todos os direitos reservados.",
+          },
+          en: {
+            "meta.title": "App for Uber Driver on iPhone | Corridex",
+            "meta.description":
+              "App for Uber Driver on iPhone. Calculate value per km and know if the ride is worth it before accepting.",
+            "meta.keywords":
+              "uber driver app, 99 driver app, calculate per km uber, earn more uber, profitable ride, uber calculator, ride profitability, driver app iphone",
+            "meta.ogTitle": "Corridex – iPhone App that Monitors Uber",
+            "meta.ogDescription":
+              "IPhone app that monitors Uber rides. Calculate value per km and earnings per hour automatically.",
+            "meta.ogLocale": "en_US",
+            "meta.twitterTitle": "Corridex – IPhone App that Monitors Uber",
+            "meta.twitterDescription":
+              "The iPhone app that monitors Uber Driver in real time.",
+            "meta.schemaDescription":
+              "The iPhone app that monitors Uber Driver. Automatically calculates value per km and earnings per hour in real time.",
+            "langSwitcher.ariaLabel": "Language selection",
+            "hero.h1": "App for Uber Driver on iPhone",
+            "hero.p":
+              "Corridex is the <strong> iPhone app</strong> that monitors <strong>Uber Driver</strong> ride offers in real time. Calculate <strong>value per km</strong> and <strong>earnings per hour</strong> automatically and decide if the ride is worth it before accepting.",
+            "hero.iconAlt": "Corridex - App icon",
+            "hero.badgeAlt": "Download on the App Store",
+            "problems.h2": "Common issues for Uber drivers",
+            "problems.li1":
+              "Have you ever accepted a ride that wasn't financially worth it?",
+            "problems.li2": "Hard to calculate value per km while driving?",
+            "problems.li3": "No time to check if the ride is profitable?",
+            "solution.h2": "How Corridex helps you earn more",
+            "solution.p":
+              "Corridex is the <strong> iPhone app</strong> that offers <strong>Uber ride monitoring</strong>. It works like a smart calculator that automatically reads the offer shown in Uber Driver and does all the profitability calculations for you in real time.",
+            "solution.li1":
+              "<strong>Value per km</strong> calculated automatically",
+            "solution.li2":
+              "<strong>Estimated earnings per hour</strong> for each ride",
+            "solution.li3":
+              "Quick and safe decision, without distraction in traffic",
+            "screenshots.h2": "iPhone exclusive – See how it works",
+            "screenshots.alt1": "Corridex app for Uber drivers - Setup screen",
+            "screenshots.alt2":
+              "Corridex monitoring Uber Driver rides in real time",
+            "screenshots.alt3":
+              "Notification showing value per km and earnings per hour for Uber ride",
+            "screenshots.title1": "Set up in seconds",
+            "screenshots.title2": "Automatic monitoring",
+            "screenshots.title3": "Instant notification",
+            "screenshots.caption1":
+              "Set your minimum value per km and earnings per hour",
+            "screenshots.caption2": "Runs in the background while you drive",
+            "screenshots.caption3":
+              "See value per km and earnings/hour before accepting",
+            "tech.h2": "Pioneering technology for iPhone",
+            "tech.p":
+              "Corridex is the <strong>first iPhone app</strong> to offer automatic Uber ride monitoring. Using exclusive technology, we brought to iOS a feature that previously only existed on Android.",
+            "tech.li1":
+              "Real-time screen monitoring via ReplayKit (iOS exclusive)",
+            "tech.li2": "Ride offer analysis directly on your iPhone",
+            "tech.li3":
+              "Instant notification when the ride meets your profitability criteria",
+            "tech.li4":
+              "<strong>Only iPhone app</strong> with support for Uber Driver",
+            "privacy.h2": "Your privacy guaranteed",
+            "privacy.li1": "100% local processing on your iPhone",
+            "privacy.li2": "No ride data sent to external servers",
+            "privacy.li3": "No screen recording saved or stored",
+            "cta.h2": "Download free – iPhone exclusive",
+            "cta.p":
+              "The first app that monitors Uber rides on iPhone. Start calculating value per km right now.",
+            "cta.badgeAriaLabel": "Download Corridex app on the App Store",
+            "cta.badgeAlt":
+              "Download Corridex on the App Store - Free app for Uber drivers",
+            "footer.copyright": "Corridex © 2026 – All rights reserved.",
+          },
+        };
+
+        function t(lang, key) {
+          return translations[lang] && translations[lang][key] !== undefined
+            ? translations[lang][key]
+            : translations.pt[key] || "";
+        }
+
+        function applyLanguage(lang) {
+          lang = lang === "en" ? "en" : "pt";
+          document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
+          document.title = t(lang, "meta.title");
+          var metaDesc = document.querySelector('meta[name="description"]');
+          if (metaDesc) metaDesc.content = t(lang, "meta.description");
+          var metaKw = document.querySelector('meta[name="keywords"]');
+          if (metaKw) metaKw.content = t(lang, "meta.keywords");
+          var ogTitle = document.querySelector('meta[property="og:title"]');
+          if (ogTitle) ogTitle.content = t(lang, "meta.ogTitle");
+          var ogDesc = document.querySelector(
+            'meta[property="og:description"]',
+          );
+          if (ogDesc) ogDesc.content = t(lang, "meta.ogDescription");
+          var ogLocale = document.querySelector('meta[property="og:locale"]');
+          if (ogLocale) ogLocale.content = t(lang, "meta.ogLocale");
+          var twTitle = document.querySelector('meta[name="twitter:title"]');
+          if (twTitle) twTitle.content = t(lang, "meta.twitterTitle");
+          var twDesc = document.querySelector(
+            'meta[name="twitter:description"]',
+          );
+          if (twDesc) twDesc.content = t(lang, "meta.twitterDescription");
+          var schemaScript = document.querySelector(
+            'script[type="application/ld+json"]',
+          );
+          if (schemaScript) {
+            try {
+              var schema = JSON.parse(schemaScript.textContent);
+              schema.description = t(lang, "meta.schemaDescription");
+              schemaScript.textContent = JSON.stringify(schema);
+            } catch (e) {}
+          }
+          document.querySelectorAll("[data-i18n]").forEach(function (el) {
+            var key = el.getAttribute("data-i18n");
+            var val = t(lang, key);
+            if (val) el.textContent = val;
+          });
+          document.querySelectorAll("[data-i18n-html]").forEach(function (el) {
+            var key = el.getAttribute("data-i18n-html");
+            var val = t(lang, key);
+            if (val) el.innerHTML = val;
+          });
+          document.querySelectorAll("[data-i18n-alt]").forEach(function (el) {
+            var key = el.getAttribute("data-i18n-alt");
+            var val = t(lang, key);
+            if (val) el.alt = val;
+          });
+          document
+            .querySelectorAll("[data-i18n-aria-label]")
+            .forEach(function (el) {
+              var key = el.getAttribute("data-i18n-aria-label");
+              var val = t(lang, key);
+              if (val) el.setAttribute("aria-label", val);
+            });
+          var badgeHero = document.getElementById("badge-hero");
+          var badgeCta = document.getElementById("badge-cta");
+          var badgeHeroImg = document.getElementById("badge-hero-img");
+          var badgeCtaImg = document.getElementById("badge-cta-img");
+          var url = lang === "en" ? APP_STORE_URL_EN : APP_STORE_URL_PT;
+          var badgeUrl = lang === "en" ? BADGE_URL_EN : BADGE_URL_PT;
+          if (badgeHero) badgeHero.href = url;
+          if (badgeCta) badgeCta.href = url;
+          if (badgeHeroImg) badgeHeroImg.src = badgeUrl;
+          if (badgeCtaImg) badgeCtaImg.src = badgeUrl;
+          document.querySelectorAll("[data-i18n-src]").forEach(function (el) {
+            var basePath = el.getAttribute("data-i18n-src");
+            if (!basePath) return;
+            el.src =
+              lang === "en" ? basePath.replace(/(\.\w+)$/, "-en$1") : basePath;
+          });
+          var langPt = document.getElementById("lang-pt");
+          var langEn = document.getElementById("lang-en");
+          if (langPt) {
+            langPt.classList.toggle("active", lang === "pt");
+            langPt.setAttribute(
+              "aria-current",
+              lang === "pt" ? "true" : "false",
+            );
+          }
+          if (langEn) {
+            langEn.classList.toggle("active", lang === "en");
+            langEn.setAttribute(
+              "aria-current",
+              lang === "en" ? "true" : "false",
+            );
+          }
+        }
+
+        function initLang() {
+          var saved = localStorage.getItem(STORAGE_KEY);
+          var lang = saved === "en" || saved === "pt" ? saved : "pt";
+          applyLanguage(lang);
+          var langPt = document.getElementById("lang-pt");
+          var langEn = document.getElementById("lang-en");
+          if (langPt)
+            langPt.addEventListener("click", function () {
+              localStorage.setItem(STORAGE_KEY, "pt");
+              applyLanguage("pt");
+            });
+          if (langEn)
+            langEn.addEventListener("click", function () {
+              localStorage.setItem(STORAGE_KEY, "en");
+              applyLanguage("en");
+            });
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", initLang);
+        } else {
+          initLang();
+        }
+      })();
+    </script>
   </body>
 </html>
