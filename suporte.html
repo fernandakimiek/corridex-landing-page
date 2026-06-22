@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-WQGSQJ58");
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Suporte | Corridex</title>
+    <meta
+      name="description"
+      content="Suporte do Corridex — app para motoristas de Uber e 99 no iPhone."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://corridex.app/suporte.html" />
+    <link rel="icon" type="image/png" href="images/logo.png" />
+    <link rel="apple-touch-icon" href="images/logo.png" />
+    <link rel="stylesheet" href="css/site.css" />
+  </head>
+  <body>
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-WQGSQJ58"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+
+    <nav class="site-nav site-nav--light">
+      <div class="container">
+        <a href="index.html" class="brand">
+          <img
+            src="images/logo.png"
+            alt="Corridex"
+            data-i18n-alt="brand.logoAlt"
+          />
+          <span>Corridex</span>
+        </a>
+        <div class="nav-actions">
+          <div
+            class="lang-switcher"
+            data-i18n-aria-label="langSwitcher.ariaLabel"
+          >
+            <button type="button" id="lang-pt" aria-current="true">PT</button>
+            <button type="button" id="lang-en">EN</button>
+          </div>
+          <a
+            class="nav-cta"
+            href="https://apps.apple.com/br/app/corridex/id6756681755?utm_source=google&utm_medium=search&utm_campaign=landing_corridex"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span data-i18n="nav.download">Baixar App</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="legal-page">
+      <div class="container legal-content">
+        <h1 data-i18n="support.title">Suporte</h1>
+        <div class="legal-placeholder" data-i18n="support.placeholder">
+          Conteúdo da página de Suporte será adicionado em breve.
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <nav
+          class="footer-links"
+          data-i18n-aria-label="footer.legalLinksAriaLabel"
+        >
+          <a href="privacidade.html" data-i18n="footer.privacy"
+            >Política de Privacidade</a
+          >
+          <span class="sep" aria-hidden="true">|</span>
+          <a href="termos.html" data-i18n="footer.terms">Termos de Uso</a>
+          <span class="sep" aria-hidden="true">|</span>
+          <a href="suporte.html" data-i18n="footer.support">Suporte</a>
+        </nav>
+        <p class="footer-copyright" data-i18n="footer.copyright">
+          © 2026 Corridex. Todos os direitos reservados.
+        </p>
+        <p class="footer-tagline" data-i18n="footer.tagline">
+          App para motoristas de Uber e 99 no iPhone
+        </p>
+      </div>
+    </footer>
+
+    <script src="js/translations.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/site.js"></script>
+    <script>
+      boot(initSupportPage);
+    </script>
+  </body>
+</html>
