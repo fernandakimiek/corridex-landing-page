@@ -48,6 +48,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "features.safe.li1": "Processamento 100% no iPhone",
     "features.safe.li2": "Sem envio de dados",
     "features.safe.li3": "Privacidade total",
+    "features.safe.li4": "Não precisa de cadastro",
     "testimonials.title": "Quem usa o Corridex?",
     "testimonials.subtitle":
       "Motoristas de aplicativos de corrida usam o Corridex para decidir melhor cada corrida.",
@@ -223,6 +224,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "features.safe.li1": "100% processing on iPhone",
     "features.safe.li2": "No data sent out",
     "features.safe.li3": "Total privacy",
+    "features.safe.li4": "No registration required",
     "testimonials.title": "Who uses Corridex?",
     "testimonials.subtitle":
       "Ride share drivers use Corridex to make better decisions on every ride.",
@@ -396,6 +398,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "features.safe.li1": "Procesamiento 100% en iPhone",
     "features.safe.li2": "Sin envío de datos",
     "features.safe.li3": "Privacidad total",
+    "features.safe.li4": "No necesita registro",
     "testimonials.title": "¿Quién usa Corridex?",
     "testimonials.subtitle":
       "Conductores de aplicaciones de transporte usan Corridex para decidir mejor cada viaje.",
