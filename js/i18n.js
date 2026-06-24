@@ -11,6 +11,9 @@
     "https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en?size=250x83";
   var HTML_LANG = { pt: "pt-BR", en: "en", es: "es" };
 
+  var LANG_FLAGS = { pt: "🇧🇷", en: "🇺🇸", es: "🇪🇸" };
+  var LANG_CODES = { pt: "PT", en: "EN", es: "ES" };
+
   function t(lang, key) {
     if (translations[lang] && translations[lang][key] !== undefined) {
       return translations[lang][key];
@@ -66,17 +69,21 @@
     if (badgeCtaImg) badgeCtaImg.src = badgeUrl;
   }
 
+  function localizedImageSrc(basePath, lang) {
+    var suffix = lang === "en" ? "-en" : lang === "es" ? "-es" : "";
+    return suffix ? basePath.replace(/(\.\w+)$/, suffix + "$1") : basePath;
+  }
+
   function updateLocalizedImages(lang) {
     document.querySelectorAll("[data-i18n-src]").forEach(function (el) {
       var basePath = el.getAttribute("data-i18n-src");
       if (!basePath) return;
-      el.src =
-        lang === "en" ? basePath.replace(/(\.\w+)$/, "-en$1") : basePath;
+      el.src = localizedImageSrc(basePath, lang);
     });
     document.querySelectorAll("[data-i18n-src-brand]").forEach(function (el) {
       var basePath = el.getAttribute("data-i18n-src-brand");
       if (!basePath) return;
-      el.src = lang === "en" ? basePath.replace(/(\.\w+)$/, "-en$1") : basePath;
+      el.src = localizedImageSrc(basePath, lang);
     });
   }
 
@@ -97,9 +104,25 @@
     updateAppStoreLinks(lang);
   }
 
+  function updateLangDropdown(lang) {
+    var toggle = document.getElementById("lang-toggle");
+    if (toggle) {
+      var flagEl = toggle.querySelector(".lang-flag");
+      var codeEl = toggle.querySelector(".lang-code");
+      if (flagEl) flagEl.textContent = LANG_FLAGS[lang] || LANG_FLAGS.pt;
+      if (codeEl) codeEl.textContent = LANG_CODES[lang] || LANG_CODES.pt;
+    }
+    ["pt", "en", "es"].forEach(function (code) {
+      var el = document.getElementById("lang-" + code);
+      if (el) {
+        el.setAttribute("aria-selected", code === lang ? "true" : "false");
+      }
+    });
+  }
+
   function applyLanguage(lang) {
-    lang = lang === "en" ? "en" : "pt";
-    document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
+    lang = normalizeLang(lang);
+    document.documentElement.lang = HTML_LANG[lang] || "pt-BR";
     document.title = t(lang, "meta.title");
     var metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.content = t(lang, "meta.description");
@@ -129,73 +152,62 @@
     applyI18nAttributes(lang);
     updateAppStoreLinks(lang);
     updateLocalizedImages(lang);
-    var langPt = document.getElementById("lang-pt");
-    var langEn = document.getElementById("lang-en");
-    if (langPt) {
-      langPt.classList.toggle("active", lang === "pt");
-      langPt.setAttribute("aria-current", lang === "pt" ? "true" : "false");
-    }
-    if (langEn) {
-      langEn.classList.toggle("active", lang === "en");
-      langEn.setAttribute("aria-current", lang === "en" ? "true" : "false");
-    }
+    updateLangDropdown(lang);
+  }
+
+  function initLangDropdown(applyFn) {
+    var toggle = document.getElementById("lang-toggle");
+    var dropdown = document.querySelector(".lang-dropdown");
+
+    if (!toggle || !dropdown) return;
+
+    toggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var isOpen = dropdown.classList.contains("is-open");
+      dropdown.classList.toggle("is-open", !isOpen);
+      toggle.setAttribute("aria-expanded", !isOpen ? "true" : "false");
+    });
+
+    dropdown.querySelectorAll("[data-lang]").forEach(function (item) {
+      item.addEventListener("click", function () {
+        var lang = item.getAttribute("data-lang");
+        localStorage.setItem(STORAGE_KEY, lang);
+        applyFn(lang);
+        dropdown.classList.remove("is-open");
+        toggle.setAttribute("aria-expanded", "false");
+      });
+    });
+
+    document.addEventListener("click", function () {
+      dropdown.classList.remove("is-open");
+      toggle.setAttribute("aria-expanded", "false");
+    });
+
+    dropdown.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
   }
 
   function initLanding() {
     var saved = localStorage.getItem(STORAGE_KEY);
-    var lang = saved === "en" || saved === "pt" ? saved : "pt";
+    var lang = normalizeLang(saved);
     applyLanguage(lang);
-    var langPt = document.getElementById("lang-pt");
-    var langEn = document.getElementById("lang-en");
-    if (langPt) {
-      langPt.addEventListener("click", function () {
-        localStorage.setItem(STORAGE_KEY, "pt");
-        applyLanguage("pt");
-      });
-    }
-    if (langEn) {
-      langEn.addEventListener("click", function () {
-        localStorage.setItem(STORAGE_KEY, "en");
-        applyLanguage("en");
-      });
-    }
+    initLangDropdown(applyLanguage);
   }
 
   function initSupportPage() {
     var saved = localStorage.getItem(STORAGE_KEY);
-    var lang = saved === "en" || saved === "pt" ? saved : "pt";
+    var lang = normalizeLang(saved);
     applySupportPage(lang);
-    var langPt = document.getElementById("lang-pt");
-    var langEn = document.getElementById("lang-en");
-    if (langPt) {
-      langPt.addEventListener("click", function () {
-        localStorage.setItem(STORAGE_KEY, "pt");
-        applySupportPage("pt");
-      });
-    }
-    if (langEn) {
-      langEn.addEventListener("click", function () {
-        localStorage.setItem(STORAGE_KEY, "en");
-        applySupportPage("en");
-      });
-    }
+    initLangDropdown(applySupportPage);
   }
 
   function applySupportPage(lang) {
-    lang = lang === "en" ? "en" : "pt";
-    document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
+    lang = normalizeLang(lang);
+    document.documentElement.lang = HTML_LANG[lang] || "pt-BR";
     updateMetaContent(lang, "support.meta.title", "support.meta.description");
     applyShell(lang);
-    var langPt = document.getElementById("lang-pt");
-    var langEn = document.getElementById("lang-en");
-    if (langPt) {
-      langPt.classList.toggle("active", lang === "pt");
-      langPt.setAttribute("aria-current", lang === "pt" ? "true" : "false");
-    }
-    if (langEn) {
-      langEn.classList.toggle("active", lang === "en");
-      langEn.setAttribute("aria-current", lang === "en" ? "true" : "false");
-    }
+    updateLangDropdown(lang);
   }
 
   window.CorridexI18n = {
