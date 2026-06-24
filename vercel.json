@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://corridex.app/$1",
+      "permanent": true
+    }
+  ]
+}
