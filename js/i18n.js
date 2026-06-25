@@ -2,9 +2,9 @@
   var STORAGE_KEY = "corridex-lang";
   var translations = window.CORRIDEX_TRANSLATIONS || {};
   var APP_STORE_URL_PT =
-    "https://apps.apple.com/br/app/corridex/id6756681755?utm_source=google&utm_medium=search&utm_campaign=landing_corridex";
+    "https://apps.apple.com/app/apple-store/id6756681755?pt=128383262&ct=Landpage&mt=8";
   var APP_STORE_URL_EN =
-    "https://apps.apple.com/app/corridex/id6756681755?utm_source=google&utm_medium=search&utm_campaign=landing_corridex";
+    "https://apps.apple.com/app/apple-store/id6756681755?pt=128383262&ct=Landpage&mt=8";
   var BADGE_URL_PT =
     "https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/pt-br?size=250x83";
   var BADGE_URL_EN =
@@ -145,7 +145,8 @@
       try {
         var schema = JSON.parse(schemaScript.textContent);
         schema.description = t(lang, "meta.schemaDescription");
-        schema.downloadUrl = lang === "en" ? APP_STORE_URL_EN : APP_STORE_URL_PT;
+        schema.downloadUrl =
+          lang === "en" ? APP_STORE_URL_EN : APP_STORE_URL_PT;
         schemaScript.textContent = JSON.stringify(schema);
       } catch (e) {}
     }
