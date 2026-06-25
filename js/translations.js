@@ -1,10 +1,11 @@
 window.CORRIDEX_TRANSLATIONS = {
   pt: {
-    "meta.title": "App para Motorista Uber Driver e 99 no iPhone | Corridex",
+    "meta.title":
+      "App para Motorista de aplicativos de corrida no iPhone | Corridex",
     "meta.description":
-      "App para motorista Uber Driver e 99 no iPhone. Calcule valor por km e saiba se a corrida vale a pena antes de aceitar.",
+      "App para motorista de aplicativos de corrida no iPhone. Calcule valor por km e saiba se a corrida vale a pena antes de aceitar.",
     "meta.keywords":
-      "app motorista uber, app motorista 99, calcular valor por km uber, ganhar mais no uber, corrida lucrativa, calculadora uber, rentabilidade corrida, app para motorista iphone",
+      "app motorista uber, app motorista 99, uber driver, 99 motorista, aplicativos de corrida, calcular valor por km, ganhar mais como motorista, corrida lucrativa, calculadora de corridas, rentabilidade corrida, app para motorista iphone",
     "meta.ogTitle":
       "Corridex – Primeiro App para iPhone que Monitora aplicativos de corrida",
     "meta.ogDescription":
@@ -182,7 +183,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "meta.description":
       "App for Ride Share Drivers on iPhone. Calculate value per km and know if the ride is worth it before accepting.",
     "meta.keywords":
-      "ride share driver app, 99 driver app, calculate per km ride share, earn more ride share, profitable ride, ride share calculator, ride profitability, driver app iphone",
+      "uber driver app, lyft driver app, 99 driver app, ride share driver app, calculate per km ride share, earn more ride share, profitable ride, ride share calculator, ride profitability, driver app iphone",
     "meta.ogTitle": "Corridex – iPhone App that Monitors Ride Share",
     "meta.ogDescription":
       "IPhone app that monitors Ride Share rides. Calculate value per km and earnings per hour automatically.",
@@ -352,20 +353,23 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.responseTime": "Average response time: 24 business hours",
   },
   es: {
-    "meta.title": "App para Conductor Uber Driver y 99 en iPhone | Corridex",
+    "meta.title":
+      "App para Conductor de aplicaciones de transporte en iPhone | Corridex",
     "meta.description":
-      "App para conductor Uber Driver y 99 en iPhone. Calcula el valor por km y sabe si el viaje vale la pena antes de aceptarlo.",
+      "App para conductor de aplicaciones de transporte en iPhone. Calcula el valor por km y sabe si el viaje vale la pena antes de aceptarlo.",
     "meta.keywords":
-      "app conductor uber, app conductor 99, calcular valor por km uber, ganar más en uber, viaje lucrativo, calculadora uber, rentabilidad viaje, app para conductor iphone",
-    "meta.ogTitle": "Corridex – App para iPhone que Monitorea Uber y 99",
+      "app conductor uber, app conductor 99, uber driver, 99 motorista, aplicaciones de transporte, calcular valor por km, ganar más como conductor, viaje lucrativo, calculadora de viajes, rentabilidad viaje, app para conductor iphone",
+    "meta.ogTitle":
+      "Corridex – App para iPhone que Monitorea aplicaciones de transporte",
     "meta.ogDescription":
-      "App para iPhone que monitorea viajes de Uber y 99. Calcula valor por km y ganancia por hora automáticamente.",
+      "App para iPhone que monitorea viajes de aplicaciones de transporte. Calcula valor por km y ganancia por hora automáticamente.",
     "meta.ogLocale": "es_ES",
-    "meta.twitterTitle": "Corridex – App para iPhone que Monitorea Uber y 99",
+    "meta.twitterTitle":
+      "Corridex – App para iPhone que Monitorea aplicaciones de transporte",
     "meta.twitterDescription":
-      "La app para iPhone que monitorea Uber Driver y 99 en tiempo real.",
+      "La app para iPhone que monitorea aplicaciones de transporte en tiempo real.",
     "meta.schemaDescription":
-      "La app para iPhone que monitorea viajes de Uber Driver y 99. Calcula automáticamente el valor por km y la ganancia por hora en tiempo real.",
+      "La app para iPhone que monitorea viajes de aplicaciones de transporte. Calcula automáticamente el valor por km y la ganancia por hora en tiempo real.",
     "brand.logoAlt": "Corridex",
     "langSwitcher.ariaLabel": "Selección de idioma",
     "legal.langSwitchAriaLabel": "Selección de idioma",

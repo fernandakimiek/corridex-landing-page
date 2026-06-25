@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://corridex-app.vercel.app/sitemap.xml
+Sitemap: https://corridex.app/sitemap.xml
