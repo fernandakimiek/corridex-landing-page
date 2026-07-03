@@ -49,6 +49,11 @@
       var val = t(lang, key);
       if (val) el.setAttribute("aria-label", val);
     });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+      var key = el.getAttribute("data-i18n-placeholder");
+      var val = t(lang, key);
+      if (val) el.placeholder = val;
+    });
   }
 
   function updateAppStoreLinks(lang) {
@@ -209,6 +214,7 @@
     updateMetaContent(lang, "support.meta.title", "support.meta.description");
     applyShell(lang);
     updateLangDropdown(lang);
+    document.dispatchEvent(new CustomEvent("corridex:support-i18n-applied"));
   }
 
   window.CorridexI18n = {
