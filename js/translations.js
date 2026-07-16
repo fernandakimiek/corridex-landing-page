@@ -182,6 +182,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.telegramAriaLabel": "Contato via Telegram",
     "support.emailLabel": "E-mail",
     "support.emailAriaLabel": "Enviar e-mail para suporte",
+    "support.channelsBarAriaLabel": "Canais de atendimento",
     "support.responseTime": "Tempo médio de resposta: 24h úteis",
   },
   en: {
@@ -362,6 +363,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.telegramAriaLabel": "Contact via Telegram",
     "support.emailLabel": "Email",
     "support.emailAriaLabel": "Send email to support",
+    "support.channelsBarAriaLabel": "Support channels",
     "support.responseTime": "Average response time: 24 business hours",
   },
   es: {
@@ -550,6 +552,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.telegramAriaLabel": "Contacto por Telegram",
     "support.emailLabel": "Correo",
     "support.emailAriaLabel": "Enviar correo a soporte",
+    "support.channelsBarAriaLabel": "Canales de atención",
     "support.responseTime": "Tiempo promedio de respuesta: 24h hábiles",
   },
 };
