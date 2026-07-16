@@ -141,6 +141,9 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q11": "Como pedir reembolso?",
     "faq.a11":
       '<p>O reembolso é solicitado diretamente à Apple — o Corridex não tem acesso a dados financeiros para fazer estorno.</p><ol><li>Acesse <a href="https://reportaproblem.apple.com" target="_blank" rel="noopener noreferrer">reportaproblem.apple.com</a></li><li>Entre com seu iCloud</li><li>Escolha "Solicitar um reembolso" e selecione o Corridex</li></ol><p>Para evitar cobranças futuras, cancele também a renovação: <strong>Ajustes → [seu nome] → Assinaturas → Corridex → Cancelar Assinatura</strong></p>',
+    "faq.q14": "Como cancelar a assinatura do Corridex?",
+    "faq.a14":
+      "<ol><li>Acesse o app <strong>Ajustes</strong></li><li>Toque no seu nome/perfil localizado no topo da tela</li><li>Selecione a opção <strong>Assinaturas</strong>. Uma lista com todas as suas assinaturas ativas e inativas será exibida</li><li>Localize e toque em <strong>Corridex</strong> para cancelar</li><li>Role até o final da tela e toque em <strong>Cancelar Assinatura</strong>. Confirme a ação</li></ol>",
     "faq.q12":
       "Por que o app grava/monitora minha tela? Meus dados ficam seguros?",
     "faq.a12":
@@ -319,6 +322,9 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q11": "How do I request a refund?",
     "faq.a11":
       '<p>Refunds are requested directly from Apple — Corridex has no access to financial data to process refunds.</p><ol><li>Go to <a href="https://reportaproblem.apple.com" target="_blank" rel="noopener noreferrer">reportaproblem.apple.com</a></li><li>Sign in with your iCloud</li><li>Choose "Request a refund" and select Corridex</li></ol><p>To avoid future charges, also cancel renewal: <strong>Settings → [your name] → Subscriptions → Corridex → Cancel Subscription</strong></p>',
+    "faq.q14": "How do I cancel my Corridex subscription?",
+    "faq.a14":
+      "<ol><li>Open the <strong>Settings</strong> app</li><li>Tap your name/profile at the top of the screen</li><li>Select <strong>Subscriptions</strong>. A list of all your active and inactive subscriptions will be displayed</li><li>Find and tap <strong>Corridex</strong> to cancel</li><li>Scroll to the bottom of the screen and tap <strong>Cancel Subscription</strong>. Confirm the action</li></ol>",
     "faq.q12": "Why does the app record/monitor my screen? Is my data safe?",
     "faq.a12":
       "<p>Corridex needs to \"look\" at the screen because it's the only way to read ride data on iPhone/iPad — Apple doesn't allow one app to access another app's internal data directly.</p><p><strong>Your data is 100% safe:</strong></p><ul><li>No images or video are saved or sent to the internet or any server</li><li>All processing happens on your device's own chip</li><li>The app works even without internet — try turning off Wi-Fi and mobile data</li></ul>",
@@ -501,6 +507,9 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q11": "¿Cómo pedir reembolso?",
     "faq.a11":
       '<p>El reembolso se solicita directamente a Apple — Corridex no tiene acceso a datos financieros para hacer reembolsos.</p><ol><li>Accede a <a href="https://reportaproblem.apple.com" target="_blank" rel="noopener noreferrer">reportaproblem.apple.com</a></li><li>Inicia sesión con tu iCloud</li><li>Elige "Solicitar un reembolso" y selecciona Corridex</li></ol><p>Para evitar cobros futuros, cancela también la renovación: <strong>Ajustes → [tu nombre] → Suscripciones → Corridex → Cancelar Suscripción</strong></p>',
+    "faq.q14": "¿Cómo cancelar la suscripción de Corridex?",
+    "faq.a14":
+      "<ol><li>Abre la app <strong>Ajustes</strong></li><li>Toca tu nombre/perfil en la parte superior de la pantalla</li><li>Selecciona <strong>Suscripciones</strong>. Se mostrará una lista con todas tus suscripciones activas e inactivas</li><li>Localiza y toca <strong>Corridex</strong> para cancelar</li><li>Desplázate hasta el final de la pantalla y toca <strong>Cancelar Suscripción</strong>. Confirma la acción</li></ol>",
     "faq.q12":
       "¿Por qué la app graba/monitorea mi pantalla? ¿Mis datos están seguros?",
     "faq.a12":
