@@ -151,6 +151,18 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q13": "O app está lento — o banner demora a aparecer e perco corridas",
     "faq.a13":
       "<p>Causas comuns de lentidão:</p><ul><li><strong>Calor:</strong> iPhone exposto ao sol no painel do carro reduz a velocidade automaticamente para se proteger — tente posicioná-lo com menos exposição solar</li><li><strong>Após atualizações:</strong> se a lentidão começou depois de uma atualização, é um bug em investigação — envie prints das corridas lentas para o suporte</li><li><strong>Modelos mais antigos (iPhone 11 ou anterior):</strong> podem sentir mais o impacto do processamento de tela em tempo real</li></ul>",
+    "faq.q15":
+      "Por que o cartão ou a notificação expandida não aparece diretamente?",
+    "faq.a15":
+      '<p>Quando o Corridex detecta uma corrida, o iOS exibe primeiro um <strong>aviso resumido</strong> (cartão resumido ou banner). Por limitação da própria Apple, nenhum app pode forçar a abertura automática do cartão ou da notificação <strong>expandida</strong> com todos os detalhes — essa etapa depende do gesto do usuário (arraste pra baixo ou toque longo) nos avisos nativos do sistema.</p><p>Estamos buscando alternativas para tornar a leitura mais rápida dentro dessas regras do iOS. Enquanto isso, assim que o aviso resumido aparecer, expanda-o normalmente para ver R$/km, ganho por hora e distância.</p>',
+    "faq.q16":
+      "O monitoramento no Uber pausa ou encerra durante uma corrida em andamento",
+    "faq.a16":
+      '<p>Se o Corridex parou de acompanhar no meio de uma corrida, verifique estes dois pontos:</p><ol><li><strong>Tela bloqueada:</strong> por limitação da Apple, quando a tela do iPhone/iPad é bloqueada o monitoramento de tela é interrompido. Mantenha o aparelho desbloqueado enquanto dirige com o app funcionando.</li><li><strong>Recurso U-Video da Uber:</strong> vários motoristas reportaram pausas no monitoramento quando a gravação de imagem da Uber está ativa. No app da Uber, vá em <strong>Menu → Segurança → U-Video → Grave suas viagens</strong> e selecione <strong>Desativar</strong> ou <strong>Apenas áudio</strong>.</li></ol><p>Depois de ajustar, volte ao Corridex e reinicie o monitoramento para confirmar que voltou ao normal.</p>',
+    "faq.q17":
+      "A notificação ou cartão expandido não abre mesmo arrastando ou segurando o aviso resumido",
+    "faq.a17":
+      '<p>Após uma atualização de versão do Corridex, o iOS às vezes mantém o estado antigo das notificações em memória — o aviso resumido aparece, mas o gesto de expandir deixa de responder.</p><p><strong>Solução:</strong> reinicie o iPhone. Isso normalmente restaura o comportamento das notificações expandidas.</p>',
     "cta.title": "Pare de aceitar corrida no escuro",
     "cta.subtitle":
       "Saiba o valor por km antes de aceitar. Grátis para iPhone.",
@@ -333,6 +345,18 @@ window.CORRIDEX_TRANSLATIONS = {
       "The app is slow — the banner takes too long to appear and I miss rides",
     "faq.a13":
       "<p>Common causes of slowness:</p><ul><li><strong>Heat:</strong> an iPhone exposed to sun on the car dashboard automatically slows down to protect itself — try positioning it with less sun exposure</li><li><strong>After updates:</strong> if slowness started after an update, it's a bug under investigation — send screenshots of slow rides to support</li><li><strong>Older models (iPhone 11 or earlier):</strong> may feel more impact from real-time screen processing</li></ul>",
+    "faq.q15":
+      "Why doesn't the expanded card or notification appear directly?",
+    "faq.a15":
+      '<p>When Corridex detects a ride, iOS first shows a <strong>compact alert</strong> (small card or banner). Due to an Apple limitation, no app can force the <strong>expanded</strong> card or notification with all details to open automatically — that step depends on the user gesture (swipe down or long press) on the system\'s native alerts.</p><p>We are exploring alternatives to make reading faster within these iOS rules. In the meantime, once the compact alert appears, expand it normally to see $/mile, earnings per hour, and distance.</p>',
+    "faq.q16":
+      "Monitoring on Uber pauses or stops during an active ride",
+    "faq.a16":
+      '<p>If Corridex stopped tracking in the middle of a ride, check these two points:</p><ol><li><strong>Locked screen:</strong> due to an Apple limitation, when the iPhone/iPad screen is locked, screen monitoring is interrupted. Keep the device unlocked while driving with the app running.</li><li><strong>Uber\'s U-Video feature:</strong> several drivers reported monitoring pauses when Uber\'s image recording is active. In the Uber app, go to <strong>Menu → Safety → U-Video → Record your trips</strong> and select <strong>Off</strong> or <strong>Audio only</strong>.</li></ol><p>After adjusting, return to Corridex and restart monitoring to confirm everything is back to normal.</p>',
+    "faq.q17":
+      "The expanded notification or card won't open even when dragging or holding the compact alert",
+    "faq.a17":
+      '<p>After a Corridex version update, iOS sometimes keeps the old notification state in memory — the compact alert appears, but the expand gesture stops responding.</p><p><strong>Solution:</strong> restart your iPhone. This usually restores expanded notification behavior.</p>',
     "cta.title": "Stop accepting rides in the dark",
     "cta.subtitle":
       "Know the value per mile before accepting. Free for iPhone.",
@@ -520,6 +544,18 @@ window.CORRIDEX_TRANSLATIONS = {
       "La app está lenta — el banner tarda en aparecer y pierdo viajes",
     "faq.a13":
       "<p>Causas comunes de lentitud:</p><ul><li><strong>Calor:</strong> iPhone expuesto al sol en el tablero del auto reduce la velocidad automáticamente para protegerse — intenta posicionarlo con menos exposición solar</li><li><strong>Después de actualizaciones:</strong> si la lentitud comenzó tras una actualización, es un bug en investigación — envía capturas de viajes lentos al soporte</li><li><strong>Modelos más antiguos (iPhone 11 o anterior):</strong> pueden sentir más el impacto del procesamiento de pantalla en tiempo real</li></ul>",
+    "faq.q15":
+      "¿Por qué la tarjeta o la notificación expandida no aparece directamente?",
+    "faq.a15":
+      '<p>Cuando Corridex detecta un viaje, iOS muestra primero un <strong>aviso resumido</strong> (tarjeta resumida o banner). Por limitación de Apple, ninguna app puede forzar la apertura automática de la tarjeta o notificación <strong>expandida</strong> con todos los detalles — ese paso depende del gesto del usuario (arrastrar hacia abajo o toque prolongado) en los avisos nativos del sistema.</p><p>Estamos buscando alternativas para hacer la lectura más rápida dentro de estas reglas de iOS. Mientras tanto, cuando aparezca el aviso resumido, expándelo normalmente para ver $/km, ganancia por hora y distancia.</p>',
+    "faq.q16":
+      "El monitoreo en Uber se pausa o detiene durante un viaje en curso",
+    "faq.a16":
+      '<p>Si Corridex dejó de acompañar en medio de un viaje, verifica estos dos puntos:</p><ol><li><strong>Pantalla bloqueada:</strong> por limitación de Apple, cuando la pantalla del iPhone/iPad se bloquea, el monitoreo de pantalla se interrumpe. Mantén el dispositivo desbloqueado mientras conduces con la app funcionando.</li><li><strong>Función U-Video de Uber:</strong> varios conductores reportaron pausas en el monitoreo cuando la grabación de imagen de Uber está activa. En la app de Uber, ve a <strong>Menú → Seguridad → U-Video → Graba tus viajes</strong> y selecciona <strong>Desactivar</strong> o <strong>Solo audio</strong>.</li></ol><p>Después de ajustar, vuelve a Corridex y reinicia el monitoreo para confirmar que volvió a la normalidad.</p>',
+    "faq.q17":
+      "La notificación o tarjeta expandida no se abre aunque arrastres o mantengas presionado el aviso resumido",
+    "faq.a17":
+      '<p>Después de una actualización de versión de Corridex, iOS a veces mantiene el estado antiguo de las notificaciones en memoria — el aviso resumido aparece, pero el gesto de expandir deja de responder.</p><p><strong>Solución:</strong> reinicia el iPhone. Esto normalmente restaura el comportamiento de las notificaciones expandidas.</p>',
     "cta.title": "Deja de aceptar viajes a ciegas",
     "cta.subtitle":
       "Conoce el valor por km antes de aceptar. Gratis para iPhone.",
