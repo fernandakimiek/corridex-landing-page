@@ -932,6 +932,34 @@ img {
   color: #78350f;
 }
 
+.support-status-alert {
+  background: #fffbeb;
+  color: #92400e;
+  padding: 1rem 1.125rem;
+  border-radius: 12px;
+  border-left: 4px solid #f59e0b;
+  margin: 0 0 2.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.support-status-alert__title {
+  display: block;
+  color: #78350f;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.legal-content .support-status-alert p {
+  color: #92400e;
+  margin-bottom: 0.625rem;
+}
+
+.legal-content .support-status-alert p:last-child {
+  margin-bottom: 0;
+}
+
 /* Support contact */
 .support-faq {
   margin-bottom: 3rem;
