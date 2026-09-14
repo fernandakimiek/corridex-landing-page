@@ -1,3 +1,9 @@
+// Aviso da página de suporte. true = exibe o bloco; false = oculta.
+// Depois, edite support.incidentAlertTitle e support.incidentAlert em pt, en e es.
+window.CORRIDEX_SUPPORT_ALERT = {
+  enabled: false,
+};
+
 window.CORRIDEX_TRANSLATIONS = {
   pt: {
     "meta.title":
@@ -198,7 +204,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.responseTime": "Tempo médio de resposta: 24h úteis",
     "support.incidentAlertTitle": "Aviso importante",
     "support.incidentAlert":
-      "<p>Estamos cientes: na versão atual, o monitoramento pode parar sozinho — principalmente no Uber, ao iniciar ou aceitar uma corrida ou entrega. Aparece mais no iPhone 11, 12 e 13, mas pode ocorrer em modelos mais novos.</p><p>Já achamos a causa e a correção está a caminho. Assim que a Apple aprovar, a nova versão aparece para atualizar na App Store.</p><p>Até lá, se parar, é só abrir o Corridex e iniciar de novo — nada de configuração ou histórico se perde.</p>",
+      "<p>Escreva o aviso aqui. Use um &lt;p&gt; por parágrafo.</p>",
   },
   en: {
     "meta.title": "App for Ride Share Drivers on iPhone | Corridex",
@@ -394,7 +400,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.responseTime": "Average response time: 24 business hours",
     "support.incidentAlertTitle": "Important notice",
     "support.incidentAlert":
-      "<p>We're aware: in the current version, monitoring may stop on its own — especially on Uber, when starting or accepting a ride or delivery. It happens more often on iPhone 11, 12, and 13, but it can also occur on newer models.</p><p>We've found the cause and the fix is on the way. As soon as Apple approves it, the new version will appear for update on the App Store.</p><p>Until then, if it stops, just open Corridex and start it again — no settings or history will be lost.</p>",
+      "<p>Write the notice here. Use one &lt;p&gt; per paragraph.</p>",
   },
   es: {
     "meta.title":
@@ -598,6 +604,6 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.responseTime": "Tiempo promedio de respuesta: 24h hábiles",
     "support.incidentAlertTitle": "Aviso importante",
     "support.incidentAlert":
-      "<p>Estamos al tanto: en la versión actual, el monitoreo puede detenerse solo — principalmente en Uber, al iniciar o aceptar un viaje o una entrega. Ocurre más en iPhone 11, 12 y 13, pero también puede pasar en modelos más nuevos.</p><p>Ya encontramos la causa y la corrección está en camino. En cuanto Apple la apruebe, la nueva versión aparece para actualizar en la App Store.</p><p>Hasta entonces, si se detiene, solo abre Corridex e inícialo de nuevo — no se pierde ninguna configuración ni el historial.</p>",
+      "<p>Escribe el aviso aquí. Usa un &lt;p&gt; por párrafo.</p>",
   },
 };

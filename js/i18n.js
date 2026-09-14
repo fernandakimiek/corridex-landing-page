@@ -208,12 +208,20 @@
     initLangDropdown(applySupportPage);
   }
 
+  function syncSupportAlert() {
+    var alertEl = document.getElementById("support-status-alert");
+    if (!alertEl) return;
+    var config = window.CORRIDEX_SUPPORT_ALERT || {};
+    alertEl.hidden = !config.enabled;
+  }
+
   function applySupportPage(lang) {
     lang = normalizeLang(lang);
     document.documentElement.lang = HTML_LANG[lang] || "pt-BR";
     updateMetaContent(lang, "support.meta.title", "support.meta.description");
     applyShell(lang);
     updateLangDropdown(lang);
+    syncSupportAlert();
     document.dispatchEvent(new CustomEvent("corridex:support-i18n-applied"));
   }
 
