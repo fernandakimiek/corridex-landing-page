@@ -38,6 +38,8 @@ window.CORRIDEX_TRANSLATIONS = {
     "hero.feature2": "Alertas automáticos de corridas lucrativas",
     "hero.feature3": "100% privado — processamento no seu iPhone",
     "hero.badgeAlt": "Baixar na App Store",
+    "home.noticeText":
+      '<strong>ATENÇÃO, MOTORISTAS:</strong> o Corridex nunca pede dados pessoais!<br>O site corridex.com.br não é oficial.',
     "hero.note": "Grátis para iPhone",
     "hero.mockupAlt": "Corridex monitorando corridas em tempo real",
     "features.title": "Feito pra motorista de aplicativos de corrida",
@@ -202,9 +204,9 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.emailAriaLabel": "Enviar e-mail para suporte",
     "support.channelsBarAriaLabel": "Canais de atendimento",
     "support.responseTime": "Tempo médio de resposta: 24h úteis",
-    "support.incidentAlertTitle": "Aviso importante",
+    "support.incidentAlertTitle": "⚠️ Atenção",
     "support.incidentAlert":
-      "<p>Escreva o aviso aqui. Use um &lt;p&gt; por parágrafo.</p>",
+      '<p>O site oficial do Corridex é <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">https://corridex.app/</a>.</p><p>O Corridex não pede cadastro nem solicita dados pessoais para usar o aplicativo.</p><p>Há outro site usando o nome Corridex, corridex.com.br, que oferece um formulário de cadastro. Esse site não é um canal oficial do nosso Corridex.</p><p>Para conhecer ou baixar o app, acesse <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">corridex.app</a> e use o link da App Store indicado lá. Não informe seus dados no outro site.</p><p>Se puder, compartilhe este aviso com outros motoristas.</p>',
   },
   en: {
     "meta.title": "App for Ride Share Drivers on iPhone | Corridex",
@@ -236,6 +238,8 @@ window.CORRIDEX_TRANSLATIONS = {
     "hero.feature2": "Automatic alerts for profitable rides",
     "hero.feature3": "100% private — processing on your iPhone",
     "hero.badgeAlt": "Download on the App Store",
+    "home.noticeText":
+      '<strong>ATTENTION, DRIVERS:</strong> Corridex never asks for personal data!<br>The site corridex.com.br is not official.',
     "hero.note": "Free for iPhone",
     "hero.mockupAlt": "Corridex monitoring rides in real time",
     "features.title": "Built for ride share drivers",
@@ -398,9 +402,9 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.emailAriaLabel": "Send email to support",
     "support.channelsBarAriaLabel": "Support channels",
     "support.responseTime": "Average response time: 24 business hours",
-    "support.incidentAlertTitle": "Important notice",
+    "support.incidentAlertTitle": "⚠️ Attention",
     "support.incidentAlert":
-      "<p>Write the notice here. Use one &lt;p&gt; per paragraph.</p>",
+      '<p>The official Corridex website is <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">https://corridex.app/</a>.</p><p>Corridex does not ask you to sign up, nor does it request personal data to use the app.</p><p>There is another site using the name Corridex, corridex.com.br, that offers a sign-up form. That site is not an official channel of our Corridex.</p><p>To learn about or download the app, go to <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">corridex.app</a> and use the App Store link shown there. Do not submit your information on the other site.</p><p>If you can, share this notice with other drivers.</p>',
   },
   es: {
     "meta.title":
@@ -435,6 +439,8 @@ window.CORRIDEX_TRANSLATIONS = {
     "hero.feature2": "Alertas automáticas de viajes lucrativos",
     "hero.feature3": "100% privado — procesamiento en tu iPhone",
     "hero.badgeAlt": "Descargar en el App Store",
+    "home.noticeText":
+      '<strong>ATENCIÓN, CONDUCTORES:</strong> Corridex nunca pide datos personales.<br>El sitio corridex.com.br no es oficial.',
     "hero.note": "Gratis para iPhone",
     "hero.mockupAlt": "Corridex monitoreando viajes en tiempo real",
     "features.title": "Hecho para conductores de aplicaciones de transporte",
@@ -602,8 +608,8 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.emailAriaLabel": "Enviar correo a soporte",
     "support.channelsBarAriaLabel": "Canales de atención",
     "support.responseTime": "Tiempo promedio de respuesta: 24h hábiles",
-    "support.incidentAlertTitle": "Aviso importante",
+    "support.incidentAlertTitle": "⚠️ Atención",
     "support.incidentAlert":
-      "<p>Escribe el aviso aquí. Usa un &lt;p&gt; por párrafo.</p>",
+      '<p>El sitio oficial de Corridex es <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">https://corridex.app/</a>.</p><p>Corridex no pide registro ni solicita datos personales para usar la aplicación.</p><p>Hay otro sitio que usa el nombre Corridex, corridex.com.br, y ofrece un formulario de registro. Ese sitio no es un canal oficial de nuestro Corridex.</p><p>Para conocer o descargar la app, entra en <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">corridex.app</a> y usa el enlace de la App Store que aparece allí. No informes tus datos en el otro sitio.</p><p>Si puedes, comparte este aviso con otros conductores.</p>',
   },
 };
