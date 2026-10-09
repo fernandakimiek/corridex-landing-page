@@ -117,10 +117,35 @@ function initLandingPage() {
   initTestimonialsCarousel();
 }
 
+function openPlatformTermsFromHash() {
+  if (location.hash !== "#termos-das-plataformas") return;
+  var item = document.getElementById("termos-das-plataformas");
+  if (!item) return;
+  var btn = item.querySelector(".faq-question");
+  item.classList.remove("faq-item--hidden");
+  item.classList.add("is-open");
+  if (!btn) return;
+  btn.setAttribute("aria-expanded", "true");
+  window.requestAnimationFrame(function () {
+    item.scrollIntoView({ block: "start" });
+    btn.focus({ preventScroll: true });
+  });
+}
+
+function initFaqHash() {
+  document.addEventListener(
+    "corridex:support-i18n-applied",
+    openPlatformTermsFromHash,
+  );
+  window.addEventListener("hashchange", openPlatformTermsFromHash);
+  openPlatformTermsFromHash();
+}
+
 function initSupportPage() {
   if (window.CorridexI18n) CorridexI18n.initSupportPage();
   initFaq();
   initFaqSearch();
+  initFaqHash();
 }
 
 function boot(initFn) {

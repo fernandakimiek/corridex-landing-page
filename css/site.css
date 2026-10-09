@@ -678,6 +678,10 @@ img {
   border-bottom: 1px solid var(--border);
 }
 
+#termos-das-plataformas {
+  scroll-margin-top: calc(var(--nav-height) + 1rem);
+}
+
 .faq-question {
   width: 100%;
   display: flex;
@@ -749,6 +753,13 @@ img {
 
 .faq-answer li:last-child {
   margin-bottom: 0;
+}
+
+.faq-answer blockquote {
+  margin: 0.75rem 0 0.875rem;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--text);
 }
 
 .faq-answer a {

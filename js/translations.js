@@ -36,7 +36,7 @@ window.CORRIDEX_TRANSLATIONS = {
       "O primeiro app para iPhone que monitora suas ofertas dos aplicativos de corrida. R$/km e ganho por hora em tempo real.",
     "hero.feature1": "Veja R$/km e R$/h de cada corrida",
     "hero.feature2": "Alertas automáticos de corridas lucrativas",
-    "hero.feature3": "100% privado — processamento no seu iPhone",
+    "hero.feature3": "Leitura da oferta no seu dispositivo",
     "hero.badgeAlt": "Baixar na App Store",
     "home.noticeText":
       '<strong>ATENÇÃO, MOTORISTAS:</strong> o Corridex nunca pede dados pessoais!<br>O site corridex.com.br não é oficial.',
@@ -44,7 +44,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "hero.mockupAlt": "Corridex monitorando corridas em tempo real",
     "features.title": "Feito pra motorista de aplicativos de corrida",
     "features.subtitle":
-      "Controle total, mais lucro, sem risco — tudo no seu iPhone.",
+      "Controle total, mais lucro — tudo no seu iPhone.",
     "features.control.title": "Controle total",
     "features.control.li1": "Define valor mínimo por km",
     "features.control.li2": "Ganho mínimo por hora",
@@ -52,11 +52,11 @@ window.CORRIDEX_TRANSLATIONS = {
     "features.profit.title": "Mais lucro",
     "features.profit.li1": "R$/km em tempo real",
     "features.profit.li2": "Ganho por hora calculado",
-    "features.profit.li3": "Recusa as que não valem",
-    "features.safe.title": "Seguro",
-    "features.safe.li1": "Processamento 100% no iPhone",
-    "features.safe.li2": "Sem envio de dados",
-    "features.safe.li3": "Privacidade total",
+    "features.profit.li3": "Marca as que não valem",
+    "features.safe.title": "Privacidade",
+    "features.safe.li1": "Leitura da oferta no dispositivo",
+    "features.safe.li2": "Histórico no dispositivo e no iCloud",
+    "features.safe.li3": "Sem servidor do Corridex",
     "features.safe.li4": "Não precisa de cadastro",
     "testimonials.title": "Quem usa o Corridex?",
     "testimonials.subtitle":
@@ -131,12 +131,12 @@ window.CORRIDEX_TRANSLATIONS = {
       '<p>Causado pela função <strong>"Ler Notificações"</strong> do iPhone (que a Siri usa para falar os avisos em voz alta no carro). Quando ela está ativa, o sistema esconde o banner visual.</p><p>Para resolver:</p><ol><li>Ajustes → Notificações</li><li>Procure a opção <strong>Ler Notificações</strong></li><li>Deixe ela desativada</li></ol><p>Após isso, o Corridex e o CarPlay funcionam juntos normalmente.</p>',
     "faq.q6": "O Apple Music para de tocar quando o Corridex está monitorando",
     "faq.a6":
-      "<p>Infelizmente essa é uma limitação técnica da própria Apple — o iOS bloqueia o áudio do Apple Music por proteção de direitos autorais (DRM) sempre que há gravação/transmissão de tela ativa.</p><p><strong>Solução que funciona:</strong> use Spotify, YouTube Music, Deezer ou qualquer outro app de terceiros. Eles continuam tocando normalmente enquanto o Corridex funciona.</p><p>Isso não é um bug do Corridex — é uma restrição da Apple que afeta o app nativo deles durante transmissões de tela.</p>",
+      "<p>Infelizmente essa é uma limitação técnica da própria Apple — o iOS bloqueia o áudio do Apple Music por proteção de direitos autorais (DRM) sempre que o Compartilhamento de Tela está ligado.</p><p><strong>Solução que funciona:</strong> use Spotify, YouTube Music, Deezer ou qualquer outro app de terceiros. Eles continuam tocando normalmente enquanto o Corridex funciona.</p><p>Isso não é um bug do Corridex — é uma restrição da Apple que afeta o app nativo deles durante o Compartilhamento de Tela.</p>",
     "faq.q7": "O cálculo inclui o deslocamento até o passageiro?",
     "faq.a7":
       "<p>Sim. O Corridex soma a distância até o passageiro + a distância da viagem, usando exatamente os números que aparecem no aplicativo de corrida, no momento do toque.</p><p>O app usa apenas as informações daquele primeiro aviso. Se a corrida mudar de rota depois de aceita, o Corridex não tem como saber — ele registra só o que estava na oferta inicial.</p>",
     "faq.q8":
-      "Configurei para rejeitar múltiplas paradas, mas corridas assim ainda aparecem",
+      "Marquei múltiplas paradas como critério, mas essas corridas ainda aparecem",
     "faq.a8":
       "<p>O Corridex não bloqueia a corrida antes de ela aparecer — ele não tem integração direta com os aplicativos de corrida. O que a regra faz é:</p><ul><li>Quando tocar uma corrida com múltiplas paradas, o app exibe o alerta em vermelho, mesmo que o valor seja bom</li><li>Os avisos dos aplicativos de corrida continuam aparecendo normalmente na tela</li></ul>",
     "faq.q9": "Posso pagar via Pix?",
@@ -152,10 +152,14 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q14": "Como cancelar a assinatura do Corridex?",
     "faq.a14":
       "<ol><li>Acesse o app <strong>Ajustes</strong></li><li>Toque no seu nome/perfil localizado no topo da tela</li><li>Selecione a opção <strong>Assinaturas</strong>. Uma lista com todas as suas assinaturas ativas e inativas será exibida</li><li>Localize e toque em <strong>Corridex</strong> para cancelar</li><li>Role até o final da tela e toque em <strong>Cancelar Assinatura</strong>. Confirme a ação</li></ol>",
+    "faq.q18":
+      "A Uber mostrou um aviso sobre capturas de tela. Posso usar o Corridex?",
+    "faq.a18":
+      '<p>A Uber mostra esse aviso quando o motorista tira um print da tela durante a viagem.</p><blockquote>As capturas de tela ou compartilhamento de endereços fora do app violam os Termos e Condições Gerais da Uber e o Código da Comunidade Uber, podendo resultar na desativação da conta.</blockquote><p>O Corridex não tem servidores: ele lê o cartão da oferta no seu dispositivo e não compartilha endereços com ninguém.</p><p>Duas coisas para saber:</p><ul><li>para ler as ofertas, o monitoramento usa o Compartilhamento de Tela do iOS, que grava a tela enquanto está ligado, e cada plataforma define as próprias regras;</li><li>com "Salvar imagem da oferta" ligado, o Corridex guarda no histórico uma imagem da tela inteira de cada oferta. Dá para desligar em Ajustes do app › Geral ou no aviso antes de iniciar o monitoramento.</li></ul><p>Por isso: leia os termos da Uber e das outras plataformas que você usa, não tire prints da viagem e não compartilhe endereços ou dados de passageiros fora do app da plataforma.</p><p>O Corridex só avalia as ofertas. A decisão sobre cada corrida e a responsabilidade pela conta são suas. Veja também <a href="https://corridex.app/termos.html">Termos de Uso › Plataformas de terceiros</a>.</p>',
     "faq.q12":
       "Por que o app grava/monitora minha tela? Meus dados ficam seguros?",
     "faq.a12":
-      '<p>O Corridex precisa "olhar" a tela porque é a única forma de ler os dados de uma corrida no iPhone/iPad — a Apple não permite que um app acesse os dados internos de outro app diretamente.</p><p><strong>Seus dados estão 100% seguros:</strong></p><ul><li>Nenhuma imagem ou vídeo é salvo ou enviado para a internet ou servidor</li><li>Todo o processamento acontece dentro do chip do seu próprio aparelho</li><li>O app funciona mesmo sem internet — teste desligando o Wi-Fi e os dados móveis</li></ul>',
+      '<p>O Corridex precisa "olhar" a tela porque é a única forma de ler os dados de uma corrida no dispositivo — a Apple não permite que um app acesse os dados internos de outro app diretamente.</p><p>O Corridex não tem servidores: a leitura do cartão é feita no dispositivo. O histórico fica 30 dias, no dispositivo e no iCloud do motorista, se o iCloud estiver ativado, sem o nome do passageiro. A imagem só é guardada com "Salvar imagem da oferta" ligado, e é da tela inteira. Um endereço só sai do app quando você toca para abri-lo no mapa.</p><p>Veja a <a href="https://corridex.app/privacidade.html">Política de Privacidade</a>.</p>',
     "faq.q13": "O app está lento — o banner demora a aparecer e perco corridas",
     "faq.a13":
       "<p>Causas comuns de lentidão:</p><ul><li><strong>Calor:</strong> iPhone exposto ao sol no painel do carro reduz a velocidade automaticamente para se proteger — tente posicioná-lo com menos exposição solar</li><li><strong>Após atualizações:</strong> se a lentidão começou depois de uma atualização, é um bug em investigação — envie prints das corridas lentas para o suporte</li><li><strong>Modelos mais antigos (iPhone 11 ou anterior):</strong> podem sentir mais o impacto do processamento de tela em tempo real</li></ul>",
@@ -236,7 +240,7 @@ window.CORRIDEX_TRANSLATIONS = {
       "The first iPhone app that monitors your ride share app. $/mile and earnings per hour in real time.",
     "hero.feature1": "See $/mile and $/hr for every ride",
     "hero.feature2": "Automatic alerts for profitable rides",
-    "hero.feature3": "100% private — processing on your iPhone",
+    "hero.feature3": "Offer reading on your device",
     "hero.badgeAlt": "Download on the App Store",
     "home.noticeText":
       '<strong>ATTENTION, DRIVERS:</strong> Corridex never asks for personal data!<br>The site corridex.com.br is not official.',
@@ -244,7 +248,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "hero.mockupAlt": "Corridex monitoring rides in real time",
     "features.title": "Built for ride share drivers",
     "features.subtitle":
-      "Full control, more profit, no risk — all on your iPhone.",
+      "Full control, more profit — all on your iPhone.",
     "features.control.title": "Full control",
     "features.control.li1": "Set minimum value per mile",
     "features.control.li2": "Minimum earnings per hour",
@@ -252,11 +256,11 @@ window.CORRIDEX_TRANSLATIONS = {
     "features.profit.title": "More profit",
     "features.profit.li1": "Real-time $/mile",
     "features.profit.li2": "Calculated earnings per hour",
-    "features.profit.li3": "Skip rides that don't pay",
-    "features.safe.title": "Secure",
-    "features.safe.li1": "100% processing on iPhone",
-    "features.safe.li2": "No data sent out",
-    "features.safe.li3": "Total privacy",
+    "features.profit.li3": "Flags rides that don't pay",
+    "features.safe.title": "Privacy",
+    "features.safe.li1": "Offer reading on the device",
+    "features.safe.li2": "History on your device and in iCloud",
+    "features.safe.li3": "No Corridex server",
     "features.safe.li4": "No registration required",
     "testimonials.title": "Who uses Corridex?",
     "testimonials.subtitle":
@@ -330,12 +334,12 @@ window.CORRIDEX_TRANSLATIONS = {
       '<p>Caused by the iPhone\'s <strong>"Announce Notifications"</strong> feature (which Siri uses to read alerts aloud in the car). When active, the system hides the visual banner.</p><p>To fix:</p><ol><li>Settings → Notifications</li><li>Find the <strong>Announce Notifications</strong> option</li><li>Leave it disabled</li></ol><p>After that, Corridex and CarPlay work together normally.</p>',
     "faq.q6": "Apple Music stops playing when Corridex is monitoring",
     "faq.a6":
-      "<p>Unfortunately this is a technical limitation from Apple itself — iOS blocks Apple Music audio for copyright protection (DRM) whenever screen recording/broadcast is active.</p><p><strong>Working solution:</strong> use Spotify, YouTube Music, Deezer, or any other third-party app. They keep playing normally while Corridex works.</p><p>This is not a Corridex bug — it's an Apple restriction that affects their native app during screen broadcasts.</p>",
+      "<p>Unfortunately this is a technical limitation from Apple itself — iOS blocks Apple Music audio for copyright protection (DRM) whenever Screen Sharing is on.</p><p><strong>Working solution:</strong> use Spotify, YouTube Music, Deezer, or any other third-party app. They keep playing normally while Corridex works.</p><p>This is not a Corridex bug — it's an Apple restriction that affects their native app during Screen Sharing.</p>",
     "faq.q7": "Does the calculation include the distance to the passenger?",
     "faq.a7":
       "<p>Yes. Corridex adds the distance to the passenger + the trip distance, using exactly the numbers shown in the ride app at the moment of the alert.</p><p>The app only uses information from that first notification. If the ride changes route after being accepted, Corridex has no way to know — it only records what was in the initial offer.</p>",
     "faq.q8":
-      "I configured to reject multiple stops, but such rides still appear",
+      "I marked multiple stops as a criterion, but those rides still appear",
     "faq.a8":
       "<p>Corridex doesn't block the ride before it appears — it has no direct integration with ride apps. What the rule does is:</p><ul><li>When a ride with multiple stops comes in, the app displays the alert in red, even if the value is good</li><li>Ride app notifications continue appearing normally on screen</li></ul>",
     "faq.q9": "Can I pay via Pix?",
@@ -351,9 +355,13 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q14": "How do I cancel my Corridex subscription?",
     "faq.a14":
       "<ol><li>Open the <strong>Settings</strong> app</li><li>Tap your name/profile at the top of the screen</li><li>Select <strong>Subscriptions</strong>. A list of all your active and inactive subscriptions will be displayed</li><li>Find and tap <strong>Corridex</strong> to cancel</li><li>Scroll to the bottom of the screen and tap <strong>Cancel Subscription</strong>. Confirm the action</li></ol>",
+    "faq.q18":
+      "Uber showed a notice about screenshots. Can I use Corridex?",
+    "faq.a18":
+      '<p>Uber shows this notice when the driver takes a screenshot during the trip.</p><blockquote>Screenshots or sharing addresses outside the app violate Uber\'s General Terms and Conditions and the Uber Community Guidelines, and may result in account deactivation.</blockquote><p>Corridex has no servers: it reads the offer card on your device and does not share addresses with anyone.</p><p>Two things to know:</p><ul><li>to read offers, monitoring uses iOS Screen Sharing, which records the screen while it is on, and each platform sets its own rules;</li><li>with "Save offer image" on, Corridex keeps a full-screen image of each offer in History. You can turn it off in the app\'s Settings › General or in the notice before monitoring starts.</li></ul><p>So: read Uber\'s terms and those of the other platforms you use, do not take screenshots of the trip, and do not share addresses or passenger data outside the platform\'s app.</p><p>Corridex only evaluates offers. The decision about each ride and responsibility for the account are yours. See also <a href="https://corridex.app/termos.html">Terms of Use › Third-party platforms</a>.</p>',
     "faq.q12": "Why does the app record/monitor my screen? Is my data safe?",
     "faq.a12":
-      "<p>Corridex needs to \"look\" at the screen because it's the only way to read ride data on iPhone/iPad — Apple doesn't allow one app to access another app's internal data directly.</p><p><strong>Your data is 100% safe:</strong></p><ul><li>No images or video are saved or sent to the internet or any server</li><li>All processing happens on your device's own chip</li><li>The app works even without internet — try turning off Wi-Fi and mobile data</li></ul>",
+      '<p>Corridex needs to "look" at the screen because it is the only way to read ride data on the device — Apple does not allow one app to access another app\'s internal data directly.</p><p>Corridex has no servers: the offer card is read on the device. History stays for 30 days, on the device and in the driver\'s iCloud if iCloud is enabled, without the passenger\'s name. The image is kept only with "Save offer image" on, and it is of the entire screen. An address only leaves the app when you tap to open it in a map.</p><p>See the <a href="https://corridex.app/privacidade.html">Privacy Policy</a>.</p>',
     "faq.q13":
       "The app is slow — the banner takes too long to appear and I miss rides",
     "faq.a13":
@@ -437,7 +445,7 @@ window.CORRIDEX_TRANSLATIONS = {
       "La app para iPhone que monitorea tus ofertas de aplicaciones de transporte. $/km y ganancia por hora en tiempo real.",
     "hero.feature1": "Ve $/km y $/h de cada viaje",
     "hero.feature2": "Alertas automáticas de viajes lucrativos",
-    "hero.feature3": "100% privado — procesamiento en tu iPhone",
+    "hero.feature3": "Lectura de la oferta en tu dispositivo",
     "hero.badgeAlt": "Descargar en el App Store",
     "home.noticeText":
       '<strong>ATENCIÓN, CONDUCTORES:</strong> Corridex nunca pide datos personales.<br>El sitio corridex.com.br no es oficial.',
@@ -445,7 +453,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "hero.mockupAlt": "Corridex monitoreando viajes en tiempo real",
     "features.title": "Hecho para conductores de aplicaciones de transporte",
     "features.subtitle":
-      "Control total, más ganancia, sin riesgo — todo en tu iPhone.",
+      "Control total, más ganancia — todo en tu iPhone.",
     "features.control.title": "Control total",
     "features.control.li1": "Define valor mínimo por km",
     "features.control.li2": "Ganancia mínima por hora",
@@ -453,11 +461,11 @@ window.CORRIDEX_TRANSLATIONS = {
     "features.profit.title": "Más ganancia",
     "features.profit.li1": "$/km en tiempo real",
     "features.profit.li2": "Ganancia por hora calculada",
-    "features.profit.li3": "Rechaza los que no valen",
-    "features.safe.title": "Seguro",
-    "features.safe.li1": "Procesamiento 100% en iPhone",
-    "features.safe.li2": "Sin envío de datos",
-    "features.safe.li3": "Privacidad total",
+    "features.profit.li3": "Marca los que no valen",
+    "features.safe.title": "Privacidad",
+    "features.safe.li1": "Lectura de la oferta en el dispositivo",
+    "features.safe.li2": "Historial en el dispositivo y en iCloud",
+    "features.safe.li3": "Sin servidor de Corridex",
     "features.safe.li4": "No necesita registro",
     "testimonials.title": "¿Quién usa Corridex?",
     "testimonials.subtitle":
@@ -533,12 +541,12 @@ window.CORRIDEX_TRANSLATIONS = {
       '<p>Causado por la función <strong>"Anunciar Notificaciones"</strong> del iPhone (que Siri usa para leer los avisos en voz alta en el auto). Cuando está activa, el sistema oculta el banner visual.</p><p>Para resolver:</p><ol><li>Ajustes → Notificaciones</li><li>Busca la opción <strong>Anunciar Notificaciones</strong></li><li>Déjala desactivada</li></ol><p>Después de esto, Corridex y CarPlay funcionan juntos normalmente.</p>',
     "faq.q6": "Apple Music deja de sonar cuando Corridex está monitoreando",
     "faq.a6":
-      "<p>Desafortunadamente esta es una limitación técnica de Apple — iOS bloquea el audio de Apple Music por protección de derechos de autor (DRM) siempre que hay grabación/transmisión de pantalla activa.</p><p><strong>Solución que funciona:</strong> usa Spotify, YouTube Music, Deezer o cualquier otra app de terceros. Siguen sonando normalmente mientras Corridex funciona.</p><p>Esto no es un bug de Corridex — es una restricción de Apple que afecta su app nativa durante transmisiones de pantalla.</p>",
+      "<p>Desafortunadamente esta es una limitación técnica de Apple — iOS bloquea el audio de Apple Music por protección de derechos de autor (DRM) siempre que Compartir Pantalla está activado.</p><p><strong>Solución que funciona:</strong> usa Spotify, YouTube Music, Deezer o cualquier otra app de terceros. Siguen sonando normalmente mientras Corridex funciona.</p><p>Esto no es un bug de Corridex — es una restricción de Apple que afecta su app nativa durante Compartir Pantalla.</p>",
     "faq.q7": "¿El cálculo incluye el desplazamiento hasta el pasajero?",
     "faq.a7":
       "<p>Sí. Corridex suma la distancia hasta el pasajero + la distancia del viaje, usando exactamente los números que aparecen en la app de viajes, en el momento del aviso.</p><p>La app usa solo la información de esa primera notificación. Si el viaje cambia de ruta después de aceptado, Corridex no tiene forma de saberlo — registra solo lo que estaba en la oferta inicial.</p>",
     "faq.q8":
-      "Configuré para rechazar múltiples paradas, pero viajes así siguen apareciendo",
+      "Marqué múltiples paradas como criterio, pero esos viajes siguen apareciendo",
     "faq.a8":
       "<p>Corridex no bloquea el viaje antes de que aparezca — no tiene integración directa con las apps de viajes. Lo que hace la regla es:</p><ul><li>Cuando llega un viaje con múltiples paradas, la app muestra la alerta en rojo, aunque el valor sea bueno</li><li>Los avisos de las apps de viajes siguen apareciendo normalmente en pantalla</li></ul>",
     "faq.q9": "¿Puedo pagar vía Pix?",
@@ -554,10 +562,14 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q14": "¿Cómo cancelar la suscripción de Corridex?",
     "faq.a14":
       "<ol><li>Abre la app <strong>Ajustes</strong></li><li>Toca tu nombre/perfil en la parte superior de la pantalla</li><li>Selecciona <strong>Suscripciones</strong>. Se mostrará una lista con todas tus suscripciones activas e inactivas</li><li>Localiza y toca <strong>Corridex</strong> para cancelar</li><li>Desplázate hasta el final de la pantalla y toca <strong>Cancelar Suscripción</strong>. Confirma la acción</li></ol>",
+    "faq.q18":
+      "Uber mostró un aviso sobre capturas de pantalla. ¿Puedo usar Corridex?",
+    "faq.a18":
+      '<p>Uber muestra ese aviso cuando el conductor toma una captura de pantalla durante el viaje.</p><blockquote>Las capturas de pantalla o compartir direcciones fuera de la app violan los Términos y Condiciones Generales de Uber y el Código de la Comunidad Uber, y pueden resultar en la desactivación de la cuenta.</blockquote><p>Corridex no tiene servidores: lee la tarjeta de la oferta en tu dispositivo y no comparte direcciones con nadie.</p><p>Dos cosas para saber:</p><ul><li>para leer las ofertas, el monitoreo usa Compartir Pantalla de iOS, que graba la pantalla mientras está activado, y cada plataforma define sus propias reglas;</li><li>con "Guardar imagen de la oferta" activado, Corridex guarda en el historial una imagen de la pantalla entera de cada oferta. Se puede desactivar en Ajustes de la app › General o en el aviso antes de iniciar el monitoreo.</li></ul><p>Por eso: lee los términos de Uber y de las otras plataformas que usas, no tomes capturas del viaje y no compartas direcciones o datos de pasajeros fuera de la app de la plataforma.</p><p>Corridex solo evalúa las ofertas. La decisión sobre cada viaje y la responsabilidad por la cuenta son tuyas. Ve también <a href="https://corridex.app/termos.html">Términos de Uso › Plataformas de terceros</a>.</p>',
     "faq.q12":
       "¿Por qué la app graba/monitorea mi pantalla? ¿Mis datos están seguros?",
     "faq.a12":
-      '<p>Corridex necesita "mirar" la pantalla porque es la única forma de leer los datos de un viaje en iPhone/iPad — Apple no permite que una app acceda a los datos internos de otra app directamente.</p><p><strong>Tus datos están 100% seguros:</strong></p><ul><li>Ninguna imagen o video se guarda o envía a internet o servidor</li><li>Todo el procesamiento ocurre dentro del chip de tu propio dispositivo</li><li>La app funciona incluso sin internet — prueba desactivando Wi-Fi y datos móviles</li></ul>',
+      '<p>Corridex necesita "mirar" la pantalla porque es la única forma de leer los datos de un viaje en el dispositivo — Apple no permite que una app acceda a los datos internos de otra app directamente.</p><p>Corridex no tiene servidores: la lectura de la tarjeta se hace en el dispositivo. El historial queda 30 días, en el dispositivo y en el iCloud del conductor, si iCloud está activado, sin el nombre del pasajero. La imagen solo se guarda con "Guardar imagen de la oferta" activado, y es de la pantalla entera. Una dirección solo sale de la app cuando tocas para abrirla en el mapa.</p><p>Consulta la <a href="https://corridex.app/privacidade.html">Política de Privacidad</a>.</p>',
     "faq.q13":
       "La app está lenta — el banner tarda en aparecer y pierdo viajes",
     "faq.a13":
