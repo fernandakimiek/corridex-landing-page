@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://corridex.app/schemas/app-update-v1.schema.json",
+  "title": "Política de atualização do Corridex (v1)",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schemaVersion", "rules"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Usado só pelo editor. O app ignora."
+    },
+    "schemaVersion": {
+      "const": 1,
+      "description": "Sempre 1 neste arquivo. O app ignora o arquivo inteiro se o número for outro."
+    },
+    "rules": {
+      "type": "array",
+      "maxItems": 20,
+      "description": "Zero a vinte regras. Lista vazia significa que ninguém recebe pedido de atualização.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["id", "level", "minimumVersion", "reason"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{3,64}$",
+            "description": "Único no arquivo. Novo quando o sentido muda; o mesmo quando só o prazo muda. Ex.: 2026-11-leitura-uber",
+            "examples": ["2026-11-leitura-uber"]
+          },
+          "level": {
+            "enum": ["recommended", "required"],
+            "description": "recommended avisa e pode ser adiado. required bloqueia o próximo início do monitoramento."
+          },
+          "minimumVersion": {
+            "type": "string",
+            "pattern": "^\\d+(\\.\\d+){0,2}$",
+            "description": "A primeira versão boa. A regra vale para quem está abaixo dela. Ex.: 2.0.55",
+            "examples": ["2.0.55"]
+          },
+          "reason": {
+            "enum": ["offerReading", "stability", "dataSafety", "security", "general"],
+            "description": "Código do motivo. O texto que o motorista lê fica no app."
+          },
+          "enforcedFrom": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Só em required. UTC terminando em Z. Meia-noite de Brasília é T03:00:00Z. Ex.: 2026-12-01T03:00:00Z",
+            "examples": ["2026-12-01T03:00:00Z"]
+          }
+        }
+      }
+    }
+  }
+}

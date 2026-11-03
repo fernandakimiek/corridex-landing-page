@@ -1,0 +1,52 @@
+name: validate-app-update
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-app-update:
+    name: validate-app-update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ver se o PR mexe na política
+        id: policy
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          files="$(git diff --name-only "$base" "$head")"
+          printf '%s\n' "$files"
+          pattern='^(app-update/|schemas/app-update-|scripts/validate-app-update|scripts/lib/app-update-policy|\.github/workflows/validate-app-update\.yml)'
+          if printf '%s\n' "$files" | grep -Eq "$pattern"; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Node
+        if: steps.policy.outputs.relevant == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Dependências
+        if: steps.policy.outputs.relevant == 'true'
+        run: npm ci
+
+      - name: Testes
+        if: steps.policy.outputs.relevant == 'true'
+        run: npm test
+
+      - name: Validar contra a App Store
+        if: steps.policy.outputs.relevant == 'true'
+        run: node scripts/validate-app-update.mjs --check-app-store

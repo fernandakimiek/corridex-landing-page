@@ -110,6 +110,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.cat.carplay": "CarPlay e Apple Music",
     "faq.cat.calculations": "Cálculos e Análise de Corridas",
     "faq.cat.subscription": "Assinatura e Pagamento",
+    "faq.cat.n99": "99 Motorista",
     "faq.cat.app": "Funcionamento do App",
     "faq.q1":
       "Configurei tudo mas o banner com os dados da corrida não aparece na tela",
@@ -128,7 +129,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q5":
       "Quando conecto o CarPlay, as notificações do Corridex param de aparecer",
     "faq.a5":
-      '<p>Causado pela função <strong>"Ler Notificações"</strong> do iPhone (que a Siri usa para falar os avisos em voz alta no carro). Quando ela está ativa, o sistema esconde o banner visual.</p><p>Para resolver:</p><ol><li>Ajustes → Notificações</li><li>Procure a opção <strong>Ler Notificações</strong></li><li>Deixe ela desativada</li></ol><p>Após isso, o Corridex e o CarPlay funcionam juntos normalmente.</p>',
+      '<p>Ao conectar o Apple CarPlay, o iPhone pode ligar sozinho o Modo Foco <strong>Carro</strong>. Com ele ativo, as notificações ficam silenciadas e o banner do Corridex deixa de aparecer.</p><p>Para desativar a ativação automática:</p><ol><li>Ajustes → Foco → <strong>Carro</strong></li><li>Em <strong>Ao dirigir</strong>, escolha <strong>Manualmente</strong></li><li>Desative <strong>Ativar com CarPlay</strong></li></ol><p>Se o banner ainda não aparecer, confira também <strong>Ler Notificações</strong>. Quando essa opção está ligada, a Siri lê os avisos em voz alta e o sistema esconde o banner visual:</p><ol><li>Ajustes → Notificações</li><li>Procure <strong>Ler Notificações</strong></li><li>Deixe desativada</li></ol><p>Depois disso, o Corridex e o CarPlay funcionam juntos normalmente.</p>',
     "faq.q6": "O Apple Music para de tocar quando o Corridex está monitorando",
     "faq.a6":
       "<p>Infelizmente essa é uma limitação técnica da própria Apple — o iOS bloqueia o áudio do Apple Music por proteção de direitos autorais (DRM) sempre que o Compartilhamento de Tela está ligado.</p><p><strong>Solução que funciona:</strong> use Spotify, YouTube Music, Deezer ou qualquer outro app de terceiros. Eles continuam tocando normalmente enquanto o Corridex funciona.</p><p>Isso não é um bug do Corridex — é uma restrição da Apple que afeta o app nativo deles durante o Compartilhamento de Tela.</p>",
@@ -175,6 +176,9 @@ window.CORRIDEX_TRANSLATIONS = {
       "A notificação ou cartão expandido não abre mesmo arrastando ou segurando o aviso resumido",
     "faq.a17":
       '<p>Após uma atualização de versão do Corridex, o iOS às vezes mantém o estado antigo das notificações em memória — o aviso resumido aparece, mas o gesto de expandir deixa de responder.</p><p><strong>Solução:</strong> reinicie o iPhone. Isso normalmente restaura o comportamento das notificações expandidas.</p>',
+    "faq.q19": 'O 99 Motorista avisa "Captura de tela não permitida"',
+    "faq.a19":
+      '<p>Esse aviso aparece quando o 99 Motorista pede o reconhecimento facial e o monitoramento do Corridex está ligado. Naquele momento, o 99 precisa da câmera sem a captura de tela ativa.</p><p>Para concluir o reconhecimento:</p><ol><li>No Corridex, desative o monitoramento</li><li>Faça o reconhecimento facial no 99 Motorista</li><li>Volte ao Corridex e ative o monitoramento de novo</li></ol><p>Depois disso, o aviso some e o monitoramento pode continuar normalmente.</p>',
     "cta.title": "Pare de aceitar corrida no escuro",
     "cta.subtitle":
       "Saiba o valor por km antes de aceitar. Grátis para iPhone.",
@@ -315,6 +319,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.cat.carplay": "CarPlay and Apple Music",
     "faq.cat.calculations": "Ride Calculations and Analysis",
     "faq.cat.subscription": "Subscription and Payment",
+    "faq.cat.n99": "99 Driver",
     "faq.cat.app": "How the App Works",
     "faq.q1":
       "I configured everything but the banner with ride data doesn't appear on screen",
@@ -331,7 +336,7 @@ window.CORRIDEX_TRANSLATIONS = {
       '<p>This happens when the iPhone text size is too large — the app can\'t read the information correctly and enters a "loop".</p><p>Reduce the font slightly at: <strong>Settings → Display & Brightness → Text Size</strong></p><p>Slide the control slightly to the left and test. Most users resolve this with that setting.</p>',
     "faq.q5": "When I connect CarPlay, Corridex notifications stop appearing",
     "faq.a5":
-      '<p>Caused by the iPhone\'s <strong>"Announce Notifications"</strong> feature (which Siri uses to read alerts aloud in the car). When active, the system hides the visual banner.</p><p>To fix:</p><ol><li>Settings → Notifications</li><li>Find the <strong>Announce Notifications</strong> option</li><li>Leave it disabled</li></ol><p>After that, Corridex and CarPlay work together normally.</p>',
+      '<p>When Apple CarPlay connects, the iPhone can turn on <strong>Driving</strong> Focus by itself. With it on, notifications are silenced and the Corridex banner stops appearing.</p><p>To turn off automatic activation:</p><ol><li>Settings → Focus → <strong>Driving</strong></li><li>Under <strong>While Driving</strong>, choose <strong>Manually</strong></li><li>Turn off <strong>Activate With CarPlay</strong></li></ol><p>If the banner still does not appear, also check <strong>Announce Notifications</strong>. When that option is on, Siri reads alerts aloud and the system hides the visual banner:</p><ol><li>Settings → Notifications</li><li>Find <strong>Announce Notifications</strong></li><li>Leave it off</li></ol><p>After that, Corridex and CarPlay work together normally.</p>',
     "faq.q6": "Apple Music stops playing when Corridex is monitoring",
     "faq.a6":
       "<p>Unfortunately this is a technical limitation from Apple itself — iOS blocks Apple Music audio for copyright protection (DRM) whenever Screen Sharing is on.</p><p><strong>Working solution:</strong> use Spotify, YouTube Music, Deezer, or any other third-party app. They keep playing normally while Corridex works.</p><p>This is not a Corridex bug — it's an Apple restriction that affects their native app during Screen Sharing.</p>",
@@ -378,6 +383,9 @@ window.CORRIDEX_TRANSLATIONS = {
       "The expanded notification or card won't open even when dragging or holding the compact alert",
     "faq.a17":
       '<p>After a Corridex version update, iOS sometimes keeps the old notification state in memory — the compact alert appears, but the expand gesture stops responding.</p><p><strong>Solution:</strong> restart your iPhone. This usually restores expanded notification behavior.</p>',
+    "faq.q19": '99 Driver shows "Screen capture not allowed"',
+    "faq.a19":
+      '<p>This warning appears when 99 Driver asks for facial recognition while Corridex monitoring is on. At that moment, 99 needs the camera without screen capture active.</p><p>To finish recognition:</p><ol><li>In Corridex, turn monitoring off</li><li>Complete facial recognition in 99 Driver</li><li>Return to Corridex and turn monitoring back on</li></ol><p>After that, the warning goes away and monitoring can continue as usual.</p>',
     "cta.title": "Stop accepting rides in the dark",
     "cta.subtitle":
       "Know the value per mile before accepting. Free for iPhone.",
@@ -519,6 +527,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.cat.carplay": "CarPlay y Apple Music",
     "faq.cat.calculations": "Cálculos y Análisis de Viajes",
     "faq.cat.subscription": "Suscripción y Pago",
+    "faq.cat.n99": "99 Conductor",
     "faq.cat.app": "Funcionamiento de la App",
     "faq.q1":
       "Configuré todo pero el banner con los datos del viaje no aparece en pantalla",
@@ -538,7 +547,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q5":
       "Cuando conecto CarPlay, las notificaciones de Corridex dejan de aparecer",
     "faq.a5":
-      '<p>Causado por la función <strong>"Anunciar Notificaciones"</strong> del iPhone (que Siri usa para leer los avisos en voz alta en el auto). Cuando está activa, el sistema oculta el banner visual.</p><p>Para resolver:</p><ol><li>Ajustes → Notificaciones</li><li>Busca la opción <strong>Anunciar Notificaciones</strong></li><li>Déjala desactivada</li></ol><p>Después de esto, Corridex y CarPlay funcionan juntos normalmente.</p>',
+      '<p>Al conectar Apple CarPlay, el iPhone puede activar solo el Modo Enfoque <strong>Conducción</strong>. Con él activo, las notificaciones quedan en silencio y el banner de Corridex deja de aparecer.</p><p>Para desactivar la activación automática:</p><ol><li>Ajustes → Enfoque → <strong>Conducción</strong></li><li>En <strong>Al conducir</strong>, elige <strong>Manualmente</strong></li><li>Desactiva <strong>Activar con CarPlay</strong></li></ol><p>Si el banner aún no aparece, revisa también <strong>Anunciar Notificaciones</strong>. Cuando esa opción está activada, Siri lee los avisos en voz alta y el sistema oculta el banner visual:</p><ol><li>Ajustes → Notificaciones</li><li>Busca <strong>Anunciar Notificaciones</strong></li><li>Déjala desactivada</li></ol><p>Después de esto, Corridex y CarPlay funcionan juntos normalmente.</p>',
     "faq.q6": "Apple Music deja de sonar cuando Corridex está monitoreando",
     "faq.a6":
       "<p>Desafortunadamente esta es una limitación técnica de Apple — iOS bloquea el audio de Apple Music por protección de derechos de autor (DRM) siempre que Compartir Pantalla está activado.</p><p><strong>Solución que funciona:</strong> usa Spotify, YouTube Music, Deezer o cualquier otra app de terceros. Siguen sonando normalmente mientras Corridex funciona.</p><p>Esto no es un bug de Corridex — es una restricción de Apple que afecta su app nativa durante Compartir Pantalla.</p>",
@@ -586,6 +595,9 @@ window.CORRIDEX_TRANSLATIONS = {
       "La notificación o tarjeta expandida no se abre aunque arrastres o mantengas presionado el aviso resumido",
     "faq.a17":
       '<p>Después de una actualización de versión de Corridex, iOS a veces mantiene el estado antiguo de las notificaciones en memoria — el aviso resumido aparece, pero el gesto de expandir deja de responder.</p><p><strong>Solución:</strong> reinicia el iPhone. Esto normalmente restaura el comportamiento de las notificaciones expandidas.</p>',
+    "faq.q19": '99 Conductor muestra "Captura de pantalla no permitida"',
+    "faq.a19":
+      '<p>Este aviso aparece cuando 99 Conductor pide el reconocimiento facial y el monitoreo de Corridex está activo. En ese momento, 99 necesita la cámara sin la captura de pantalla activa.</p><p>Para completar el reconocimiento:</p><ol><li>En Corridex, desactiva el monitoreo</li><li>Haz el reconocimiento facial en 99 Conductor</li><li>Vuelve a Corridex y activa el monitoreo de nuevo</li></ol><p>Después de eso, el aviso desaparece y el monitoreo puede seguir con normalidad.</p>',
     "cta.title": "Deja de aceptar viajes a ciegas",
     "cta.subtitle":
       "Conoce el valor por km antes de aceptar. Gratis para iPhone.",

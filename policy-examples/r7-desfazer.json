@@ -1,0 +1,12 @@
+{
+  "$schema": "https://corridex.app/schemas/app-update-v1.schema.json",
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "2026-12-falha-historico",
+      "level": "recommended",
+      "minimumVersion": "2.0.59",
+      "reason": "dataSafety"
+    }
+  ]
+}

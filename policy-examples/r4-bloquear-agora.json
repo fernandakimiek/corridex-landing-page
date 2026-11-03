@@ -1,0 +1,12 @@
+{
+  "$schema": "https://corridex.app/schemas/app-update-v1.schema.json",
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "2026-12-leitura-uber-obrigatoria",
+      "level": "required",
+      "minimumVersion": "2.0.58",
+      "reason": "offerReading"
+    }
+  ]
+}
