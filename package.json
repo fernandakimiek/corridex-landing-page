@@ -1,0 +1,17 @@
+{
+  "name": "corridex-site",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "validate:app-update": "node scripts/validate-app-update.mjs",
+    "validate:app-update:store": "node scripts/validate-app-update.mjs --check-app-store"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}
