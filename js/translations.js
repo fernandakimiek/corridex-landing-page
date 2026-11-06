@@ -1,7 +1,7 @@
 // Aviso da página de suporte. true = exibe o bloco; false = oculta.
 // Depois, edite support.incidentAlertTitle e support.incidentAlert em pt, en e es.
 window.CORRIDEX_SUPPORT_ALERT = {
-  enabled: false,
+  enabled: true,
 };
 
 window.CORRIDEX_TRANSLATIONS = {
@@ -214,7 +214,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.responseTime": "Tempo médio de resposta: 24h úteis",
     "support.incidentAlertTitle": "⚠️ Atenção",
     "support.incidentAlert":
-      '<p>O site oficial do Corridex é <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">https://corridex.app/</a>.</p><p>O Corridex não pede cadastro nem solicita dados pessoais para usar o aplicativo.</p><p>Há outro site usando o nome Corridex, corridex.com.br, que oferece um formulário de cadastro. Esse site não é um canal oficial do nosso Corridex.</p><p>Para conhecer ou baixar o app, acesse <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">corridex.app</a> e use o link da App Store indicado lá. Não informe seus dados no outro site.</p><p>Se puder, compartilhe este aviso com outros motoristas.</p>',
+      '<p>A Uber, a Uber Moto e a Uber Entrega atualizaram o modelo do cartão de oferta, o que pode impactar nos cálculos de ganhos.</p><p>Verifique abaixo se o Corridex foi atualizado.</p>',
   },
   en: {
     "meta.title": "App for Ride Share Drivers on iPhone | Corridex",
@@ -420,7 +420,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.responseTime": "Average response time: 24 business hours",
     "support.incidentAlertTitle": "⚠️ Attention",
     "support.incidentAlert":
-      '<p>The official Corridex website is <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">https://corridex.app/</a>.</p><p>Corridex does not ask you to sign up, nor does it request personal data to use the app.</p><p>There is another site using the name Corridex, corridex.com.br, that offers a sign-up form. That site is not an official channel of our Corridex.</p><p>To learn about or download the app, go to <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">corridex.app</a> and use the App Store link shown there. Do not submit your information on the other site.</p><p>If you can, share this notice with other drivers.</p>',
+      '<p>Uber, Uber Moto, and Uber Entrega updated the offer card layout, which can affect earnings calculations.</p><p>Check below whether Corridex is up to date.</p>',
   },
   es: {
     "meta.title":
@@ -634,6 +634,6 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.responseTime": "Tiempo promedio de respuesta: 24h hábiles",
     "support.incidentAlertTitle": "⚠️ Atención",
     "support.incidentAlert":
-      '<p>El sitio oficial de Corridex es <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">https://corridex.app/</a>.</p><p>Corridex no pide registro ni solicita datos personales para usar la aplicación.</p><p>Hay otro sitio que usa el nombre Corridex, corridex.com.br, y ofrece un formulario de registro. Ese sitio no es un canal oficial de nuestro Corridex.</p><p>Para conocer o descargar la app, entra en <a href="https://corridex.app/" target="_blank" rel="noopener noreferrer">corridex.app</a> y usa el enlace de la App Store que aparece allí. No informes tus datos en el otro sitio.</p><p>Si puedes, comparte este aviso con otros conductores.</p>',
+      '<p>Uber, Uber Moto y Uber Entrega actualizaron el modelo de la tarjeta de oferta, lo que puede afectar el cálculo de las ganancias.</p><p>Comprueba abajo si Corridex está actualizado.</p>',
   },
 };

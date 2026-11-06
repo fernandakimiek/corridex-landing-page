@@ -64,6 +64,8 @@
     var badgeCta = document.getElementById("badge-cta");
     var badgeHeroImg = document.getElementById("badge-hero-img");
     var badgeCtaImg = document.getElementById("badge-cta-img");
+    var badgeSupport = document.getElementById("badge-support");
+    var badgeSupportImg = document.getElementById("badge-support-img");
     document.querySelectorAll(".nav-cta").forEach(function (el) {
       el.href = url;
     });
@@ -72,6 +74,8 @@
     if (badgeCta) badgeCta.href = url;
     if (badgeHeroImg) badgeHeroImg.src = badgeUrl;
     if (badgeCtaImg) badgeCtaImg.src = badgeUrl;
+    if (badgeSupport) badgeSupport.href = url;
+    if (badgeSupportImg) badgeSupportImg.src = badgeUrl;
   }
 
   function localizedImageSrc(basePath, lang) {
