@@ -1,0 +1,31 @@
+name: validate-site
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-site:
+    name: validate-site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Dependências
+        run: npm ci
+
+      - name: Testes
+        run: npm test
+
+      - name: Gerar páginas (PT, EN, ES)
+        run: npm run build:pages

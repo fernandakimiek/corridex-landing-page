@@ -1,5 +1,8 @@
 (function () {
-  var STORAGE_KEY = "corridex-lang";
+  // Escolha manual de idioma. O vercel.json lê este cookie para não
+  // redirecionar quem já escolheu um idioma no menu.
+  var LANG_COOKIE = "corridex-lang";
+  var LANG_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
   var translations = window.CORRIDEX_TRANSLATIONS || {};
   var APP_STORE_URL_PT =
     "https://apps.apple.com/app/apple-store/id6756681755?pt=128383262&ct=Landpage&mt=8";
@@ -26,6 +29,47 @@
 
   function normalizeLang(lang) {
     return lang === "en" || lang === "es" ? lang : "pt";
+  }
+
+  // Idioma da página, gravado no build em <html data-lang>.
+  function pageLang() {
+    return normalizeLang(document.documentElement.getAttribute("data-lang"));
+  }
+
+  // "/en/support" -> "/support"; "/es" -> "/"
+  function stripLangPrefix(pathname) {
+    var rest = pathname.replace(/^\/(en|es)(?=\/|$)/, "");
+    return rest || "/";
+  }
+
+  // Endereço da mesma página em outro idioma. PT fica sem prefixo.
+  function localizedPath(pathname, lang) {
+    var base = stripLangPrefix(pathname);
+    lang = normalizeLang(lang);
+    if (lang === "pt") return base;
+    return "/" + lang + (base === "/" ? "" : base);
+  }
+
+  function rememberLang(lang) {
+    var cookie =
+      LANG_COOKIE +
+      "=" +
+      normalizeLang(lang) +
+      "; Path=/; Max-Age=" +
+      LANG_COOKIE_MAX_AGE +
+      "; SameSite=Lax";
+    if (location.protocol === "https:") cookie += "; Secure";
+    try {
+      document.cookie = cookie;
+    } catch (e) {}
+  }
+
+  function goToLang(lang, href) {
+    lang = normalizeLang(lang);
+    rememberLang(lang);
+    if (lang === pageLang()) return;
+    location.href =
+      (href || localizedPath(location.pathname, lang)) + location.hash;
   }
 
   function applyI18nAttributes(lang) {
@@ -165,7 +209,7 @@
     updateLangDropdown(lang);
   }
 
-  function initLangDropdown(applyFn) {
+  function initLangDropdown() {
     var toggle = document.getElementById("lang-toggle");
     var dropdown = document.querySelector(".lang-dropdown");
 
@@ -180,11 +224,12 @@
 
     dropdown.querySelectorAll("[data-lang]").forEach(function (item) {
       item.addEventListener("click", function () {
-        var lang = item.getAttribute("data-lang");
-        localStorage.setItem(STORAGE_KEY, lang);
-        applyFn(lang);
         dropdown.classList.remove("is-open");
         toggle.setAttribute("aria-expanded", "false");
+        goToLang(
+          item.getAttribute("data-lang"),
+          item.getAttribute("data-href"),
+        );
       });
     });
 
@@ -198,18 +243,27 @@
     });
   }
 
+  // As páginas já chegam traduzidas do build (scripts/build-pages.mjs).
+  // No navegador só falta ligar o menu de idioma.
   function initLanding() {
-    var saved = localStorage.getItem(STORAGE_KEY);
-    var lang = normalizeLang(saved);
-    applyLanguage(lang);
-    initLangDropdown(applyLanguage);
+    initLangDropdown();
   }
 
   function initSupportPage() {
-    var saved = localStorage.getItem(STORAGE_KEY);
-    var lang = normalizeLang(saved);
-    applySupportPage(lang);
-    initLangDropdown(applySupportPage);
+    syncSupportAlert();
+    initLangDropdown();
+    document.dispatchEvent(new CustomEvent("corridex:support-i18n-applied"));
+  }
+
+  function initLegalPage() {
+    document
+      .querySelectorAll(".legal-lang-switch [data-lang]")
+      .forEach(function (link) {
+        link.addEventListener("click", function (e) {
+          e.preventDefault();
+          goToLang(link.getAttribute("data-lang"), link.getAttribute("href"));
+        });
+      });
   }
 
   function syncSupportAlert() {
@@ -237,7 +291,9 @@
     updateMetaContent: updateMetaContent,
     initLanding: initLanding,
     initSupportPage: initSupportPage,
+    initLegalPage: initLegalPage,
     normalizeLang: normalizeLang,
+    localizedPath: localizedPath,
     HTML_LANG: HTML_LANG,
   };
 })();

@@ -895,7 +895,7 @@ img {
   flex-wrap: wrap;
 }
 
-.legal-lang-switch button {
+.legal-lang-switch a {
   background: var(--bg-muted);
   border: 1px solid var(--border);
   color: var(--text);
@@ -904,6 +904,8 @@ img {
   padding: 0.4rem 0.85rem;
   border-radius: 999px;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
   font-family: inherit;
   transition:
     background 0.2s,
@@ -911,11 +913,11 @@ img {
     border-color 0.2s;
 }
 
-.legal-lang-switch button:hover {
+.legal-lang-switch a:hover {
   background: var(--border);
 }
 
-.legal-lang-switch button.active {
+.legal-lang-switch a.active {
   background: var(--accent);
   color: #ffffff;
   border-color: var(--accent);

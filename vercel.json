@@ -1,7 +1,204 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/validate-app-update.mjs",
+  "buildCommand": "npm run build",
   "outputDirectory": ".",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/suporte.html",
+      "destination": "/support",
+      "permanent": true
+    },
+    {
+      "source": "/suporte",
+      "destination": "/support",
+      "permanent": true
+    },
+    {
+      "source": "/privacidade.html",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/privacidade",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/termos.html",
+      "destination": "/terms",
+      "permanent": true
+    },
+    {
+      "source": "/termos",
+      "destination": "/terms",
+      "permanent": true
+    },
+    {
+      "source": "/pages/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "destination": "/en",
+      "permanent": false,
+      "has": [
+        {
+          "type": "cookie",
+          "key": "corridex-lang",
+          "value": {
+            "eq": "en"
+          }
+        }
+      ]
+    },
+    {
+      "source": "/",
+      "destination": "/es",
+      "permanent": false,
+      "has": [
+        {
+          "type": "cookie",
+          "key": "corridex-lang",
+          "value": {
+            "eq": "es"
+          }
+        }
+      ]
+    },
+    {
+      "source": "/",
+      "destination": "/es",
+      "permanent": false,
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": {
+            "pre": "es"
+          }
+        }
+      ],
+      "missing": [
+        {
+          "type": "cookie",
+          "key": "corridex-lang"
+        }
+      ]
+    },
+    {
+      "source": "/",
+      "destination": "/en",
+      "permanent": false,
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language"
+        }
+      ],
+      "missing": [
+        {
+          "type": "cookie",
+          "key": "corridex-lang"
+        },
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": {
+            "pre": "pt"
+          }
+        },
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": {
+            "pre": "es"
+          }
+        }
+      ]
+    },
+    {
+      "source": "/:page(support|privacy|terms)",
+      "destination": "/en/:page",
+      "permanent": false,
+      "has": [
+        {
+          "type": "cookie",
+          "key": "corridex-lang",
+          "value": {
+            "eq": "en"
+          }
+        }
+      ]
+    },
+    {
+      "source": "/:page(support|privacy|terms)",
+      "destination": "/es/:page",
+      "permanent": false,
+      "has": [
+        {
+          "type": "cookie",
+          "key": "corridex-lang",
+          "value": {
+            "eq": "es"
+          }
+        }
+      ]
+    },
+    {
+      "source": "/:page(support|privacy|terms)",
+      "destination": "/es/:page",
+      "permanent": false,
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": {
+            "pre": "es"
+          }
+        }
+      ],
+      "missing": [
+        {
+          "type": "cookie",
+          "key": "corridex-lang"
+        }
+      ]
+    },
+    {
+      "source": "/:page(support|privacy|terms)",
+      "destination": "/en/:page",
+      "permanent": false,
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language"
+        }
+      ],
+      "missing": [
+        {
+          "type": "cookie",
+          "key": "corridex-lang"
+        },
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": {
+            "pre": "pt"
+          }
+        },
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": {
+            "pre": "es"
+          }
+        }
+      ]
+    }
+  ],
   "headers": [
     {
       "source": "/app-update/(.*)",
