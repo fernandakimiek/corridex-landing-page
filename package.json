@@ -3,15 +3,19 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=20.19"
   },
   "scripts": {
+    "build": "node scripts/validate-app-update.mjs && node scripts/build-pages.mjs",
+    "build:pages": "node scripts/build-pages.mjs",
+    "build:sitemap": "node scripts/build-pages.mjs --sitemap",
     "test": "node --test",
     "validate:app-update": "node scripts/validate-app-update.mjs",
     "validate:app-update:store": "node scripts/validate-app-update.mjs --check-app-store"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "jsdom": "^29.1.1"
   }
 }

@@ -1,1 +1,9 @@
 node_modules
+
+# Páginas geradas por scripts/build-pages.mjs (fonte em pages/)
+/index.html
+/support.html
+/privacy.html
+/terms.html
+/en/
+/es/

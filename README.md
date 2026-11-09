@@ -132,24 +132,59 @@ Resultado: [`policy-examples/r9-vazio.json`](policy-examples/r9-vazio.json). É 
 
 ## O que o build e o PR conferem
 
-No deploy, `node scripts/validate-app-update.mjs` roda antes de publicar. JSON inválido, fora do schema, `id` repetido, `enforcedFrom` fora de UTC ou arquivo acima de 16 KB derrubam o build. A produção anterior continua no ar.
+No deploy, `npm run build` roda `node scripts/validate-app-update.mjs` e depois gera as páginas do site (veja [Páginas do site e idiomas](#páginas-do-site-e-idiomas)). JSON inválido, fora do schema, `id` repetido, `enforcedFrom` fora de UTC ou arquivo acima de 16 KB derrubam o build. A produção anterior continua no ar.
 
 No pull request para `main`, o check `validate-app-update` faz a mesma validação e ainda consulta a App Store (`id` 6756681755, país `br`). Se alguma regra, recomendada ou obrigatória, pede versão maior do que a que está na loja, o check fica vermelho. Pull request que não mexe na política passa em segundos, sem consultar a Apple.
 
 O comando de build fica só no `vercel.json`. Não duplique o comando no painel da Vercel. O `outputDirectory` é `.` porque o site não tem pasta `public/`: com um comando de build, a Vercel procuraria essa pasta e o deploy do site inteiro falharia. Com a raiz como saída, ela deixa de fora `node_modules` e `package.json`.
 
-Não há `cleanUrls` nem `trailingSlash` neste projeto. `/app-update/v1.json` responde o arquivo, sem redirect.
+O `vercel.json` liga `cleanUrls` e `trailingSlash: false` por causa das páginas do site. Os dois só mexem em arquivos `.html` e em barra no final, então `/app-update/v1.json` continua respondendo o arquivo, sem redirect. Nenhum redirect do `vercel.json` pode tocar em `/app-update/` ou `/schemas/` (há teste para isso).
 
 ## Como rodar localmente
 
-Requer Node 20 ou mais novo.
+Requer Node 20.19 ou mais novo.
 
 ```bash
 npm install
 npm test
 npm run validate:app-update
 npm run validate:app-update:store
+npm run build:pages            # gera as páginas em PT, EN e ES
+npx serve .                    # abre em http://localhost:3000 (/, /en, /es/support...)
 ```
+
+## Páginas do site e idiomas
+
+O site existe em português, inglês e espanhol, cada idioma no seu endereço:
+
+| Página | PT | EN | ES |
+| --- | --- | --- | --- |
+| Início | `/` | `/en` | `/es` |
+| Suporte | `/support` | `/en/support` | `/es/support` |
+| Privacidade | `/privacy` | `/en/privacy` | `/es/privacy` |
+| Termos | `/terms` | `/en/terms` | `/es/terms` |
+
+### Onde editar
+
+- **Estrutura e texto em PT das páginas:** `pages/index.html`, `pages/support.html`, `pages/privacy.html`, `pages/terms.html`.
+- **Textos em cada idioma:** `js/translations.js`. As páginas legais são exceção: o texto completo dos três idiomas fica no próprio `pages/privacy.html` e `pages/terms.html`, em `#legal-pt`, `#legal-en` e `#legal-es`.
+- **Não edite** `index.html`, `support.html`, `privacy.html`, `terms.html`, `en/` e `es/` na raiz. Eles são gerados no build por `scripts/build-pages.mjs` e não vão para o git.
+
+O build aplica as traduções com o mesmo `js/i18n.js` que roda no navegador, então o HTML publicado já chega no idioma certo, com título, descrição, `canonical` e `hreflang` próprios. Isso é o que permite ao Google mostrar a versão em inglês para quem busca em inglês.
+
+Ao criar uma página nova ou mudar endereços, ajuste `PAGES` em `scripts/lib/site-pages.mjs` e rode `npm run build:sitemap` para atualizar o `sitemap.xml` (há teste que confere).
+
+### Idioma automático
+
+As regras ficam em `redirects` no `vercel.json` e rodam no CDN da Vercel, sem função. Valem só para os endereços em PT (`/`, `/support`, `/privacy`, `/terms`):
+
+1. Quem escolheu idioma no menu tem o cookie `corridex-lang`. Com `en` ou `es`, vai para a versão nesse idioma; com `pt`, fica.
+2. Sem cookie, o navegador decide pelo primeiro idioma do `Accept-Language`: espanhol vai para `/es`, português fica, qualquer outro vai para `/en`.
+3. Robôs nunca são redirecionados pela detecção: sem `Accept-Language` (o Googlebot não manda) ou com `Google`, `bot`, `crawl` ou `spider` no user-agent (inclui o teste ao vivo do Search Console, o Google-InspectionTool).
+
+Os redirecionamentos por idioma são temporários (307). Os endereços em `/en` e `/es` nunca redirecionam: um link compartilhado abre no idioma do link.
+
+Endereços antigos (`/suporte.html`, `/privacidade.html`, `/termos.html` e as versões sem `.html`) redirecionam de vez (308) para os novos. Âncoras como `#termos-das-plataformas` são mantidas.
 
 ## O que ainda precisa de gente, fora deste repositório
 
