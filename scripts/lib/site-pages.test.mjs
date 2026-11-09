@@ -145,6 +145,24 @@ test("landing em inglês: textos, imagens e og traduzidos", () => {
   assert.equal(doc.querySelector('meta[property="og:url"]').content, "https://corridex.app/en");
 });
 
+test("selo da App Store no idioma da página", () => {
+  const locale = { pt: "pt-br", en: "en", es: "es-mx" };
+  for (const slug of ["", "support"]) {
+    for (const lang of LANGS) {
+      const doc = docs.get(outputFile(slug, lang));
+      const badges = doc.querySelectorAll('img[src*="download-on-the-app-store"]');
+      assert.ok(badges.length > 0, outputFile(slug, lang));
+      for (const img of badges) {
+        assert.match(
+          img.getAttribute("src"),
+          new RegExp(`/black/${locale[lang]}\\?`),
+          `${outputFile(slug, lang)}: ${img.id}`,
+        );
+      }
+    }
+  }
+});
+
 test("páginas legais levam só o texto do próprio idioma", () => {
   for (const slug of ["privacy", "terms"]) {
     for (const lang of LANGS) {

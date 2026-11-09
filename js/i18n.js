@@ -12,6 +12,8 @@
     "https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/pt-br?size=250x83";
   var BADGE_URL_EN =
     "https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en?size=250x83";
+  var BADGE_URL_ES =
+    "https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/es-mx?size=250x83";
   var HTML_LANG = { pt: "pt-BR", en: "en", es: "es" };
 
   var LANG_FLAGS = { pt: "🇧🇷", en: "🇺🇸", es: "🇪🇸" };
@@ -102,7 +104,8 @@
 
   function updateAppStoreLinks(lang) {
     var url = lang === "en" ? APP_STORE_URL_EN : APP_STORE_URL_PT;
-    var badgeUrl = lang === "en" ? BADGE_URL_EN : BADGE_URL_PT;
+    var badgeUrl =
+      lang === "en" ? BADGE_URL_EN : lang === "es" ? BADGE_URL_ES : BADGE_URL_PT;
     var navCta = document.getElementById("nav-cta");
     var badgeHero = document.getElementById("badge-hero");
     var badgeCta = document.getElementById("badge-cta");
