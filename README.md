@@ -180,7 +180,7 @@ As regras ficam em `redirects` no `vercel.json` e rodam no CDN da Vercel, sem fu
 
 1. Quem escolheu idioma no menu tem o cookie `corridex-lang`. Com `en` ou `es`, vai para a versão nesse idioma; com `pt`, fica.
 2. Sem cookie, o navegador decide pelo primeiro idioma do `Accept-Language`: espanhol vai para `/es`, português fica, qualquer outro vai para `/en`.
-3. Sem `Accept-Language` (o Googlebot não manda), não há redirecionamento.
+3. Robôs nunca são redirecionados pela detecção: sem `Accept-Language` (o Googlebot não manda) ou com `Google`, `bot`, `crawl` ou `spider` no user-agent (inclui o teste ao vivo do Search Console, o Google-InspectionTool).
 
 Os redirecionamentos por idioma são temporários (307). Os endereços em `/en` e `/es` nunca redirecionam: um link compartilhado abre no idioma do link.
 

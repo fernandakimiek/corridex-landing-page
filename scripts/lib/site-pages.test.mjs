@@ -264,3 +264,27 @@ test("vercel.json: redirecionamento por idioma é temporário e só nas páginas
     assert.doesNotMatch(rule.source, /app-update|schemas/, rule.source);
   }
 });
+
+test("vercel.json: robôs (Google, Bing...) nunca são redirecionados pela detecção", () => {
+  const config = JSON.parse(readFileSync(new URL("vercel.json", ROOT), "utf8"));
+  const detection = config.redirects.filter((r) =>
+    (r.has || []).some((h) => h.key === "accept-language"),
+  );
+  assert.equal(detection.length, 4);
+  for (const rule of detection) {
+    const ua = (rule.missing || []).find((m) => m.key === "user-agent");
+    assert.ok(ua, rule.source);
+    const re = new RegExp(`^${ua.value}$`);
+    for (const agent of [
+      "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      "Mozilla/5.0 (compatible; Google-InspectionTool/1.0;)",
+      "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+    ]) {
+      assert.match(agent, re);
+    }
+    assert.doesNotMatch(
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+      re,
+    );
+  }
+});
