@@ -420,7 +420,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.responseTime": "Average response time: 24 business hours",
     "support.incidentAlertTitle": "⚠️ Attention",
     "support.incidentAlert":
-      '<p>Uber, Uber Moto, and Uber Entrega updated the offer card layout, which can affect earnings calculations.</p><p>Check below whether Corridex is up to date.</p>',
+      '<p>Uber, Uber Moto, and Uber Eats updated the offer card layout, which can affect earnings calculations.</p><p>Check below whether Corridex is up to date.</p>',
   },
   es: {
     "meta.title":
@@ -634,6 +634,6 @@ window.CORRIDEX_TRANSLATIONS = {
     "support.responseTime": "Tiempo promedio de respuesta: 24h hábiles",
     "support.incidentAlertTitle": "⚠️ Atención",
     "support.incidentAlert":
-      '<p>Uber, Uber Moto y Uber Entrega actualizaron el modelo de la tarjeta de oferta, lo que puede afectar el cálculo de las ganancias.</p><p>Comprueba abajo si Corridex está actualizado.</p>',
+      '<p>Uber, Uber Moto y Uber Eats actualizaron el modelo de la tarjeta de oferta, lo que puede afectar el cálculo de las ganancias.</p><p>Comprueba abajo si Corridex está actualizado.</p>',
   },
 };
