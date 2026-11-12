@@ -143,6 +143,9 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q9": "Posso pagar via Pix?",
     "faq.a9":
       "<p>Não. A Apple exige que todas as assinaturas de apps no iPhone sejam feitas exclusivamente pela App Store — ela não permite pagamentos por fora (Pix, transferência, etc.).</p><p>O pagamento deve ser feito com o cartão cadastrado no seu ID Apple: <strong>Ajustes → [seu nome] → Pagamento e Entrega</strong></p>",
+    "faq.q20": "Como trocar a forma de pagamento da assinatura?",
+    "faq.a20":
+      "<p>Como a assinatura do Corridex é feita pelo iPhone, quem faz a cobrança é a Apple. Por isso, a forma de pagamento é alterada nos Ajustes do iPhone, e não dentro do app.</p><ol><li>Abra o app <strong>Ajustes</strong></li><li>Toque no seu nome, no topo da tela</li><li>Toque em <strong>Pagamento e Entrega</strong> (pode ser preciso confirmar com Face ID ou código)</li><li>Toque em <strong>Adicionar Forma de Pagamento</strong> e cadastre o novo cartão</li><li>Se tiver mais de um cartão, toque em <strong>Editar</strong> e arraste o novo para o topo da lista — a Apple sempre tenta cobrar primeiro a forma de pagamento que está no topo</li></ol><p>Se quiser, remova o cartão antigo na mesma tela: <strong>Editar → Apagar</strong>.</p>",
     "faq.q10":
       "Como mudar o plano de assinatura (ex: de mensal para trimestral)?",
     "faq.a10":
@@ -350,6 +353,9 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q9": "Can I pay via Pix?",
     "faq.a9":
       "<p>No. Apple requires that all iPhone app subscriptions be made exclusively through the App Store — it doesn't allow external payments (Pix, bank transfer, etc.).</p><p>Payment must be made with the card registered to your Apple ID: <strong>Settings → [your name] → Payment & Shipping</strong></p>",
+    "faq.q20": "How do I change my subscription payment method?",
+    "faq.a20":
+      "<p>Since your Corridex subscription was made on your iPhone, Apple handles the billing. That's why the payment method is changed in your iPhone Settings, not inside the app.</p><ol><li>Open the <strong>Settings</strong> app</li><li>Tap your name at the top of the screen</li><li>Tap <strong>Payment &amp; Shipping</strong> (you may need to confirm with Face ID or your passcode)</li><li>Tap <strong>Add Payment Method</strong> and enter the new card</li><li>If you have more than one card, tap <strong>Edit</strong> and drag the new one to the top of the list — Apple always tries to charge the payment method at the top first</li></ol><p>If you want, remove the old card on the same screen: <strong>Edit → Remove</strong>.</p>",
     "faq.q10":
       "How do I change my subscription plan (e.g., from monthly to quarterly)?",
     "faq.a10":
@@ -561,6 +567,9 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.q9": "¿Puedo pagar vía Pix?",
     "faq.a9":
       "<p>No. Apple exige que todas las suscripciones de apps en iPhone se hagan exclusivamente por la App Store — no permite pagos externos (Pix, transferencia, etc.).</p><p>El pago debe hacerse con la tarjeta registrada en tu ID Apple: <strong>Ajustes → [tu nombre] → Pago y Envío</strong></p>",
+    "faq.q20": "¿Cómo cambiar el método de pago de la suscripción?",
+    "faq.a20":
+      "<p>Como la suscripción de Corridex se hizo desde el iPhone, el cobro lo hace Apple. Por eso, el método de pago se cambia en los Ajustes del iPhone, y no dentro de la app.</p><ol><li>Abre la app <strong>Ajustes</strong></li><li>Toca tu nombre, en la parte superior de la pantalla</li><li>Toca <strong>Pago y envío</strong> (puede que tengas que confirmar con Face ID o tu código)</li><li>Toca <strong>Añadir método de pago</strong> y registra la nueva tarjeta</li><li>Si tienes más de una tarjeta, toca <strong>Editar</strong> y arrastra la nueva al primer lugar de la lista — Apple siempre intenta cobrar primero el método de pago que está arriba</li></ol><p>Si quieres, elimina la tarjeta antigua en la misma pantalla: <strong>Editar → Eliminar</strong>.</p>",
     "faq.q10":
       "¿Cómo cambiar el plan de suscripción (ej: de mensual a trimestral)?",
     "faq.a10":
