@@ -1,5 +1,12 @@
 {
   "$schema": "https://corridex.app/schemas/app-update-v1.schema.json",
   "schemaVersion": 1,
-  "rules": []
+  "rules": [
+    {
+      "id": "2026-11-recomendada-2-0-64",
+      "level": "recommended",
+      "minimumVersion": "2.0.64",
+      "reason": "offerReading"
+    }
+  ]
 }
