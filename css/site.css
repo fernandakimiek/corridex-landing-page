@@ -274,7 +274,7 @@ img {
 }
 
 .official-notice__text {
-  max-width: 60rem;
+  max-width: 80rem;
   margin: 0 auto;
   font-size: 1.0625rem;
   font-weight: 600;
@@ -284,6 +284,11 @@ img {
 .official-notice strong {
   font-weight: 800;
   letter-spacing: 0.01em;
+}
+
+.official-notice .official-notice__code {
+  text-decoration: none;
+  color: #ffffff;
 }
 
 .official-notice__code {
@@ -420,56 +425,135 @@ img {
 }
 
 .promo-modal__desc {
-  margin: 0 0 1.25rem;
+  margin: 0 0 0.25rem;
   color: #3a4352;
   font-size: 0.875rem;
   line-height: 1.45;
 }
 
-.promo-modal__code-row {
+.promo-modal__trial {
+  display: inline-block;
+  margin: 0.25rem 0 0;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: #e8f9ee;
+  color: #0e6b2b;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.promo-modal__pick {
+  margin: 1rem 0 0;
+  color: #0a1628;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.promo-modal__offers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0.5rem 0 1rem;
+  text-align: left;
+}
+
+.promo-offer {
+  padding: 0.85rem;
+  border: 2px solid #e3e6ea;
+  border-radius: 14px;
+}
+
+.promo-offer--featured {
+  border-color: #e10600;
+  background: #fff4f4;
+}
+
+.promo-offer__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.promo-offer__plan {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #0a1628;
+}
+
+.promo-offer__percent {
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: #e10600;
+  white-space: nowrap;
+}
+
+.promo-offer:not(.promo-offer--featured) .promo-offer__percent {
+  color: #0a1628;
+}
+
+.promo-offer__actions {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.4rem;
+  align-items: stretch;
+}
+
+.promo-offer__code {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-}
-
-.promo-modal__code {
-  padding: 0.55rem 0.9rem;
+  padding: 0.5rem 0.4rem;
   border: 2px dashed #e10600;
   border-radius: 10px;
-  background: #fff4f4;
+  background: #ffffff;
   color: #000000;
   font-family: inherit;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
-.promo-modal__copy {
-  padding: 0.6rem 0.9rem;
+.promo-offer__copy,
+.promo-offer__redeem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
   border: 0;
   border-radius: 10px;
-  background: #000000;
-  color: #ffffff;
   font: inherit;
+  font-size: 0.875rem;
   font-weight: 700;
+  text-decoration: none;
   cursor: pointer;
 }
 
-.promo-modal__cta {
-  display: block;
-  padding: 0.95rem 1rem;
-  border-radius: 12px;
-  background: #e10600;
+.promo-offer__copy {
+  background: #000000;
   color: #ffffff;
-  font-size: 1.0625rem;
-  font-weight: 800;
-  text-decoration: none;
 }
 
-.promo-modal__cta:hover {
+.promo-offer__redeem {
+  background: #e10600;
+  color: #ffffff;
+}
+
+.promo-offer__redeem:hover {
   background: #b80500;
+}
+
+@media (max-width: 420px) {
+  .promo-offer__actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .promo-offer__code {
+    grid-column: 1 / -1;
+  }
 }
 
 .promo-modal__note {
@@ -1686,6 +1770,23 @@ img {
 
 .testimonials-score .stars {
   font-size: 1.125rem;
+}
+
+.testimonials-score b {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Pinta só a fração das estrelas que corresponde à nota (4,54 de 5). */
+.stars--rated {
+  background: linear-gradient(
+    90deg,
+    var(--brand-yellow) var(--rating-fill, 100%),
+    #d1d5db var(--rating-fill, 100%)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .testimonials-track {
