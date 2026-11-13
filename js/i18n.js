@@ -4,8 +4,7 @@
   var LANG_COOKIE = "corridex-lang";
   var LANG_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
   var translations = window.CORRIDEX_TRANSLATIONS || {};
-  var APP_STORE_URL_PT =
-    "https://apps.apple.com/app/apple-store/id6756681755?pt=128383262&ct=Landpage&mt=8";
+  var APP_STORE_URL_PT = "https://apps.apple.com/br/app/corridex/id6756681755";
   var APP_STORE_URL_EN =
     "https://apps.apple.com/app/apple-store/id6756681755?pt=128383262&ct=Landpage&mt=8";
   var BADGE_URL_PT =

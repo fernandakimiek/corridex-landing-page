@@ -163,6 +163,28 @@ test("selo da App Store no idioma da página", () => {
   }
 });
 
+test("link de download: loja americana só em EN, brasileira nos demais", () => {
+  const BR = "https://apps.apple.com/br/app/corridex/id6756681755";
+  const US = "https://apps.apple.com/app/apple-store/id6756681755?pt=128383262&ct=Landpage&mt=8";
+  for (const page of PAGES) {
+    for (const lang of LANGS) {
+      const file = outputFile(page.slug, lang);
+      const doc = docs.get(file);
+      const links = [...doc.querySelectorAll('a[href*="apps.apple.com"]')].filter(
+        (a) => !a.getAttribute("href").includes("/redeem"),
+      );
+      assert.ok(links.length > 0, file);
+      for (const a of links) {
+        assert.equal(a.getAttribute("href"), lang === "en" ? US : BR, file);
+      }
+      const schema = doc.querySelector('script[type="application/ld+json"]');
+      if (schema) {
+        assert.equal(JSON.parse(schema.textContent).downloadUrl, lang === "en" ? US : BR, file);
+      }
+    }
+  }
+});
+
 test("páginas legais levam só o texto do próprio idioma", () => {
   for (const slug of ["privacy", "terms"]) {
     for (const lang of LANGS) {
