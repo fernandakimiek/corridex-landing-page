@@ -7,3 +7,6 @@ node_modules
 /terms.html
 /en/
 /es/
+
+# Mockups do brainstorming (visual companion)
+.superpowers/
