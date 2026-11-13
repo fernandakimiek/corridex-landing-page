@@ -1688,6 +1688,23 @@ img {
   font-size: 1.125rem;
 }
 
+.testimonials-score b {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Pinta só a fração das estrelas que corresponde à nota (4,54 de 5). */
+.stars--rated {
+  background: linear-gradient(
+    90deg,
+    var(--brand-yellow) var(--rating-fill, 100%),
+    #d1d5db var(--rating-fill, 100%)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .testimonials-track {
   align-items: stretch;
 }
