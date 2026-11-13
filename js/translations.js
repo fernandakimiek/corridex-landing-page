@@ -191,8 +191,8 @@ window.CORRIDEX_TRANSLATIONS = {
     "homeFaq.plansQ": "Como funcionam os planos?",
     "homeFaq.plansA": "<p>Você testa o Corridex de graça por <strong>7 dias</strong>. Depois, escolhe o plano que preferir: <strong>mensal</strong>, <strong>trimestral</strong> ou <strong>anual</strong>.</p><p>A assinatura é feita pela App Store, com o cartão do seu ID Apple, e se renova automaticamente. Para cancelar, é só ir em <strong>Ajustes → [seu nome] → Assinaturas</strong> antes da próxima cobrança.</p>",
     "homeFaq.more": "Ver todas as dúvidas →",
-    "cta.titleStart": "Pare de aceitar corrida",
-    "cta.titleAccent": "no escuro",
+    "cta.titleStart": "Aceitar ou",
+    "cta.titleAccent": "deixar passar?",
     "cta.card.kmLabel": "R$/km",
     "cta.card.hLabel": "R$/h",
     "cta.card.km": "2,41",
@@ -297,7 +297,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.a19":
       '<p>Esse aviso aparece quando o 99 Motorista pede o reconhecimento facial e o monitoramento do Corridex está ligado. Naquele momento, o 99 precisa da câmera sem a captura de tela ativa.</p><p>Para concluir o reconhecimento:</p><ol><li>No Corridex, desative o monitoramento</li><li>Faça o reconhecimento facial no 99 Motorista</li><li>Volte ao Corridex e ative o monitoramento de novo</li></ol><p>Depois disso, o aviso some e o monitoramento pode continuar normalmente.</p>',
     "cta.subtitle":
-      "Saiba o valor por km antes de aceitar. Grátis para iPhone.",
+      "Faça a escolha certa com o Corridex.",
     "cta.badgeAriaLabel": "Baixar app Corridex na App Store",
     "cta.badgeAlt": "Baixar Corridex na App Store",
     "cta.note": "Disponível exclusivamente na App Store",
@@ -515,8 +515,8 @@ window.CORRIDEX_TRANSLATIONS = {
     "homeFaq.plansQ": "How do the plans work?",
     "homeFaq.plansA": "<p>You can try Corridex for free for <strong>7 days</strong>. After that, pick the plan you prefer: <strong>monthly</strong>, <strong>quarterly</strong> or <strong>yearly</strong>.</p><p>The subscription is handled by the App Store, with the card on your Apple ID, and renews automatically. To cancel, go to <strong>Settings → [your name] → Subscriptions</strong> before the next charge.</p>",
     "homeFaq.more": "See all questions →",
-    "cta.titleStart": "Stop accepting rides",
-    "cta.titleAccent": "in the dark",
+    "cta.titleStart": "Accept or",
+    "cta.titleAccent": "let it pass?",
     "cta.card.kmLabel": "R$/km",
     "cta.card.hLabel": "R$/h",
     "cta.card.km": "2.41",
@@ -619,7 +619,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.a19":
       '<p>This warning appears when 99 Driver asks for facial recognition while Corridex monitoring is on. At that moment, 99 needs the camera without screen capture active.</p><p>To finish recognition:</p><ol><li>In Corridex, turn monitoring off</li><li>Complete facial recognition in 99 Driver</li><li>Return to Corridex and turn monitoring back on</li></ol><p>After that, the warning goes away and monitoring can continue as usual.</p>',
     "cta.subtitle":
-      "Know the value per mile before accepting. Free for iPhone.",
+      "Make the right call with Corridex.",
     "cta.badgeAriaLabel": "Download Corridex app on the App Store",
     "cta.badgeAlt": "Download Corridex on the App Store",
     "cta.note": "Available exclusively on the App Store",
@@ -839,8 +839,8 @@ window.CORRIDEX_TRANSLATIONS = {
     "homeFaq.plansQ": "¿Cómo funcionan los planes?",
     "homeFaq.plansA": "<p>Puedes probar Corridex gratis durante <strong>7 días</strong>. Después, eliges el plan que prefieras: <strong>mensual</strong>, <strong>trimestral</strong> o <strong>anual</strong>.</p><p>La suscripción se hace en el App Store, con la tarjeta de tu ID de Apple, y se renueva automáticamente. Para cancelarla, ve a <strong>Ajustes → [tu nombre] → Suscripciones</strong> antes del próximo cobro.</p>",
     "homeFaq.more": "Ver todas las dudas →",
-    "cta.titleStart": "Deja de aceptar viajes",
-    "cta.titleAccent": "a ciegas",
+    "cta.titleStart": "¿Aceptar o",
+    "cta.titleAccent": "dejarlo pasar?",
     "cta.card.kmLabel": "R$/km",
     "cta.card.hLabel": "R$/h",
     "cta.card.km": "2,41",
@@ -947,7 +947,7 @@ window.CORRIDEX_TRANSLATIONS = {
     "faq.a19":
       '<p>Este aviso aparece cuando 99 Conductor pide el reconocimiento facial y el monitoreo de Corridex está activo. En ese momento, 99 necesita la cámara sin la captura de pantalla activa.</p><p>Para completar el reconocimiento:</p><ol><li>En Corridex, desactiva el monitoreo</li><li>Haz el reconocimiento facial en 99 Conductor</li><li>Vuelve a Corridex y activa el monitoreo de nuevo</li></ol><p>Después de eso, el aviso desaparece y el monitoreo puede seguir con normalidad.</p>',
     "cta.subtitle":
-      "Conoce el valor por km antes de aceptar. Gratis para iPhone.",
+      "Toma la decisión correcta con Corridex.",
     "cta.badgeAriaLabel": "Descargar app Corridex en el App Store",
     "cta.badgeAlt": "Descargar Corridex en el App Store",
     "cta.note": "Disponible exclusivamente en el App Store",
