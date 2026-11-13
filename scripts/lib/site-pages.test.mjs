@@ -136,8 +136,8 @@ test("landing em inglês: textos, imagens e og traduzidos", () => {
   const doc = docs.get("en/index.html");
   const el = doc.querySelector('[data-i18n="nav.download"]');
   assert.equal(el.textContent, translations.en["nav.download"]);
-  const hero = doc.querySelector('[data-i18n-src="/images/screenshot-hero.png"]');
-  assert.equal(hero.getAttribute("src"), "/images/screenshot-hero-en.png");
+  const step = doc.querySelector('[data-i18n-src="/images/step_configurations.png"]');
+  assert.equal(step.getAttribute("src"), "/images/step_configurations-en.png");
   assert.equal(
     doc.querySelector('meta[property="og:locale"]').content,
     translations.en["meta.ogLocale"],

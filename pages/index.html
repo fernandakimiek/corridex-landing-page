@@ -212,23 +212,16 @@
 
       <div class="container hero-grid">
         <div class="hero-content">
+          <span class="hero-pill" data-i18n="hero.pill">Feito para iPhone</span>
           <h1>
-            <span data-i18n="hero.line1">Dirija mais inteligente.</span>
-            <span class="accent" data-i18n="hero.line2">Ganhe mais.</span>
+            <span data-i18n="hero.titleStart">Saiba se a corrida</span>
+            <span class="accent" data-i18n="hero.titleAccent">vale a pena</span>
+            <span data-i18n="hero.titleEnd">antes de aceitar</span>
           </h1>
           <p class="hero-subtitle" data-i18n="hero.subtitle">
-            O primeiro app para iPhone que monitora suas corridas de aplicativos
-            de corrida. R$/km e ganho por hora em tempo real.
+            O Corridex lê a oferta do app de corrida e te avisa na hora com
+            R$/km, R$/hora e se passou do seu mínimo.
           </p>
-          <ul class="feature-list">
-            <li data-i18n="hero.feature1">Veja R$/km e R$/h de cada corrida</li>
-            <li data-i18n="hero.feature2">
-              Alertas automáticos de corridas lucrativas
-            </li>
-            <li data-i18n="hero.feature3">
-              Leitura da oferta no seu dispositivo
-            </li>
-          </ul>
           <div class="hero-cta">
             <div class="badge">
               <a
@@ -245,303 +238,453 @@
                 />
               </a>
             </div>
+            <p class="hero-trial" data-i18n="hero.trial">7 dias grátis para testar</p>
+            <p class="hero-works" data-i18n="hero.works">
+              Funciona com Uber, 99, Lyft e outros apps
+            </p>
           </div>
         </div>
         <div class="hero-visual">
-          <div class="phone-mockup">
-            <img
-              src="/images/screenshot-hero.png"
-              alt="Corridex monitorando corridas em tempo real"
-              data-i18n-src="/images/screenshot-hero.png"
-              data-i18n-alt="hero.mockupAlt"
-            />
+          <div class="hero-demo" data-hero-demo>
+            <div
+              class="hero-phone"
+              role="group"
+              aria-label="Corridex monitorando corridas em tempo real"
+              data-i18n-aria-label="hero.mockupAlt"
+            >
+              <div class="hero-phone__screen">
+                <img
+                  class="hero-shot is-on"
+                  src="/images/hero/ride-99.jpg"
+                  alt=""
+                  width="640"
+                  height="1387"
+                  data-ride="99"
+                />
+                <img
+                  class="hero-shot"
+                  src="/images/hero/ride-uber.jpg"
+                  alt=""
+                  width="640"
+                  height="1387"
+                  loading="lazy"
+                  data-ride="uber"
+                />
+                <img
+                  class="hero-shot"
+                  src="/images/hero/ride-lyft.jpg"
+                  alt=""
+                  width="640"
+                  height="1391"
+                  loading="lazy"
+                  data-ride="lyft"
+                />
+                <div class="hero-dim" data-hero-dim></div>
+                <div
+                  class="hero-banner"
+                  data-hero-banner
+                  role="button"
+                  tabindex="0"
+                  aria-expanded="false"
+                  aria-label="Abrir detalhes da notificação"
+                  data-i18n-aria-label="hero.demo.expandLabel"
+                >
+                  <div class="hero-banner__slot" data-hero-slot>
+                    <div class="hero-banner__collapsed" data-hero-collapsed></div>
+                    <div class="hero-banner__expanded" data-hero-expanded></div>
+                  </div>
+                </div>
+                <div class="hero-hint" data-hero-hint aria-hidden="true">
+                  <span class="hero-hint__hand">👆</span>
+                  <span class="hero-hint__label" data-i18n="hero.demo.hint"
+                    >Arraste para baixo</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div
+              class="hero-tabs"
+              role="group"
+              aria-label="Escolher app de corrida"
+              data-i18n-aria-label="hero.demo.tabsLabel"
+            >
+              <button type="button" class="hero-tab is-on" data-hero-tab="0" aria-pressed="true">
+                <img class="hero-tab__logo" src="/images/apps/ninetyNine.png" alt="" width="20" height="20" />
+                <span>99</span><span class="hero-tab__progress"></span>
+              </button>
+              <button type="button" class="hero-tab" data-hero-tab="1" aria-pressed="false">
+                <img class="hero-tab__logo" src="/images/apps/uber.png" alt="" width="20" height="20" />
+                <span>Uber</span><span class="hero-tab__progress"></span>
+              </button>
+              <button type="button" class="hero-tab" data-hero-tab="2" aria-pressed="false">
+                <img class="hero-tab__logo" src="/images/apps/lyft.png" alt="" width="20" height="20" />
+                <span>Lyft</span><span class="hero-tab__progress"></span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </header>
 
-    <section class="section">
+    <section class="apps-strip" aria-labelledby="apps-strip-title">
       <div class="container">
-        <h2 class="section-title" data-i18n="features.title">
-          Feito pra motorista de aplicativos de corrida
+        <h2 class="apps-strip__title" id="apps-strip-title" data-i18n="apps.title">
+          Funciona com os apps que você já usa
         </h2>
-        <p class="section-subtitle" data-i18n="features.subtitle">
-          Controle total, mais lucro — tudo no seu iPhone.
-        </p>
+      </div>
+      <div class="marquee" data-marquee>
+        <ul class="marquee__track apps-strip__list">
+          <li class="app-chip"><img src="/images/apps/uber.png" alt="" width="28" height="28" loading="lazy" />Uber</li>
+          <li class="app-chip"><img src="/images/apps/ninetyNine.png" alt="" width="28" height="28" loading="lazy" />99</li>
+          <li class="app-chip"><img src="/images/apps/lyft.png" alt="" width="28" height="28" loading="lazy" />Lyft</li>
+          <li class="app-chip"><img src="/images/apps/iFood.png" alt="" width="28" height="28" loading="lazy" />iFood</li>
+          <li class="app-chip"><img src="/images/apps/uberEats.png" alt="" width="28" height="28" loading="lazy" />Uber Eats</li>
+          <li class="app-chip"><img src="/images/apps/ninetyNineFood.png" alt="" width="28" height="28" loading="lazy" />99 Food</li>
+          <li class="app-chip"><img src="/images/apps/inDrive.png" alt="" width="28" height="28" loading="lazy" />inDrive</li>
+          <li class="app-chip"><img src="/images/apps/keeta.png" alt="" width="28" height="28" loading="lazy" />Keeta</li>
+          <li class="app-chip"><img src="/images/apps/didi.png" alt="" width="28" height="28" loading="lazy" />DiDi</li>
+          <li class="app-chip"><img src="/images/apps/bolt.png" alt="" width="28" height="28" loading="lazy" />Bolt</li>
+          <li class="app-chip"><img src="/images/apps/doorDash.png" alt="" width="28" height="28" loading="lazy" />DoorDash</li>
+          <li class="app-chip"><img src="/images/apps/empower.png" alt="" width="28" height="28" loading="lazy" />Empower</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section section--soft">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag" data-i18n="features.tag">Por que Corridex</span>
+          <h2 class="section-title">
+            <span data-i18n="features.titleStart">Tudo que você precisa para</span>
+            <span class="accent" data-i18n="features.titleAccent">decidir em 1 segundo</span>
+          </h2>
+          <p class="section-subtitle" data-i18n="features.subtitle">
+            Controle total, mais lucro — tudo no seu iPhone.
+          </p>
+        </div>
         <div class="benefits-grid">
           <article class="benefit-card">
-            <div class="benefit-icon benefit-icon--blue" aria-hidden="true">
-              ⚙️
+            <div class="benefit-ill" aria-hidden="true">
+              <div class="band-demo" data-band-demo>
+                <div class="band-demo__bar">
+                  <span class="band-demo__tick band-demo__tick--min"></span>
+                  <span class="band-demo__tick band-demo__tick--ideal"></span>
+                </div>
+                <div class="band-demo__marks">
+                  <span class="band-demo__mark band-demo__mark--min"
+                    ><span data-i18n="features.band.minShort">Mín.</span>
+                    <span data-band-text="min" data-i18n="features.band.startMin">R$ 1,65/km</span></span
+                  >
+                  <span class="band-demo__mark band-demo__mark--ideal"
+                    ><span data-i18n="features.band.idealShort">Ideal</span>
+                    <span data-band-text="ideal" data-i18n="features.band.startIdeal">R$ 3,50/km</span></span
+                  >
+                </div>
+                <div class="band-demo__row">
+                  <span data-i18n="features.band.minimum">Mínimo</span>
+                  <b data-band-text="min" data-i18n="features.band.startMin">R$ 1,65/km</b>
+                </div>
+                <div class="band-demo__slider band-demo__slider--min"><span></span></div>
+                <div class="band-demo__row">
+                  <span data-i18n="features.band.ideal">Ideal</span>
+                  <b data-band-text="ideal" data-i18n="features.band.startIdeal">R$ 3,50/km</b>
+                </div>
+                <div class="band-demo__slider band-demo__slider--ideal"><span></span></div>
+              </div>
             </div>
-            <h3 data-i18n="features.control.title">Controle total</h3>
-            <ul>
-              <li data-i18n="features.control.li1">
-                Define valor mínimo por km
-              </li>
-              <li data-i18n="features.control.li2">Ganho mínimo por hora</li>
-              <li data-i18n="features.control.li3">Alertas personalizados</li>
-            </ul>
+            <h3 data-i18n="features.control.title">Você define o mínimo e o ideal</h3>
+            <p data-i18n="features.control.desc">
+              Valor por km, ganho por hora, nota do passageiro e distância até o
+              embarque. Vermelho abaixo do mínimo, laranja entre os dois e verde
+              no ideal.
+            </p>
           </article>
           <article class="benefit-card">
-            <div class="benefit-icon benefit-icon--green" aria-hidden="true">
-              📈
+            <div class="benefit-ill" aria-hidden="true">
+              <div class="mini-banner">
+                <span class="mini-banner__icon"></span>
+                <span class="mini-banner__lines">
+                  <b data-i18n="features.alert.line1">🟢 BOA R$ 32,47</b>
+                  <span data-i18n="features.alert.line2">✅ R$ 2,41/km · ✅ R$ 74,93/h</span>
+                </span>
+              </div>
             </div>
-            <h3 data-i18n="features.profit.title">Mais lucro</h3>
-            <ul>
-              <li data-i18n="features.profit.li1">R$/km em tempo real</li>
-              <li data-i18n="features.profit.li2">Ganho por hora calculado</li>
-              <li data-i18n="features.profit.li3">Marca as que não valem</li>
-            </ul>
+            <h3 data-i18n="features.alert.title">Aviso na hora</h3>
+            <p data-i18n="features.alert.desc">
+              A oferta chega e o Corridex já te diz se compensa, antes de você
+              aceitar.
+            </p>
           </article>
           <article class="benefit-card">
-            <div class="benefit-icon benefit-icon--purple" aria-hidden="true">
-              🔒
+            <div class="benefit-ill" aria-hidden="true">
+              <div class="privacy-demo">
+                <span class="privacy-demo__shield">🔒</span>
+                <span class="privacy-demo__pills">
+                  <span data-i18n="features.safe.pill1">Sem cadastro</span>
+                  <span data-i18n="features.safe.pill2">Fica no seu iPhone</span>
+                  <span data-i18n="features.safe.pill3">Sem servidor</span>
+                </span>
+              </div>
             </div>
-            <h3 data-i18n="features.safe.title">Privacidade</h3>
-            <ul>
-              <li data-i18n="features.safe.li1">
-                Leitura da oferta no dispositivo
-              </li>
-              <li data-i18n="features.safe.li2">
-                Histórico no dispositivo e no iCloud
-              </li>
-              <li data-i18n="features.safe.li3">Sem servidor do Corridex</li>
-              <li data-i18n="features.safe.li4">Não precisa de cadastro</li>
-            </ul>
+            <h3 data-i18n="features.safe.title">Seus dados ficam com você</h3>
+            <p data-i18n="features.safe.desc">
+              A leitura da oferta acontece no seu iPhone. Nada vai para servidor
+              do Corridex.
+            </p>
           </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section section-alt">
-      <div class="container">
-        <h2 class="section-title" data-i18n="testimonials.title">
-          Quem usa o Corridex?
-        </h2>
-        <p class="section-subtitle" data-i18n="testimonials.subtitle">
-          Motoristas de aplicativos de corrida no Brasil usam o Corridex para
-          decidir melhor cada corrida.
-        </p>
-        <div
-          class="testimonials-carousel"
-          data-testimonials-carousel
-          aria-roledescription="carousel"
-        >
-          <button
-            type="button"
-            class="carousel-btn carousel-btn--prev"
-            data-carousel-prev
-            data-i18n-aria-label="testimonials.carouselPrev"
-            aria-label="Depoimento anterior"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-              <path
-                d="M12.5 15L7.5 10L12.5 5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.75"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
-          <div class="testimonials-viewport" tabindex="0">
-            <div class="testimonials-track">
-              <article class="testimonial-card">
-                <p class="testimonial-rating" data-i18n="testimonials.rating1">
-                  Excelente
-                </p>
-                <blockquote data-i18n="testimonials.q1">
-                  "Me ajuda muito, simples e informa com precisão."
-                </blockquote>
-                <cite data-i18n-html="testimonials.cite1"
-                  >Davi B. · <span>16 jun 2026</span></cite
-                >
-              </article>
-              <article class="testimonial-card">
-                <p class="testimonial-rating" data-i18n="testimonials.rating2">
-                  O MELHOR PARA IPHONE!
-                </p>
-                <blockquote data-i18n="testimonials.q2">
-                  "Não existe NENHUM melhor para iPhone. Já testei todos,
-                  inclusive os que foram lançados recentemente."
-                </blockquote>
-                <cite data-i18n-html="testimonials.cite2"
-                  >Motora L. · <span>14 jun 2026</span></cite
-                >
-              </article>
-              <article class="testimonial-card">
-                <p class="testimonial-rating" data-i18n="testimonials.rating3">
-                  Muito bom
-                </p>
-                <blockquote data-i18n="testimonials.q3">
-                  "Que app excelente. Bem fácil de configurar, bem explicativo e
-                  preço acessível. Vou até ajudar na divulgação!!"
-                </blockquote>
-                <cite data-i18n-html="testimonials.cite3"
-                  >K M. · <span>15 mai 2026</span></cite
-                >
-              </article>
-              <article class="testimonial-card">
-                <p class="testimonial-rating" data-i18n="testimonials.rating4">
-                  Muito bom
-                </p>
-                <blockquote data-i18n="testimonials.q4">
-                  "Meus ganhos melhoraram muito depois que comecei a usar.
-                  Recomendo demais."
-                </blockquote>
-                <cite data-i18n-html="testimonials.cite4"
-                  >Kevin K. · <span>2 mai 2026</span></cite
-                >
-              </article>
-              <article class="testimonial-card">
-                <p class="testimonial-rating" data-i18n="testimonials.rating5">
-                  Aplicativo perfeito para o iPhone!!
-                </p>
-                <blockquote data-i18n="testimonials.q5">
-                  "Valor compensa demais e o aplicativo é completo nas
-                  limitações do iOS, parabéns!!"
-                </blockquote>
-                <cite data-i18n-html="testimonials.cite5"
-                  >Guiih F. · <span>26 abr 2026</span></cite
-                >
-              </article>
-              <article class="testimonial-card">
-                <p class="testimonial-rating" data-i18n="testimonials.rating6">
-                  Aplicativo sensacional
-                </p>
-                <blockquote data-i18n="testimonials.q6">
-                  "Aplicativo muito bem feito. Sempre tivemos dificuldades em
-                  analisar corridas pelo iPhone por conta de certas burocracias
-                  no iOS, mas esse aplicativo surpreendeu. Parabéns aos
-                  criadores."
-                </blockquote>
-                <cite data-i18n-html="testimonials.cite6"
-                  >Giovany R. · <span>5 abr 2026</span></cite
-                >
-              </article>
-            </div>
-          </div>
-          <button
-            type="button"
-            class="carousel-btn carousel-btn--next"
-            data-carousel-next
-            data-i18n-aria-label="testimonials.carouselNext"
-            aria-label="Próximo depoimento"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-              <path
-                d="M7.5 15L12.5 10L7.5 5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.75"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
         </div>
       </div>
     </section>
 
     <section class="section">
       <div class="container">
-        <h2 class="section-title" data-i18n="howItWorks.title">
-          Como funciona
-        </h2>
-        <div class="how-steps">
-          <div class="how-step">
-            <div class="how-step-content">
-              <span class="how-step-label" data-i18n="howItWorks.step1.label"
-                >Passo 01</span
-              >
-              <h3 data-i18n="howItWorks.step1.title">
-                Configure seus critérios
-              </h3>
-              <p data-i18n="howItWorks.step1.desc">
-                Defina seu valor mínimo por km, ganho por hora desejado e quais
-                apps monitorar. Leva menos de 1 minuto.
-              </p>
-            </div>
-            <div class="how-step-visual">
-              <img
-                src="/images/step_configurations.png"
-                alt="Configure o Corridex em segundos"
-                data-i18n-src="/images/step_configurations.png"
-                data-i18n-alt="howItWorks.alt1"
-              />
-            </div>
-          </div>
-          <div class="how-step how-step--reverse">
-            <div class="how-step-content">
-              <span class="how-step-label" data-i18n="howItWorks.step2.label"
-                >Passo 02</span
-              >
-              <h3 data-i18n="howItWorks.step2.title">Inicie o monitoramento</h3>
-              <p data-i18n="howItWorks.step2.desc">
-                O Corridex usa compatilhamento de tela para analisar ofertas de
-                aplicativos de corrida em tempo real, enquanto você dirige.
-              </p>
-            </div>
-            <div class="how-step-visual">
-              <img
-                src="/images/monitoring-active.png"
-                alt="Monitoramento automático de corridas"
-                data-i18n-src="/images/monitoring-active.png"
-                data-i18n-alt="howItWorks.alt2"
-              />
-            </div>
-          </div>
-          <div class="how-step">
-            <div class="how-step-content">
-              <span class="how-step-label" data-i18n="howItWorks.step3.label"
-                >Passo 03</span
-              >
-              <h3 data-i18n="howItWorks.step3.title">Receba alertas na hora</h3>
-              <p data-i18n="howItWorks.step3.desc">
-                Quando uma corrida atende seus critérios, você recebe uma
-                notificação com R$/km, ganho por hora e distância — antes de
-                aceitar.
-              </p>
-            </div>
-            <div class="how-step-visual">
-              <img
-                src="/images/monitoring_banner.png"
-                alt="Notificação com R$/km e ganho por hora"
-                data-i18n-src="/images/monitoring_banner.png"
-                data-i18n-alt="howItWorks.alt3"
-              />
+        <div class="section-head section-head--left">
+          <span class="section-tag" data-i18n="howItWorks.tag">Como funciona</span>
+          <h2 class="section-title">
+            <span data-i18n="howItWorks.titleStart">Pronto em</span>
+            <span class="accent" data-i18n="howItWorks.titleAccent">menos de 1 minuto</span>
+          </h2>
+        </div>
+        <div class="how" data-how>
+          <ol class="how__steps">
+            <li>
+              <button type="button" class="how__step is-on" data-how-step="0" aria-pressed="true">
+                <span class="how__num">1</span>
+                <span class="how__text">
+                  <span class="how__title" data-i18n="howItWorks.step1.title">Configure seus critérios</span>
+                  <span class="how__desc" data-i18n="howItWorks.step1.desc">
+                    Defina seu valor mínimo por km, ganho por hora desejado e
+                    quais apps monitorar. Leva menos de 1 minuto.
+                  </span>
+                </span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="how__step" data-how-step="1" aria-pressed="false">
+                <span class="how__num">2</span>
+                <span class="how__text">
+                  <span class="how__title" data-i18n="howItWorks.step2.title">Inicie o monitoramento</span>
+                  <span class="how__desc" data-i18n="howItWorks.step2.desc">
+                    O Corridex usa compatilhamento de tela para analisar ofertas
+                    de aplicativos de corrida em tempo real, enquanto você dirige.
+                  </span>
+                </span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="how__step" data-how-step="2" aria-pressed="false">
+                <span class="how__num">3</span>
+                <span class="how__text">
+                  <span class="how__title" data-i18n="howItWorks.step3.title">Receba alertas na hora</span>
+                  <span class="how__desc" data-i18n="howItWorks.step3.desc">
+                    Quando uma corrida atende seus critérios, você recebe uma
+                    notificação com R$/km, ganho por hora e distância — antes de
+                    aceitar.
+                  </span>
+                </span>
+              </button>
+            </li>
+          </ol>
+          <div class="how__stage">
+            <img
+              class="how__visual is-on"
+              src="/images/step_configurations.png"
+              alt="Configure o Corridex em segundos"
+              data-i18n-src="/images/step_configurations.png"
+              data-i18n-alt="howItWorks.alt1"
+              loading="lazy"
+            />
+            <img
+              class="how__visual"
+              src="/images/monitoring-active.png"
+              alt="Monitoramento automático de corridas"
+              data-i18n-src="/images/monitoring-active.png"
+              data-i18n-alt="howItWorks.alt2"
+              loading="lazy"
+            />
+            <div
+              class="how__visual how__phone"
+              role="img"
+              aria-label="Notificação com R$/km e ganho por hora"
+              data-i18n-aria-label="howItWorks.alt3"
+            >
+              <img src="/images/hero/ride-99.jpg" alt="" loading="lazy" />
+              <div class="how__banner" aria-hidden="true">
+                <span class="mini-banner__icon"></span>
+                <span class="how__banner-lines">
+                  <span class="how__banner-title">
+                    <b data-i18n="features.alert.line1">🟢 BOA R$ 32,47</b>
+                    <small data-i18n="hero.demo.now">agora</small>
+                  </span>
+                  <span data-i18n="features.alert.line2">✅ R$ 2,41/km · ✅ R$ 74,93/h</span>
+                  <span class="how__banner-meta" data-i18n="howItWorks.bannerMeta">📍 13,5 km · ⏱ 26 min · ⭐ 4,95 (573)</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="section section--soft section--bleed">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag" data-i18n="testimonials.tag">Depoimentos</span>
+          <h2 class="section-title">
+            <span data-i18n="testimonials.titleStart">Quem usa,</span>
+            <span class="accent" data-i18n="testimonials.titleAccent">recomenda</span>
+          </h2>
+          <p class="testimonials-score">
+            <span class="stars" aria-hidden="true">★★★★★</span>
+            <span data-i18n="testimonials.score">Avaliações na App Store</span>
+          </p>
+        </div>
+      </div>
+      <div class="marquee marquee--slow" data-marquee>
+        <div class="marquee__track testimonials-track">
+          <article class="testimonial-card">
+            <p class="stars" aria-hidden="true">★★★★★</p>
+            <h3 class="testimonial-rating" data-i18n="testimonials.rating1">Excelente</h3>
+            <blockquote data-i18n="testimonials.q1">"Me ajuda muito, simples e informa com precisão."</blockquote>
+            <cite data-i18n-html="testimonials.cite1">Davi B. · <span>16 jun 2026</span></cite>
+          </article>
+          <article class="testimonial-card">
+            <p class="stars" aria-hidden="true">★★★★★</p>
+            <h3 class="testimonial-rating" data-i18n="testimonials.rating2">O MELHOR PARA IPHONE!</h3>
+            <blockquote data-i18n="testimonials.q2">"Não existe NENHUM melhor para iPhone. Já testei todos, inclusive os que foram lançados recentemente."</blockquote>
+            <cite data-i18n-html="testimonials.cite2">Motora L. · <span>14 jun 2026</span></cite>
+          </article>
+          <article class="testimonial-card">
+            <p class="stars" aria-hidden="true">★★★★★</p>
+            <h3 class="testimonial-rating" data-i18n="testimonials.rating3">Muito bom</h3>
+            <blockquote data-i18n="testimonials.q3">"Que app excelente. Bem fácil de configurar, bem explicativo e preço acessível. Vou até ajudar na divulgação!!"</blockquote>
+            <cite data-i18n-html="testimonials.cite3">K M. · <span>15 mai 2026</span></cite>
+          </article>
+          <article class="testimonial-card">
+            <p class="stars" aria-hidden="true">★★★★★</p>
+            <h3 class="testimonial-rating" data-i18n="testimonials.rating4">Muito bom</h3>
+            <blockquote data-i18n="testimonials.q4">"Meus ganhos melhoraram muito depois que comecei a usar. Recomendo demais."</blockquote>
+            <cite data-i18n-html="testimonials.cite4">Kevin K. · <span>2 mai 2026</span></cite>
+          </article>
+          <article class="testimonial-card">
+            <p class="stars" aria-hidden="true">★★★★★</p>
+            <h3 class="testimonial-rating" data-i18n="testimonials.rating5">Aplicativo perfeito para o iPhone!!</h3>
+            <blockquote data-i18n="testimonials.q5">"Valor compensa demais e o aplicativo é completo nas limitações do iOS, parabéns!!"</blockquote>
+            <cite data-i18n-html="testimonials.cite5">Guiih F. · <span>26 abr 2026</span></cite>
+          </article>
+          <article class="testimonial-card">
+            <p class="stars" aria-hidden="true">★★★★★</p>
+            <h3 class="testimonial-rating" data-i18n="testimonials.rating6">Aplicativo sensacional</h3>
+            <blockquote data-i18n="testimonials.q6">"Aplicativo muito bem feito. Sempre tivemos dificuldades em analisar corridas pelo iPhone por conta de certas burocracias no iOS, mas esse aplicativo surpreendeu. Parabéns aos criadores."</blockquote>
+            <cite data-i18n-html="testimonials.cite6">Giovany R. · <span>5 abr 2026</span></cite>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag" data-i18n="homeFaq.tag">Dúvidas</span>
+          <h2 class="section-title" data-i18n="homeFaq.title">Perguntas frequentes</h2>
+        </div>
+        <div class="faq-list home-faq">
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span data-i18n="homeFaq.signupQ">Preciso me cadastrar para usar o Corridex?</span>
+              <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" /></svg>
+            </button>
+            <div class="faq-answer" data-i18n-html="homeFaq.signupA"></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span data-i18n="faq.q7">O cálculo inclui o deslocamento até o passageiro?</span>
+              <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" /></svg>
+            </button>
+            <div class="faq-answer" data-i18n-html="faq.a7"></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span data-i18n="faq.q12">Por que o app grava/monitora minha tela? Meus dados ficam seguros?</span>
+              <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" /></svg>
+            </button>
+            <div class="faq-answer" data-i18n-html="faq.a12"></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+              <span data-i18n="homeFaq.plansQ">Como funcionam os planos?</span>
+              <svg class="faq-chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" /></svg>
+            </button>
+            <div class="faq-answer" data-i18n-html="homeFaq.plansA"></div>
+          </div>
+        </div>
+        <p class="home-faq__more">
+          <a href="/support" data-i18n="homeFaq.more">Ver todas as dúvidas →</a>
+        </p>
       </div>
     </section>
 
     <section class="cta-section">
-      <div class="container">
-        <h2 data-i18n="cta.title">Pare de aceitar corrida no escuro</h2>
-        <p data-i18n="cta.subtitle">
-          Saiba o valor por km antes de aceitar. Grátis para iPhone.
-        </p>
-        <div class="badge">
-          <a
-            id="badge-cta"
-            href="https://apps.apple.com/app/apple-store/id6756681755?pt=128383262&ct=Landpage&mt=8"
-            target="_blank"
-            rel="noopener noreferrer"
-            data-i18n-aria-label="cta.badgeAriaLabel"
-          >
-            <img
-              id="badge-cta-img"
-              src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/pt-br?size=250x83"
-              alt="Baixar Corridex na App Store"
-              data-i18n-alt="cta.badgeAlt"
-            />
-          </a>
+      <div class="container cta-section__inner">
+        <div class="cta-section__text">
+          <h2>
+            <span data-i18n="cta.titleStart">Pare de aceitar corrida</span>
+            <span class="accent" data-i18n="cta.titleAccent">no escuro</span>
+          </h2>
+          <p data-i18n="cta.subtitle">
+            Saiba o valor por km antes de aceitar. Grátis para iPhone.
+          </p>
+          <div class="badge">
+            <a
+              id="badge-cta"
+              href="https://apps.apple.com/app/apple-store/id6756681755?pt=128383262&ct=Landpage&mt=8"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-i18n-aria-label="cta.badgeAriaLabel"
+            >
+              <img
+                id="badge-cta-img"
+                src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/pt-br?size=250x83"
+                alt="Baixar Corridex na App Store"
+                data-i18n-alt="cta.badgeAlt"
+              />
+            </a>
+          </div>
+          <p class="cta-note" data-i18n="cta.note">
+            Disponível exclusivamente na App Store
+          </p>
         </div>
-        <p class="cta-note" data-i18n="cta.note">
-          Disponível exclusivamente na App Store
-        </p>
+        <div class="cta-section__phone" aria-hidden="true">
+          <img src="/images/hero/ride-99.jpg" alt="" loading="lazy" />
+          <div class="cta-section__dim"></div>
+          <div class="hero-banner__expanded cta-section__card" data-verdict="good">
+            <div class="hero-metrics">
+              <div class="hero-metric is-pass">
+                <div class="hero-metric__label" data-i18n="cta.card.kmLabel">R$/km</div>
+                <div class="hero-metric__value"><b data-i18n="cta.card.km">2,41</b></div>
+                <div class="hero-metric__diff"><span data-i18n="cta.card.kmDiff">+R$ 0,41/km</span>
+<span data-i18n="hero.demo.above">acima do mínimo</span></div>
+              </div>
+              <div class="hero-metric is-pass">
+                <div class="hero-metric__label" data-i18n="cta.card.hLabel">R$/h</div>
+                <div class="hero-metric__value"><b data-i18n="cta.card.h">74,93</b></div>
+                <div class="hero-metric__diff"><span data-i18n="cta.card.hDiff">+R$ 34,93/h</span>
+<span data-i18n="hero.demo.above">acima do mínimo</span></div>
+              </div>
+              <div class="hero-metric is-pass">
+                <div class="hero-metric__label" data-i18n="hero.demo.rating">Nota</div>
+                <div class="hero-metric__value"><b data-i18n="cta.card.rating">4,95</b></div>
+                <div class="hero-metric__diff"><span data-i18n="cta.card.ratingDiff">★ +0,45</span>
+<span data-i18n="hero.demo.above">acima do mínimo</span></div>
+              </div>
+            </div>
+            <div class="hero-banner__footer">
+              <span class="hero-banner__platform" style="background: #ffd000; color: #000">99</span>
+              <span class="hero-banner__total" data-i18n="cta.card.total">R$ 32,47 · 26 min · 13,5 km</span>
+              <span class="hero-banner__check">✔︎</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
