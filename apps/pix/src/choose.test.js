@@ -22,7 +22,8 @@ test('GET /pix mostra Anual selecionado com R$ 99,90', async () => {
   assert.equal(on.length, 1);
   assert.equal(on[0].dataset.plan, 'anual');
   assert.match(on[0].textContent, /R\$ 99,90/);
-  assert.match(on[0].textContent, /Corridex Anual/);
+  assert.equal(on[0].querySelector('h1').textContent, 'Corridex Anual');
+  assert.equal(doc.querySelector('.brand').tagName, 'DIV'); // marca não é título
   const button = [...doc.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Gerar Pix');
   assert.ok(button);
   const form = button.closest('form');
@@ -91,17 +92,25 @@ test('?cenario=pausado → "A venda por Pix está pausada"; sem devTools o cená
 
 test('?cenario=sem-estoque → Anual riscado com texto "indisponível" e Notice warning', async () => {
   const doc = await dom(await get('/pix?cenario=sem-estoque'));
-  const anual = doc.querySelector('input[name=plano][value=anual]');
-  assert.ok(anual.disabled);
-  const label = anual.closest('label');
-  assert.ok(label.querySelector('s'));
-  assert.match(label.textContent, /indisponível/);
+  assert.equal(doc.querySelector('main').dataset.state, 'plan_out_of_stock');
+  const off = doc.querySelector('.plan.off');
+  assert.equal(off.querySelector('s').textContent, 'Anual');
+  assert.match(off.textContent, /indisponível/);
+  assert.equal(off.querySelector('a'), null);
   const notice = doc.querySelector('.notice[data-tone=warning]');
   assert.ok(notice);
   assert.match(notice.textContent, /O Anual está indisponível no Pix agora/);
-  const see = [...doc.querySelectorAll('a')].find((a) => /^Ver /.test(a.textContent.trim()));
+  const see = notice.querySelector('a.btn-secondary');
   assert.equal(see.textContent.trim(), 'Ver Mensal');
   assert.equal(see.getAttribute('href'), '/pix?plano=mensal');
+});
+
+test('sem botão de envio, os outros planos viram links ?plano= (sem rádios soltos)', async () => {
+  const doc = await dom(await get('/pix?cenario=sem-estoque'));
+  assert.equal(doc.querySelectorAll('input[type=radio]').length, 0);
+  assert.equal(doc.querySelector('form[action="/pix/pedidos"]'), null);
+  const hrefs = [...doc.querySelectorAll('ul.plans a.plan')].map((a) => a.getAttribute('href'));
+  assert.deepEqual(hrefs, ['/pix?plano=mensal', '/pix?plano=trimestral']);
 });
 
 test('?cenario=fora-do-ar → "O Pix está indisponível agora" e botão "Tentar de novo"', async () => {
@@ -120,15 +129,37 @@ test('?cenario=indisponivel-email&plano=mensal → mensagem e botão "Ver Trimes
   const see = [...doc.querySelectorAll('a')].find((a) => a.textContent.trim() === 'Ver Trimestral');
   assert.ok(see);
   assert.equal(see.getAttribute('href'), '/pix?plano=trimestral&email=m%40email.com');
-  assert.equal(doc.querySelector('input[name=email]').value, 'm@email.com');
+  assert.equal(doc.querySelector('h1').textContent, 'Corridex Mensal');
+  assert.equal(doc.querySelector('main').dataset.state, 'unavailable_for_customer');
+  // Plano atual marcado; os outros são links que mantêm o e-mail; nada gera Pix.
+  assert.match(doc.querySelector('.plan[aria-current=true]').textContent, /Mensal/);
+  const hrefs = [...doc.querySelectorAll('ul.plans a.plan')].map((a) => a.getAttribute('href'));
+  assert.deepEqual(hrefs, ['/pix?plano=trimestral&email=m%40email.com', '/pix?plano=anual&email=m%40email.com']);
+  assert.equal(doc.querySelectorAll('input[type=radio]').length, 0);
+  assert.equal(doc.querySelector('form[action="/pix/pedidos"]'), null);
+  const input = doc.querySelector('input[name=email]');
+  assert.equal(input.value, 'm@email.com');
+  assert.equal(input.form.getAttribute('method'), 'get');
 });
 
 test('sem estoque real no armazenamento marca o plano indisponível', async () => {
   const { app, stores } = makeApp();
   for (let i = 0; i < 6; i++) stores.codes.reserve('anual', `x${i}@e.com`, `h${i}`);
-  const doc = await dom(await app.request('/pix'));
-  assert.ok(doc.querySelector('input[name=plano][value=anual]').disabled);
+  const doc = await dom(await app.request('/pix?plano=mensal'));
+  const anual = doc.querySelector('input[name=plano][value=anual]');
+  assert.ok(anual.disabled);
+  assert.ok(anual.closest('label').classList.contains('off')); // cursor not-allowed no cartão todo
+  assert.match(anual.closest('label').textContent, /indisponível/);
   assert.ok(!doc.querySelector('input[name=plano][value=mensal]').disabled);
+  // Plano escolhido sem estoque → aviso de estoque.
+  const def = await dom(await app.request('/pix'));
+  assert.equal(def.querySelector('main').dataset.state, 'plan_out_of_stock');
+});
+
+test('?email= pré-preenchido é cortado em 254 caracteres', async () => {
+  const long = 'a'.repeat(300) + '@email.com';
+  const doc = await dom(await get('/pix?email=' + encodeURIComponent(long)));
+  assert.equal(doc.querySelector('input[name=email]').value, 'a'.repeat(254));
 });
 
 test('config.salesEnabled=false ou provider null → tela pausada', async () => {

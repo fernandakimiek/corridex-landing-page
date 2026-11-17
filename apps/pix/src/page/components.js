@@ -6,12 +6,24 @@ import { brl, maskEmail, groupCode, dateBR, timeBR, redeemUrl } from './format.j
 // Valores interpolados são escapados pelo hono/html; `raw` só para SVG/CSS nossos
 // (e para o SVG do QR, gerado no servidor a partir do copia e cola).
 
-const ICONS = {
-  info: '<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 9v5M10 6v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-  warning: '<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M10 2 19 18H1Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 8v4M10 15v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-  error: '<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="m6.5 6.5 7 7m0-7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-  check: '<svg class="ok" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle cx="32" cy="32" r="30" fill="currentColor"/><path d="m19 33 9 9 17-19" fill="none" stroke="#FFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+// Ícones no estilo dos SF Symbols "fill" do app (círculo/triângulo cheio + glifo branco).
+const svg = (cls, body, box = 28) => `<svg class="${cls}" viewBox="0 0 ${box} ${box}" aria-hidden="true" focusable="false">${body}</svg>`;
+const DOT = '<circle cx="14" cy="14" r="13" fill="currentColor"/>';
+const GLYPH = {
+  check: '<path d="m8.5 14.5 3.8 3.8 7.2-8.3" fill="none" stroke="#FFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',
+  xmark: '<path d="m9.5 9.5 9 9m0-9-9 9" stroke="#FFF" stroke-width="2.6" stroke-linecap="round"/>',
+  info: '<rect x="12.6" y="12" width="2.8" height="8.5" rx="1.4" fill="#FFF"/><circle cx="14" cy="8.3" r="1.8" fill="#FFF"/>',
 };
+const ICONS = {
+  info: svg('ic', DOT + GLYPH.info), // info.circle.fill
+  // exclamationmark.triangle.fill
+  warning: svg('ic', '<path d="M12.1 3.6a2.2 2.2 0 0 1 3.8 0l10.4 18.6a2.2 2.2 0 0 1-1.9 3.3H3.6a2.2 2.2 0 0 1-1.9-3.3Z" fill="currentColor"/><rect x="12.6" y="9.5" width="2.8" height="8.5" rx="1.4" fill="#FFF"/><circle cx="14" cy="21.3" r="1.7" fill="#FFF"/>'),
+  error: svg('ic', DOT + GLYPH.xmark), // xmark.circle.fill
+  success: svg('ic', DOT + GLYPH.check), // checkmark.circle.fill
+};
+// Indicador de seleção do cartão de plano: circle / checkmark.circle.fill (22 px).
+const PICK = svg('i-off', '<circle cx="11" cy="11" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/>', 22)
+  + svg('i-on', '<circle cx="11" cy="11" r="11" fill="currentColor"/><path d="m6.5 11.5 3 3 6-6.8" fill="none" stroke="#FFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>', 22);
 
 // Preenche o modelo do copy permitindo valores HTML (ex.: <span> que o cliente atualiza).
 // Partes de texto continuam escapadas.
@@ -24,14 +36,14 @@ function tHtml(template, vars) {
 
 export const planTitle = (plan) => t(copy.plan.title, { plano: plan.name });
 
-// heading: true → a marca é o h1 da página (tela de escolha).
-export function Brand({ heading = false } = {}) {
-  const inner = html`<i aria-hidden="true"></i><span>${copy.brand}</span>`;
-  return heading ? html`<h1 class="brand">${inner}</h1>` : html`<div class="brand">${inner}</div>`;
+// Marca (não é título): quadrado na cor do ícone do app + nome.
+export function Brand() {
+  return html`<div class="brand"><i aria-hidden="true"></i><span>${copy.brand}</span></div>`;
 }
 
-export function CheckIcon() {
-  return raw(ICONS.check);
+// Ícone grande de estado (pago, venceu, erro, info), 44 px como o glifo do app.
+export function StateIcon({ tone = 'success' } = {}) {
+  return html`<div class="hero-ic" data-tone="${tone}">${raw(ICONS[tone] ?? ICONS.info)}</div>`;
 }
 
 // action: { label, href, variant?: 'primary'|'secondary'|'plain' }
@@ -43,23 +55,37 @@ export function SubmitButton({ label, variant = 'primary', name, value }) {
   return html`<button type="submit" class="btn btn-${variant}"${name ? html` name="${name}" value="${value}"` : ''}>${label}</button>`;
 }
 
-// Seletor de plano: rádios reais (funciona sem JS; setas do teclado nativas).
-// Indisponível: rádio desativado, nome riscado e o texto "indisponível" (nunca só cor).
-export function PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds = [] }) {
-  const items = Object.values(plans).map((plan) => {
+// Seletor de plano: cartões empilhados como no app (indicador + nome + preço, borda 2 px).
+// Modo rádio (padrão): rádios reais dentro do form, funciona sem JS e com setas.
+// Modo link (`linkTo(id) → href`): usado quando não há botão de envio (avisos);
+// cada plano disponível vira um link para ?plano=<id>.
+// Indisponível: nome riscado + selo "indisponível" (nunca só cor), sem interação.
+export function PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds = [], linkTo }) {
+  const card = (plan, off) => html`<span class="pc">${raw(PICK)}<span class="pn">${
+    off ? html`<s>${plan.name}</s> <span class="tag">${copy.stock.unavailableTag}</span>` : plan.name
+  }</span><span class="pp">${brl(plan.amountCents)}</span></span>`;
+  const list = Object.values(plans);
+  if (linkTo) {
+    const items = list.map((plan) => {
+      const off = unavailablePlanIds.includes(plan.id);
+      if (off) return html`<li class="plan off">${card(plan, true)}</li>`;
+      if (plan.id === selectedPlanId) return html`<li class="plan cur" aria-current="true">${card(plan, false)}</li>`;
+      return html`<li><a class="plan" href="${linkTo(plan.id)}">${card(plan, false)}</a></li>`;
+    });
+    return html`<ul class="plans" aria-label="${copy.plan.legend}">${items}</ul>`;
+  }
+  const items = list.map((plan) => {
     const off = unavailablePlanIds.includes(plan.id);
     const checked = plan.id === selectedPlanId && !off;
-    return html`<label><input type="radio" name="plano" value="${plan.id}"${checked ? raw(' checked') : ''}${off ? raw(' disabled') : ''}>${
-      off ? html`<span class="lbl"><s>${plan.name}</s><span class="tag">${copy.stock.unavailableTag}</span></span>` : html`<span class="lbl">${plan.name}</span>`
-    }</label>`;
+    return html`<label class="plan${off ? ' off' : ''}"><input type="radio" name="plano" value="${plan.id}"${checked ? raw(' checked') : ''}${off ? raw(' disabled') : ''}>${card(plan, off)}</label>`;
   });
-  return html`<fieldset class="seg" role="radiogroup"><legend>${copy.plan.legend}</legend>${items}</fieldset>`;
+  return html`<fieldset class="plans" role="radiogroup"><legend class="vh">${copy.plan.legend}</legend>${items}</fieldset>`;
 }
 
 // Cartão do plano. `on` = visível sem depender de :has() (plano escolhido no servidor).
 export function PlanSummary({ plan, on = true, heading = 'h2' }) {
   const h = heading === 'h1' ? html`<h1>${planTitle(plan)}</h1>` : html`<h2>${planTitle(plan)}</h2>`;
-  return html`<section class="card sum stack${on ? ' on' : ''}" data-plan="${plan.id}">
+  return html`<section class="sum hero${on ? ' on' : ''}" data-plan="${plan.id}">
 ${h}
 <p>${t(copy.plan.summary, { 'duração': capitalize(plan.durationLabel) })}</p>
 <p><span class="price">${brl(plan.amountCents)}</span><br><span class="note">${copy.plan.payOnce}</span></p>
@@ -80,11 +106,12 @@ ${errorText ? html`<p class="err" id="${id}-error">${errorText}</p>` : ''}
 </div>`;
 }
 
-// Aviso: tom por ícone + borda + texto; erro com role=alert.
+// Aviso (InlineNoticeCard do app): fundo no tom a 15%, ícone + título na cor do tom.
+// Tom nunca só por cor: ícone e texto. Erro com role=alert.
 export function Notice({ tone = 'info', title, body, action, heading = 'h2' }) {
   const h = heading === 'h1' ? html`<h1>${title}</h1>` : html`<h2>${title}</h2>`;
   return html`<section class="notice" data-tone="${tone}"${tone === 'error' ? raw(' role="alert"') : ''}>
-<div class="nt">${raw(ICONS[tone] ?? ICONS.info)}${h}</div>
+${raw(ICONS[tone] ?? ICONS.info)}${h}
 ${body ? html`<p>${body}</p>` : ''}
 ${action ? LinkButton({ variant: 'secondary', ...action }) : ''}
 </section>`;

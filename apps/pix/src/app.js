@@ -1,7 +1,10 @@
 import { Hono } from 'hono';
 import { PLANS, DEFAULT_PLAN_ID } from './plans.js';
 import { copy, t } from './page/copy.pt-BR.js';
-import { chooseScreen, pausedScreen, errorScreen } from './page/screens.js';
+import { chooseScreen, pausedScreen, errorScreen, choosePath } from './page/screens.js';
+
+// Tamanho máximo de um endereço de e-mail (RFC 5321); corta o ?email= pré-preenchido.
+const MAX_EMAIL = 254;
 
 // Tudo vive sob /pix: o site (corridex.app) faz rewrite de /pix/* para este app,
 // então o mesmo caminho funciona no Cloudflare Workers hoje e na Vercel depois.
@@ -40,12 +43,6 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     return null;
   }
 
-  function choosePath(planId, email) {
-    const q = new URLSearchParams({ plano: planId });
-    if (email) q.set('email', email);
-    return `/pix?${q}`;
-  }
-
   // Link do teste grátis: só quando o app manda teste=1 e os dois tokens.
   function trialHref(c) {
     const dcLer = c.req.query('dc_ler');
@@ -63,7 +60,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     const requested = c.req.query('plano');
     const selectedPlanId = requested && Object.hasOwn(plans, requested) ? requested : DEFAULT_PLAN_ID;
     const selected = plans[selectedPlanId];
-    const email = c.req.query('email') ?? '';
+    const email = (c.req.query('email') ?? '').slice(0, MAX_EMAIL);
 
     if (cenario === 'fora-do-ar') {
       return c.html(errorScreen({ planName: selected.name, retryHref: choosePath(selectedPlanId, email) }));
