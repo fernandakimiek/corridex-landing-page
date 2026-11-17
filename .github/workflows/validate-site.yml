@@ -28,4 +28,4 @@ jobs:
         run: npm test
 
       - name: Gerar páginas (PT, EN, ES)
-        run: npm run build:pages
+        run: npm run build:pages -w apps/website

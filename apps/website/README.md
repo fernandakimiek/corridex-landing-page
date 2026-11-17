@@ -8,13 +8,13 @@ A leitura no app ainda não foi publicada. Até a primeira versão do app que l�
 
 ## Onde mexer
 
-O arquivo servido é [`app-update/v1.json`](app-update/v1.json). O site não tem pasta `public/`: a Vercel publica a raiz do repositório, então a URL é `/app-update/v1.json`, sem `www`, sem barra no final e sem redirect.
+O arquivo servido é [`app-update/v1.json`](app-update/v1.json). O site não tem pasta `public/`: a Vercel publica a pasta `apps/website` (Root Directory do projeto), então a URL é `/app-update/v1.json`, sem `www`, sem barra no final e sem redirect.
 
 O schema do editor é [`schemas/app-update-v1.schema.json`](schemas/app-update-v1.schema.json), publicado em `https://corridex.app/schemas/app-update-v1.schema.json`. O `"$schema"` no topo do JSON faz o editor apontar erro enquanto você digita. O app ignora esse campo.
 
 ## Pelo navegador, sem instalar nada
 
-1. No GitHub, abra [fernandakimiek/corridex-landing-page](https://github.com/fernandakimiek/corridex-landing-page) → `app-update/v1.json` → ícone de lápis (**Edit this file**).
+1. No GitHub, abra [fernandakimiek/corridex-landing-page](https://github.com/fernandakimiek/corridex-landing-page) → `apps/website/app-update/v1.json` → ícone de lápis (**Edit this file**).
 2. Escolha a receita abaixo, abra o arquivo indicado e copie o conteúdo de `rules`. Ajuste versão, data e motivo. O `$schema` e o `schemaVersion` não mudam.
 3. **Commit changes…** → marque **Create a new branch for this commit and start a pull request**. Nome sugerido da branch: `politica/<assunto>`.
 4. Espere o check `validate-app-update` ficar verde. Se ficar vermelho, a mensagem diz a regra (`id`) e como corrigir, com um exemplo do valor certo.
@@ -136,16 +136,17 @@ No deploy, `npm run build` roda `node scripts/validate-app-update.mjs` e depois 
 
 No pull request para `main`, o check `validate-app-update` faz a mesma validação e ainda consulta a App Store (`id` 6756681755, país `br`). Se alguma regra, recomendada ou obrigatória, pede versão maior do que a que está na loja, o check fica vermelho. Pull request que não mexe na política passa em segundos, sem consultar a Apple.
 
-O comando de build fica só no `vercel.json`. Não duplique o comando no painel da Vercel. O `outputDirectory` é `.` porque o site não tem pasta `public/`: com um comando de build, a Vercel procuraria essa pasta e o deploy do site inteiro falharia. Com a raiz como saída, ela deixa de fora `node_modules` e `package.json`.
+O comando de build fica só no `vercel.json`. Não duplique o comando no painel da Vercel. O `outputDirectory` é `.` porque o site não tem pasta `public/`: com um comando de build, a Vercel procuraria essa pasta e o deploy do site inteiro falharia. Com a raiz como saída, ela deixa de fora `node_modules` e `package.json`. No painel da Vercel, o **Root Directory** do projeto é `apps/website`: o `outputDirectory: "."` vale só para esta pasta, e nada de `apps/pix` vai para o site.
 
 O `vercel.json` liga `cleanUrls` e `trailingSlash: false` por causa das páginas do site. Os dois só mexem em arquivos `.html` e em barra no final, então `/app-update/v1.json` continua respondendo o arquivo, sem redirect. Nenhum redirect do `vercel.json` pode tocar em `/app-update/` ou `/schemas/` (há teste para isso).
 
 ## Como rodar localmente
 
-Requer Node 20.19 ou mais novo.
+Requer Node 20.19 ou mais novo. O `npm install` roda na raiz do repositório (monorepo com npm workspaces); os demais comandos, dentro de `apps/website`.
 
 ```bash
-npm install
+npm install                    # na raiz do repositório
+cd apps/website
 npm test
 npm run validate:app-update
 npm run validate:app-update:store
@@ -168,11 +169,11 @@ O site existe em português, inglês e espanhol, cada idioma no seu endereço:
 
 - **Estrutura e texto em PT das páginas:** `pages/index.html`, `pages/support.html`, `pages/privacy.html`, `pages/terms.html`.
 - **Textos em cada idioma:** `js/translations.js`. As páginas legais são exceção: o texto completo dos três idiomas fica no próprio `pages/privacy.html` e `pages/terms.html`, em `#legal-pt`, `#legal-en` e `#legal-es`.
-- **Não edite** `index.html`, `support.html`, `privacy.html`, `terms.html`, `en/` e `es/` na raiz. Eles são gerados no build por `scripts/build-pages.mjs` e não vão para o git.
+- **Não edite** `index.html`, `support.html`, `privacy.html`, `terms.html`, `en/` e `es/` em `apps/website/`. Eles são gerados no build por `scripts/build-pages.mjs` e não vão para o git.
 
 O build aplica as traduções com o mesmo `js/i18n.js` que roda no navegador, então o HTML publicado já chega no idioma certo, com título, descrição, `canonical` e `hreflang` próprios. Isso é o que permite ao Google mostrar a versão em inglês para quem busca em inglês.
 
-Ao criar uma página nova ou mudar endereços, ajuste `PAGES` em `scripts/lib/site-pages.mjs` e rode `npm run build:sitemap` para atualizar o `sitemap.xml` (há teste que confere).
+Ao criar uma página nova ou mudar endereços, ajuste `PAGES` em `scripts/lib/site-pages.mjs` e rode `npm run build:websitemap` para atualizar o `sitemap.xml` (há teste que confere).
 
 ### Idioma automático
 

@@ -1,5 +1,5 @@
 {
-  "name": "corridex-site",
+  "name": "corridex-website",
   "private": true,
   "type": "module",
   "engines": {
@@ -8,7 +8,7 @@
   "scripts": {
     "build": "node scripts/validate-app-update.mjs && node scripts/build-pages.mjs",
     "build:pages": "node scripts/build-pages.mjs",
-    "build:sitemap": "node scripts/build-pages.mjs --sitemap",
+    "build:websitemap": "node scripts/build-pages.mjs --sitemap",
     "test": "node --test",
     "validate:app-update": "node scripts/validate-app-update.mjs",
     "validate:app-update:store": "node scripts/validate-app-update.mjs --check-app-store"
