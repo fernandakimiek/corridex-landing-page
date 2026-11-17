@@ -95,6 +95,7 @@ export const copy = {
     waitBody: 'Se acabou de comprar, tente de novo daqui a pouco.',
     cta: 'Falar com o suporte',
     hint: 'Respondemos pelo WhatsApp. Tenha o e-mail da compra em mãos.',
+    back: 'Voltar ao pedido',
   },
   notFound: {
     title: 'Pedido não encontrado',

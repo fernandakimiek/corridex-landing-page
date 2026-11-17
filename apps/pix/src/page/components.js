@@ -47,8 +47,8 @@ export function StateIcon({ tone = 'success' } = {}) {
 }
 
 // action: { label, href, variant?: 'primary'|'secondary'|'plain' }
-export function LinkButton({ label, href, variant = 'primary' }) {
-  return html`<a class="btn btn-${variant}" href="${href}">${label}</a>`;
+export function LinkButton({ label, href, variant = 'primary', rel }) {
+  return html`<a class="btn btn-${variant}" href="${href}"${rel ? html` rel="${rel}"` : ''}>${label}</a>`;
 }
 
 export function SubmitButton({ label, variant = 'primary', name, value }) {
@@ -162,13 +162,14 @@ ${helpHref ? LinkButton({ label: copy.code.help, href: helpHref, variant: 'plain
 }
 
 // Ajuda quando o código não funciona: dois cartões + suporte.
-export function CodeHelp({ supportUrl }) {
+export function CodeHelp({ supportUrl, backHref }) {
   return html`<section class="card stack"><h2>${copy.help.account}</h2><p>${copy.help.accountBody}</p></section>
 <section class="card stack"><h2>${copy.help.wait}</h2><p>${copy.help.waitBody}</p></section>
 <div class="stack">
-${LinkButton({ label: copy.help.cta, href: supportUrl })}
+${LinkButton({ label: copy.help.cta, href: supportUrl, rel: 'noopener' })}
 <p class="note center">${copy.help.hint}</p>
-</div>`;
+</div>
+${backHref ? LinkButton({ label: copy.help.back, href: backHref, variant: 'plain' }) : ''}`;
 }
 
 // Pedido do teste grátis: tokens do app em campos ocultos.

@@ -87,7 +87,7 @@ test('após markPaid: delivered com "Resgatar código" → href apps.apple.com/r
   assert.match(page, /Corridex Anual/);
   assert.match(page, /R\$ 99,90/);
   assert.match(page, /Pago em 17\/11\/2026 por Pix/);
-  assert.ok(!page.includes('O código não funcionou?')); // Task 7
+  assert.ok(page.includes('O código não funcionou?'));
 });
 
 test('status JSON acompanha: paying → delivered', async () => {

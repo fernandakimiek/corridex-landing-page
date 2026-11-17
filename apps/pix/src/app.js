@@ -5,7 +5,7 @@ import { renderSVG } from 'uqr';
 import { createOrderService } from './orders.js';
 import {
   chooseScreen, pausedScreen, errorScreen, choosePath, orderPath,
-  payingScreen, deliveredScreen, pendingScreen, expiredScreen, notFoundScreen,
+  payingScreen, deliveredScreen, pendingScreen, expiredScreen, notFoundScreen, helpScreen,
 } from './page/screens.js';
 
 // Tamanho máximo de um endereço de e-mail (RFC 5321); corta o ?email= pré-preenchido.
@@ -185,6 +185,19 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
         return c.html(payingScreen({ order, qrSvg, nowMs: now() }));
       }
     }
+  });
+
+  app.get('/pedido/:token/ajuda', async (c) => {
+    if (!orders) return c.html(pausedScreen());
+    const token = c.req.param('token');
+    let order;
+    try {
+      order = await orders.get(token);
+    } catch {
+      return orderError(c, token);
+    }
+    if (!order) return notFound(c);
+    return c.html(helpScreen({ supportUrl: config.supportUrl, backHref: orderPath(token) }));
   });
 
   app.get('/pedido/:token/status', async (c) => {

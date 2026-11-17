@@ -4,7 +4,7 @@ import { page } from './layout.js';
 import { brl, maskEmail, dateBR } from './format.js';
 import {
   Brand, PlanSwitcher, PlanSummary, EmailField, Notice, SubmitButton, LinkButton, planTitle,
-  StateIcon, PixPayment, PaymentStatus, CodeDelivery,
+  StateIcon, PixPayment, PaymentStatus, CodeDelivery, CodeHelp,
 } from './components.js';
 
 // Telas completas (página inteira). Cada uma aceita `devBar` (Task 9) e repassa ao layout.
@@ -116,9 +116,16 @@ ${paidOn ? html`<p class="note">${t(copy.order.paidOn, { data: paidOn })}</p>` :
 export function deliveredScreen({ order, plan, appStoreId, devBar }) {
   const body = html`${StateIcon({ tone: 'success' })}
 <div class="stack center"><h1>${copy.paid.title}</h1><p>${copy.paid.next}</p></div>
-${CodeDelivery({ code: order.code, email: order.email, appStoreId })}
+${CodeDelivery({ code: order.code, email: order.email, appStoreId, helpHref: `${orderPath(order.token)}/ajuda` })}
 ${OrderSummary({ order, plan })}`;
   return page({ title: copy.paid.title, body, state: 'delivered', devBar });
+}
+
+// Ajuda quando o código não funciona.
+export function helpScreen({ supportUrl, backHref, devBar }) {
+  const body = html`<h1>${copy.help.title}</h1>
+${CodeHelp({ supportUrl, backHref })}`;
+  return page({ title: copy.help.title, body, state: 'help', devBar });
 }
 
 // Pago, mas o código chega depois por e-mail.
