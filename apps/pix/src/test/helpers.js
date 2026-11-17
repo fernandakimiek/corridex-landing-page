@@ -1,9 +1,13 @@
 import { JSDOM } from 'jsdom';
 import { createApp } from '../app.js';
 import { PLANS } from '../plans.js';
+import { createMockPixProvider } from '../pix/mock-provider.js';
+import { createMemoryStores } from '../store/memory.js';
+import { seedCodes } from '../dev/seed.js';
 
 export function makeApp(overrides = {}) {
-  const clock = { t: null, now() { return this.t ?? Date.now(); }, set(ms) { this.t = ms; } };
+  let t = null;
+  const clock = { now: () => t ?? Date.now(), set: (ms) => { t = ms; } };
   const config = {
     devTools: true,
     salesEnabled: true,
@@ -11,10 +15,14 @@ export function makeApp(overrides = {}) {
     supportUrl: 'https://wa.me/message/ON3GNOTDII42F1',
     ...overrides.config,
   };
-  const provider = overrides.provider ?? null;
-  const stores = overrides.stores ?? null;
-  const plans = overrides.plans ?? PLANS;
-  const now = overrides.now ?? (() => clock.now());
+  const provider = 'provider' in overrides
+    ? overrides.provider
+    : createMockPixProvider({ devTools: true, now: () => clock.now() });
+  const stores = 'stores' in overrides
+    ? overrides.stores
+    : createMemoryStores({ codes: seedCodes() });
+  const plans = 'plans' in overrides ? overrides.plans : PLANS;
+  const now = 'now' in overrides ? overrides.now : () => clock.now();
   const app = createApp({ config, provider, stores, plans, now });
   return { app, provider, stores, clock };
 }
