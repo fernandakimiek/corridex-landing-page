@@ -1,8 +1,10 @@
 import { html } from 'hono/html';
-import { copy } from './copy.pt-BR.js';
+import { copy, t } from './copy.pt-BR.js';
 import { page } from './layout.js';
+import { brl, maskEmail, dateBR } from './format.js';
 import {
   Brand, PlanSwitcher, PlanSummary, EmailField, Notice, SubmitButton, LinkButton, planTitle,
+  StateIcon, PixPayment, PaymentStatus, CodeDelivery,
 } from './components.js';
 
 // Telas completas (página inteira). Cada uma aceita `devBar` (Task 9) e repassa ao layout.
@@ -69,4 +71,76 @@ export function errorScreen({ planName, retryHref = '/pix', devBar }) {
 ${Notice({ tone: 'error', title: copy.down.title, body: copy.down.body })}
 ${LinkButton({ label: copy.down.cta, href: retryHref })}`;
   return page({ title, body, state: 'error', devBar });
+}
+
+// Endereços do pedido.
+export const orderPath = (token) => `/pix/pedido/${encodeURIComponent(token)}`;
+
+// ms → 'aaaa-mm-dd' no fuso de Brasília (en-CA formata como ISO).
+const isoDateBR = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+
+// Pagando: copiar código antes do QR; status ao vivo; link sem JS para atualizar.
+// O cliente (pix.js) consulta data-status-url e conta até data-expires-at.
+export function payingScreen({ order, qrSvg, nowMs, devBar }) {
+  const path = orderPath(order.token);
+  const title = t(copy.pix.payTitle, { valor: brl(order.amountCents) });
+  const body = html`<h1>${title}</h1>
+${PixPayment({ copiaECola: order.copiaECola, qrSvg })}
+${PaymentStatus({ expiresAt: order.expiresAt, nowMs, refreshHref: path })}`;
+  return page({
+    title, body, state: 'paying', data: { statusUrl: `${path}/status`, expiresAt: order.expiresAt }, devBar,
+  });
+}
+
+// Resumo do pedido: plano, preço e data do pagamento.
+function OrderSummary({ order, plan }) {
+  const paidOn = order.paidAt != null ? dateBR(isoDateBR.format(new Date(order.paidAt))) : null;
+  return html`<section class="card stack">
+<h2>${copy.order.title}</h2>
+<p>${planTitle(plan)} · ${brl(order.amountCents)}</p>
+${paidOn ? html`<p class="note">${t(copy.order.paidOn, { data: paidOn })}</p>` : ''}
+</section>`;
+}
+
+// Pago e entregue: código pronto para resgatar.
+export function deliveredScreen({ order, plan, appStoreId, devBar }) {
+  const body = html`${StateIcon({ tone: 'success' })}
+<div class="stack center"><h1>${copy.paid.title}</h1><p>${copy.paid.next}</p></div>
+${CodeDelivery({ code: order.code, email: order.email, appStoreId })}
+${OrderSummary({ order, plan })}`;
+  return page({ title: copy.paid.title, body, state: 'delivered', devBar });
+}
+
+// Pago, mas o código chega depois por e-mail.
+export function pendingScreen({ order, devBar }) {
+  const body = html`${StateIcon({ tone: 'success' })}
+<h1 class="center">${copy.paid.title}</h1>
+${Notice({ tone: 'info', title: copy.pending.title, body: copy.pending.body })}
+<p class="note center">${t(copy.pending.sentTo, { email: maskEmail(order.email) })}</p>`;
+  return page({ title: copy.paid.title, body, state: 'pending', devBar });
+}
+
+// Pix vencido: gerar outro para o mesmo pedido. Se o pagamento cair depois,
+// o pedido vira "pago"; por isso o status continua consultável (data-status-url).
+export function expiredScreen({ order, plan, devBar }) {
+  const path = orderPath(order.token);
+  const title = planTitle(plan);
+  const body = html`${StateIcon({ tone: 'warning' })}
+<h1 class="center">${title}</h1>
+${Notice({ tone: 'warning', title: copy.expired.title, body: copy.expired.body })}
+<form class="stack" method="post" action="${path}/renovar">
+${SubmitButton({ label: copy.expired.cta })}
+<p class="note center">${copy.expired.hint}</p>
+</form>`;
+  return page({ title, body, state: 'expired', data: { statusUrl: `${path}/status` }, devBar });
+}
+
+// Pedido inexistente (link errado ou antigo).
+export function notFoundScreen({ devBar } = {}) {
+  const body = html`${StateIcon({ tone: 'error' })}
+<div class="stack center"><h1>${copy.notFound.title}</h1><p>${copy.notFound.body}</p></div>
+${LinkButton({ label: copy.pix.cta, href: '/pix' })}`;
+  return page({ title: copy.notFound.title, body, state: 'not_found', devBar });
 }
