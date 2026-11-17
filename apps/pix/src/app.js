@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
+import { html } from 'hono/html';
 import { PLANS, DEFAULT_PLAN_ID } from './plans.js';
-import { copy, t } from './page/copy.pt-BR.js';
+import { copy, t, dev } from './page/copy.pt-BR.js';
+import { devBarView } from './page/layout.js';
 import { renderSVG } from 'uqr';
 import { createOrderService, normalizeEmail } from './orders.js';
 import {
@@ -37,6 +39,17 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
 
   // ?cenario= só vale com as ferramentas de simulação ligadas.
   const scenario = (c) => (config.devTools ? c.req.query('cenario') || null : null);
+  // Barra de simulação: só com devTools. `orderToken` põe os links de cenário do
+  // pedido; `payToken` o botão "Simular pagamento".
+  const devBarFor = (c, { orderToken, payToken } = {}) => {
+    if (!config.devTools) return undefined;
+    return devBarView({
+      payAction: payToken ? `/pix/dev/pedido/${payToken}/pagar` : undefined,
+      links: orderToken
+        ? ['vencido', 'pendente'].map((n) => ({ label: n, href: `${orderPath(orderToken)}?cenario=${n}` }))
+        : [],
+    });
+  };
   const salesPaused = () => !config.salesEnabled || !provider || !stores;
   const planIds = () => Object.keys(plans);
 
@@ -95,6 +108,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     }
 
     return c.html(chooseScreen({
+      devBar: devBarFor(c),
       plans, selectedPlanId, email, notice, unavailablePlanIds, trialHref: trialHref(session), trialSession: session, state, emailError,
     }));
   }
@@ -103,13 +117,13 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
 
   app.get('/', (c) => {
     const cenario = scenario(c);
-    if (salesPaused() || cenario === 'pausado') return c.html(pausedScreen());
+    if (salesPaused() || cenario === 'pausado') return c.html(pausedScreen({ devBar: devBarFor(c) }));
 
     const selectedPlanId = validPlanId(c.req.query('plano'));
     const email = (c.req.query('email') ?? '').slice(0, MAX_EMAIL);
 
     if (cenario === 'fora-do-ar') {
-      return c.html(errorScreen({ planName: plans[selectedPlanId].name, retryHref: choosePath(selectedPlanId, email) }));
+      return c.html(errorScreen({ devBar: devBarFor(c), planName: plans[selectedPlanId].name, retryHref: choosePath(selectedPlanId, email) }));
     }
     return chooseView(c, {
       selectedPlanId, email, outOfStock: cenario === 'sem-estoque', customerUnavailable: cenario === 'indisponivel-email',
@@ -129,11 +143,11 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     if (reason === 'plan_out_of_stock') return chooseView(c, { ...base, outOfStock: true });
     if (reason === 'unavailable_for_customer') return chooseView(c, { ...base, customerUnavailable: true });
     if (reason === 'invalid_plan') return chooseView(c, { ...base, selectedPlanId: DEFAULT_PLAN_ID });
-    return c.html(errorScreen({ planName: plans[planId].name, retryHref: choosePath(planId, email) }), 503);
+    return c.html(errorScreen({ devBar: devBarFor(c), planName: plans[planId].name, retryHref: choosePath(planId, email) }), 503);
   }
 
   app.post('/pedidos', async (c) => {
-    if (salesPaused()) return c.html(pausedScreen());
+    if (salesPaused()) return c.html(pausedScreen({ devBar: devBarFor(c) }));
     const form = await c.req.parseBody();
     const rawPlan = typeof form.plano === 'string' ? form.plano : '';
     const email = (typeof form.email === 'string' ? form.email : '').trim().slice(0, MAX_EMAIL);
@@ -150,15 +164,15 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     return c.redirect(orderPath(result.order.token), 303);
   });
 
-  const notFound = (c) => c.html(notFoundScreen(), 404);
+  const notFound = (c) => c.html(notFoundScreen({ devBar: devBarFor(c) }), 404);
   // Erro do provedor ao consultar um pedido: tela "Pix indisponível", tentar de novo na mesma página.
   const orderError = (c, token) => {
     const planId = validPlanId(stores?.orders.get(token)?.planId);
-    return c.html(errorScreen({ planName: plans[planId].name, retryHref: orderPath(token) }), 503);
+    return c.html(errorScreen({ devBar: devBarFor(c), planName: plans[planId].name, retryHref: orderPath(token) }), 503);
   };
 
   app.get('/pedido/:token', async (c) => {
-    if (!orders) return c.html(pausedScreen());
+    if (!orders) return c.html(pausedScreen({ devBar: devBarFor(c) }));
     const token = c.req.param('token');
     let order;
     try {
@@ -170,26 +184,26 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     const plan = plans[order.planId];
 
     const cenario = scenario(c);
-    if (cenario === 'vencido') return c.html(expiredScreen({ order, plan }));
-    if (cenario === 'pendente') return c.html(pendingScreen({ order }));
+    if (cenario === 'vencido') return c.html(expiredScreen({ devBar: devBarFor(c, { orderToken: token }), order, plan }));
+    if (cenario === 'pendente') return c.html(pendingScreen({ devBar: devBarFor(c, { orderToken: token }), order }));
 
     switch (order.status) {
       case 'delivered':
-        return c.html(deliveredScreen({ order, plan, appStoreId: config.appStoreId }));
+        return c.html(deliveredScreen({ devBar: devBarFor(c, { orderToken: token }), order, plan, appStoreId: config.appStoreId }));
       case 'pending':
-        return c.html(pendingScreen({ order }));
+        return c.html(pendingScreen({ devBar: devBarFor(c, { orderToken: token }), order }));
       case 'expired':
-        return c.html(expiredScreen({ order, plan }));
+        return c.html(expiredScreen({ devBar: devBarFor(c, { orderToken: token }), order, plan }));
       default: {
         // SVG do QR é decorativo para leitor de tela: o rótulo fica no contêiner role=img.
         const qrSvg = renderSVG(order.copiaECola, { border: 2 }).replace('<svg ', '<svg aria-hidden="true" focusable="false" ');
-        return c.html(payingScreen({ order, qrSvg, nowMs: now() }));
+        return c.html(payingScreen({ devBar: devBarFor(c, { orderToken: token, payToken: token }), order, qrSvg, nowMs: now() }));
       }
     }
   });
 
   app.get('/pedido/:token/ajuda', async (c) => {
-    if (!orders) return c.html(pausedScreen());
+    if (!orders) return c.html(pausedScreen({ devBar: devBarFor(c) }));
     const token = c.req.param('token');
     let order;
     try {
@@ -198,7 +212,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
       return orderError(c, token);
     }
     if (!order) return notFound(c);
-    return c.html(helpScreen({ supportUrl: config.supportUrl, backHref: orderPath(token) }));
+    return c.html(helpScreen({ devBar: devBarFor(c), supportUrl: config.supportUrl, backHref: orderPath(token) }));
   });
 
   app.get('/pedido/:token/status', async (c) => {
@@ -215,7 +229,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
   });
 
   app.post('/pedido/:token/renovar', async (c) => {
-    if (salesPaused() || !orders) return c.html(pausedScreen());
+    if (salesPaused() || !orders) return c.html(pausedScreen({ devBar: devBarFor(c) }));
     const token = c.req.param('token');
     let result;
     try {
@@ -227,33 +241,78 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     if (result.reason === 'not_found') return notFound(c);
     const order = stores.orders.get(token);
     if (result.reason === 'pix_unavailable') {
-      return c.html(errorScreen({ planName: plans[order.planId].name, retryHref: orderPath(token) }), 503);
+      return c.html(errorScreen({ devBar: devBarFor(c), planName: plans[order.planId].name, retryHref: orderPath(token) }), 503);
     }
     return refusal(c, result.reason, { planId: order.planId, email: order.email });
   });
 
   // Teste grátis: não depende do Pix, só das lojas. A chave do aparelho é o dc_ler.
   app.get('/teste', (c) => {
-    if (!stores || !config.salesEnabled) return c.html(pausedScreen());
+    if (!stores || !config.salesEnabled) return c.html(pausedScreen({ devBar: devBarFor(c) }));
     const session = trialSession((k) => c.req.query(k));
-    if (!session || scenario(c) === 'teste-usado' || stores.trials.used(session.dcLer)) return c.html(trialUsedScreen());
-    return c.html(trialRequestScreen({ ...session, backHref: trialHref(session).replace('/teste?', '?') }));
+    if (!session || scenario(c) === 'teste-usado' || stores.trials.used(session.dcLer)) return c.html(trialUsedScreen({ devBar: devBarFor(c) }));
+    return c.html(trialRequestScreen({ devBar: devBarFor(c), ...session, backHref: trialHref(session).replace('/teste?', '?') }));
   });
 
   app.post('/teste', async (c) => {
-    if (!stores || !config.salesEnabled) return c.html(pausedScreen());
+    if (!stores || !config.salesEnabled) return c.html(pausedScreen({ devBar: devBarFor(c) }));
     const form = await c.req.parseBody();
     const session = trialSession((k) => form[k]);
-    if (!session || stores.trials.used(session.dcLer)) return c.html(trialUsedScreen());
+    if (!session || stores.trials.used(session.dcLer)) return c.html(trialUsedScreen({ devBar: devBarFor(c) }));
     const rawEmail = (typeof form.email === 'string' ? form.email : '').trim().slice(0, MAX_EMAIL);
     const backHref = trialHref(session).replace('/teste?', '?');
     const email = normalizeEmail(rawEmail);
-    if (!email) return c.html(trialRequestScreen({ ...session, email: rawEmail, error: true, backHref }));
+    if (!email) return c.html(trialRequestScreen({ devBar: devBarFor(c), ...session, email: rawEmail, error: true, backHref }));
     const code = stores.codes.claim(`trial:${session.dcLer}`, 'teste', email);
-    if (!code) return c.html(trialStockScreen());
+    if (!code) return c.html(trialStockScreen({ devBar: devBarFor(c) }));
     stores.trials.mark(session.dcLer);
-    return c.html(trialDeliveredScreen({ code, email, appStoreId: config.appStoreId }));
+    return c.html(trialDeliveredScreen({ devBar: devBarFor(c), code, email, appStoreId: config.appStoreId }));
   });
+
+  // Ferramentas de simulação: só existem com devTools; sem ele, 404 normal.
+  if (config.devTools) {
+    const SAMPLE = { planId: 'anual', email: 'motorista@email.com' };
+    const TRIAL = '/pix/teste?teste=1&dc_ler=dev-ler&dc_marcar=dev-marcar';
+    const li = (href, label) => html`<li><a href="${href}">${label}</a></li>`;
+
+    app.get('/dev', (c) => c.html(html`<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${dev.title}</title></head>
+<body><main class="stack">
+<h1>${dev.title}</h1>
+<h2>${dev.choose}</h2>
+<ul>${li('/pix', dev.choose)}${li('/pix?plano=mensal', dev.chooseMonthly)}</ul>
+<h2>${dev.scenarios}</h2>
+<ul>${['sem-estoque', 'indisponivel-email', 'pausado', 'fora-do-ar'].map((n) => li(`/pix?cenario=${n}`, n))}</ul>
+<h2>${dev.trial}</h2>
+<ul>${li(TRIAL, dev.trialRequest)}${li(`${TRIAL}&cenario=teste-usado`, `${dev.trialUsed} (teste-usado)`)}</ul>
+<h2>${dev.orders}</h2>
+<form method="post" action="/pix/dev/pedido-exemplo"><button class="btn btn-secondary" type="submit">${dev.createOrder}</button></form>
+<h2>${dev.orderScenarios}</h2>
+<p class="note">${dev.orderHint}</p>
+<ul><li>vencido</li><li>pendente</li></ul>
+</main></body></html>`));
+
+    app.post('/dev/pedido-exemplo', async (c) => {
+      if (!orders) return c.notFound();
+      let result;
+      try {
+        result = await orders.create(SAMPLE);
+      } catch {
+        return c.text('Pix indisponível', 503);
+      }
+      if (!result.ok) return c.text(`Recusado: ${result.reason}`, 409);
+      return c.redirect(orderPath(result.order.token), 303);
+    });
+
+    app.post('/dev/pedido/:token/pagar', async (c) => {
+      if (!orders || typeof provider.markPaid !== 'function') return c.notFound();
+      const token = c.req.param('token');
+      const order = stores.orders.get(token);
+      if (!order) return c.notFound();
+      provider.markPaid(order.txids.at(-1));
+      return c.redirect(orderPath(token), 303);
+    });
+  }
 
   return app;
 }

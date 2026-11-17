@@ -1,5 +1,5 @@
 import { html, raw } from 'hono/html';
-import { copy, links } from './copy.pt-BR.js';
+import { copy, links, dev } from './copy.pt-BR.js';
 import { PLANS } from '../plans.js';
 
 // Sem JS, o resumo do plano acompanha o rádio marcado via :has().
@@ -99,6 +99,11 @@ a{color:var(--info-text)}
 .toast{min-height:1.4em;text-align:center;color:var(--success-text);font-weight:600}
 footer{width:100%;max-width:30rem;margin:1.5rem auto 0;text-align:center;font-size:.8125rem;color:var(--label2)}
 footer a{display:inline-block;padding:.75rem .25rem;min-height:44px;color:var(--info-text)}
+body:has(.devbar){padding-bottom:calc(3.25rem + env(safe-area-inset-bottom))}
+.devbar{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.25rem .75rem;padding:.375rem 1rem calc(.375rem + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--card-border);font-size:.75rem;color:var(--label2)}
+.devbar a{color:var(--info-text)}
+.devbar form{margin:0}
+.devbar button{min-height:32px;padding:0 .75rem;border:1px solid var(--field-border);border-radius:999px;background:none;color:var(--info-text);font:inherit;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 `;
 
@@ -138,4 +143,15 @@ ${body}
 ${devBar ?? ''}
 </body>
 </html>`;
+}
+
+// Barra de simulação (só com devTools). `payAction`: form "Simular pagamento";
+// `links`: [{label, href}] extras (cenários do pedido).
+export function devBarView({ payAction, links: extra = [] } = {}) {
+  return html`<aside class="devbar" aria-label="${dev.label}">
+<strong>${dev.label}</strong>
+<a href="/pix/dev">${dev.catalog}</a>
+${extra.map((l) => html`<a href="${l.href}">${l.label}</a>`)}
+${payAction ? html`<form method="post" action="${payAction}"><button type="submit">${dev.pay}</button></form>` : ''}
+</aside>`;
 }

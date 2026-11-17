@@ -111,6 +111,24 @@ export const copy = {
   },
 };
 
+// Só aparece com as ferramentas de simulação ligadas; não é texto para o cliente.
+export const dev = {
+  label: 'Simulação',
+  catalog: 'Catálogo',
+  pay: 'Simular pagamento',
+  title: 'Simulação (só desenvolvimento)',
+  choose: 'Escolha de plano',
+  chooseMonthly: 'Escolha com plano mensal',
+  scenarios: 'Cenários da escolha',
+  orderScenarios: 'Cenários do pedido',
+  orderHint: 'Abra qualquer página de pedido e acrescente ?cenario= com o nome abaixo (ou use os links da barra).',
+  trial: 'Teste grátis',
+  trialRequest: 'Teste grátis (pedir código)',
+  trialUsed: 'Teste grátis já usado',
+  createOrder: 'Criar pedido de exemplo (plano anual)',
+  orders: 'Pedidos',
+};
+
 export const links = {
   terms: 'https://corridex.app/terms',
   privacy: 'https://corridex.app/privacy',
