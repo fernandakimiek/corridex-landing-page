@@ -90,7 +90,8 @@ a{color:var(--info-text)}
 .notice>.btn{grid-column:1/-1;margin-top:.75rem}
 .code{display:block;padding:1rem;border-radius:16px;background:var(--surface);font:600 1.25rem/1.3 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.08em;font-variant-numeric:tabular-nums;text-align:center;word-break:break-all}
 .pixcode{width:100%;padding:.5rem;border:1px solid var(--field-border);border-radius:10px;background:var(--surface);color:var(--label2);font:.8125rem ui-monospace,Menlo,monospace;resize:none}
-.qr{width:108px;height:108px;margin:0 auto;padding:6px;background:#FFF;border-radius:8px}
+/* QR legível por outro celular: até 13rem, quadrado, fundo branco mesmo no tema escuro */
+.qr{width:min(13rem,70vw);aspect-ratio:1;margin:0 auto;padding:6px;background:#FFF;border-radius:8px}
 .qr svg{display:block;width:100%;height:100%}
 .status{display:flex;align-items:center;justify-content:center;gap:.5rem;font-weight:600}
 .spin{width:1rem;height:1rem;border:2px solid var(--fill);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}

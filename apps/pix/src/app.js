@@ -50,19 +50,25 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     return null;
   }
 
-  // Link do teste grátis: só quando o app manda teste=1 e os dois tokens.
-  function trialHref(c) {
-    const dcLer = c.req.query('dc_ler');
-    const dcMarcar = c.req.query('dc_marcar');
-    if (c.req.query('teste') !== '1' || !dcLer || !dcMarcar) return null;
-    return `/pix/teste?teste=1&dc_ler=${encodeURIComponent(dcLer)}&dc_marcar=${encodeURIComponent(dcMarcar)}`;
+  // Sessão do teste grátis: só quando o app manda teste=1 e os dois tokens.
+  // `read(nome)` lê da query (GET) ou do formulário (POST, campos ocultos).
+  function trialSession(read) {
+    const str = (v) => (typeof v === 'string' ? v : '');
+    const dcLer = str(read('dc_ler'));
+    const dcMarcar = str(read('dc_marcar'));
+    if (str(read('teste')) !== '1' || !dcLer || !dcMarcar) return null;
+    return { dcLer, dcMarcar };
   }
+  const trialHref = (trial) => (trial
+    ? `/pix/teste?teste=1&dc_ler=${encodeURIComponent(trial.dcLer)}&dc_marcar=${encodeURIComponent(trial.dcMarcar)}`
+    : null);
 
   app.get('/health', (c) => c.json({ ok: true }));
 
   // Tela de escolha. `outOfStock` marca o plano como sem estoque (cenário ou pedido
   // recusado); `customerUnavailable`, indisponível para este e-mail.
-  function chooseView(c, { selectedPlanId, email = '', outOfStock, customerUnavailable, emailError }) {
+  function chooseView(c, { selectedPlanId, email = '', outOfStock, customerUnavailable, emailError, trial }) {
+    const session = trial === undefined ? trialSession((k) => c.req.query(k)) : trial;
     const selected = plans[selectedPlanId];
     // Disponibilidade geral; a checagem por e-mail acontece no POST.
     const unavailablePlanIds = planIds().filter((id) => stores.codes.availability(id, '') === 'out_of_stock');
@@ -88,7 +94,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     }
 
     return c.html(chooseScreen({
-      plans, selectedPlanId, email, notice, unavailablePlanIds, trialHref: trialHref(c), state, emailError,
+      plans, selectedPlanId, email, notice, unavailablePlanIds, trialHref: trialHref(session), trialSession: session, state, emailError,
     }));
   }
 
@@ -116,11 +122,12 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     : null;
 
   // Recusa do serviço → tela. Estoque e e-mail voltam à escolha com o aviso.
-  function refusal(c, reason, { planId, email }) {
-    if (reason === 'invalid_email') return chooseView(c, { selectedPlanId: planId, email, emailError: true });
-    if (reason === 'plan_out_of_stock') return chooseView(c, { selectedPlanId: planId, email, outOfStock: true });
-    if (reason === 'unavailable_for_customer') return chooseView(c, { selectedPlanId: planId, email, customerUnavailable: true });
-    if (reason === 'invalid_plan') return chooseView(c, { selectedPlanId: DEFAULT_PLAN_ID, email });
+  function refusal(c, reason, { planId, email, trial = null }) {
+    const base = { selectedPlanId: planId, email, trial };
+    if (reason === 'invalid_email') return chooseView(c, { ...base, emailError: true });
+    if (reason === 'plan_out_of_stock') return chooseView(c, { ...base, outOfStock: true });
+    if (reason === 'unavailable_for_customer') return chooseView(c, { ...base, customerUnavailable: true });
+    if (reason === 'invalid_plan') return chooseView(c, { ...base, selectedPlanId: DEFAULT_PLAN_ID });
     return c.html(errorScreen({ planName: plans[planId].name, retryHref: choosePath(planId, email) }), 503);
   }
 
@@ -129,7 +136,8 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     const form = await c.req.parseBody();
     const rawPlan = typeof form.plano === 'string' ? form.plano : '';
     const email = (typeof form.email === 'string' ? form.email : '').trim().slice(0, MAX_EMAIL);
-    if (!Object.hasOwn(plans, rawPlan)) return chooseView(c, { selectedPlanId: DEFAULT_PLAN_ID, email });
+    const trial = trialSession((k) => form[k]);
+    if (!Object.hasOwn(plans, rawPlan)) return chooseView(c, { selectedPlanId: DEFAULT_PLAN_ID, email, trial });
 
     let result;
     try {
@@ -137,7 +145,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     } catch {
       result = { ok: false, reason: 'pix_unavailable' };
     }
-    if (!result.ok) return refusal(c, result.reason, { planId: rawPlan, email });
+    if (!result.ok) return refusal(c, result.reason, { planId: rawPlan, email, trial });
     return c.redirect(orderPath(result.order.token), 303);
   });
 
@@ -193,7 +201,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
   });
 
   app.post('/pedido/:token/renovar', async (c) => {
-    if (salesPaused()) return c.html(pausedScreen());
+    if (salesPaused() || !orders) return c.html(pausedScreen());
     const token = c.req.param('token');
     let result;
     try {

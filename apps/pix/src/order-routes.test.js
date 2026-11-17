@@ -110,6 +110,7 @@ test('vencido: "Este Pix venceu", form renovar, sem campo de e-mail', async () =
   assert.equal(doc.querySelector('h1').textContent, 'Corridex Anual');
   assert.match(text(doc), /Este Pix venceu/);
   assert.match(text(doc), /Se você já pagou, espere/);
+  assert.equal(doc.querySelector('.hero-ic'), null); // só o ícone do aviso
   const form = doc.querySelector(`form[action="${location}/renovar"]`);
   assert.ok(form);
   assert.equal(form.getAttribute('method'), 'post');
@@ -152,6 +153,7 @@ test('renovar sem código disponível → escolha com aviso de estoque e e-mail'
   assert.equal(doc.querySelector('main').dataset.state, 'plan_out_of_stock');
   assert.match(text(doc), /O Anual está indisponível no Pix agora/);
   assert.ok([...doc.querySelectorAll('a')].some((a) => a.getAttribute('href').includes(`email=${encodeURIComponent(EMAIL)}`)));
+  assert.equal(doc.querySelector('input[type=email]').value, EMAIL);
 });
 
 test('pending: "Seu código está a caminho"', async () => {
@@ -187,11 +189,14 @@ test('token inexistente → 404 com página amigável; /status → 404 JSON', as
   const ctx = setup();
   const res = await ctx.app.request('/pix/pedido/naoexiste');
   assert.equal(res.status, 404);
+  assert.equal(res.headers.get('referrer-policy'), 'no-referrer');
+  assert.equal(res.headers.get('x-robots-tag'), 'noindex');
   const doc = await dom(res);
   assert.equal(doc.querySelector('h1').textContent, 'Pedido não encontrado');
   assert.match(text(doc), /Confira o link do e-mail ou gere um novo Pix\./);
   const back = doc.querySelector('main a.btn-primary');
   assert.equal(back.getAttribute('href'), '/pix');
+  assert.equal(back.textContent.trim(), 'Ver planos');
   const status = await ctx.app.request('/pix/pedido/naoexiste/status');
   assert.equal(status.status, 404);
   assert.deepEqual(await status.json(), { error: 'not_found' });
@@ -269,6 +274,8 @@ test('falha ao consultar o Pix → 503 (página e status), nunca 500', async () 
   ctx.provider.getCharge = async () => { throw new Error('fora'); };
   const res = await ctx.app.request(location);
   assert.equal(res.status, 503);
+  assert.equal(res.headers.get('referrer-policy'), 'no-referrer');
+  assert.equal(res.headers.get('x-robots-tag'), 'noindex');
   const doc = await dom(res);
   assert.equal(doc.querySelector('main').dataset.state, 'error');
   assert.equal(doc.querySelector('h1').textContent, 'Corridex Anual');
@@ -310,4 +317,37 @@ test('páginas do pedido sem palavras proibidas', async () => {
     const body = text(await dom(res));
     for (const word of [/token/i, /oferta/i, /geração/i, /Apple ID/i, /webhook/i]) assert.doesNotMatch(body, word);
   }
+});
+
+test('e-mail inválido com sessão de teste grátis mantém o link do teste', async () => {
+  const ctx = setup();
+  const res = await post(ctx.app, '/pix/pedidos', {
+    plano: 'anual', email: 'sem-arroba', teste: '1', dc_ler: 'a b', dc_marcar: 'x&y',
+  });
+  assert.equal(res.status, 200);
+  const doc = await dom(res);
+  const link = doc.querySelector('a[href^="/pix/teste"]');
+  assert.ok(link);
+  assert.equal(link.getAttribute('href'), '/pix/teste?teste=1&dc_ler=a%20b&dc_marcar=x%26y');
+  // E os campos ocultos continuam no formulário para o próximo envio.
+  const form = doc.querySelector('form[action="/pix/pedidos"]');
+  assert.equal(form.querySelector('input[name=dc_ler]').value, 'a b');
+  assert.equal(form.querySelector('input[name=dc_marcar]').value, 'x&y');
+  assert.equal(form.querySelector('input[name=teste]').value, '1');
+});
+
+test('escolha via GET com sessão de teste leva os campos ocultos no formulário', async () => {
+  const doc = await dom(await setup().app.request('/pix?teste=1&dc_ler=abc&dc_marcar=def'));
+  const form = doc.querySelector('form[action="/pix/pedidos"]');
+  assert.equal(form.querySelector('input[name=dc_ler]').value, 'abc');
+  assert.equal(form.querySelector('input[name=dc_marcar]').value, 'def');
+  const plain = await dom(await setup().app.request('/pix'));
+  assert.equal(plain.querySelector('form[action="/pix/pedidos"] input[name=dc_ler]'), null);
+});
+
+test('renovar sem provedor configurado → venda pausada, sem erro', async () => {
+  const ctx = setup({ provider: null });
+  const res = await post(ctx.app, '/pix/pedido/qualquer/renovar');
+  assert.equal(res.status, 200);
+  assert.equal((await dom(res)).querySelector('main').dataset.state, 'sales_paused');
 });

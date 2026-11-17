@@ -99,6 +99,7 @@ export const copy = {
   notFound: {
     title: 'Pedido não encontrado',
     body: 'Confira o link do e-mail ou gere um novo Pix.',
+    cta: 'Ver planos',
   },
   // Handoff: "Pagamento pelo Banco Inter · Termos · Privacidade · Ajuda"
   footer: {

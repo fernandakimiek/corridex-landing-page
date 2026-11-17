@@ -21,7 +21,7 @@ export function choosePath(planId, email) {
 // Com `notice` não há botão "Gerar Pix": os planos viram links para ?plano=<id>
 // (a página continua utilizável sem JS) e o aviso traz "Ver {outro plano}".
 export function chooseScreen({
-  plans, selectedPlanId, email = '', notice, unavailablePlanIds = [], trialHref, emailError,
+  plans, selectedPlanId, email = '', notice, unavailablePlanIds = [], trialHref, trialSession, emailError,
   state = 'choose', devBar,
 }) {
   const selected = plans[selectedPlanId];
@@ -29,7 +29,8 @@ export function chooseScreen({
 
   if (notice) {
     // Trocar o e-mail recarrega a escolha deste plano (GET), sem gerar Pix.
-    const emailForm = state === 'unavailable_for_customer'
+    // Sem estoque, o campo só aparece se já há e-mail (ex.: pedido vencido que não renovou).
+    const emailForm = state === 'unavailable_for_customer' || (state === 'plan_out_of_stock' && email)
       ? html`<form method="get" action="/pix"><input type="hidden" name="plano" value="${selectedPlanId}">${EmailField({ value: email, error: emailError })}</form>`
       : '';
     const body = html`${Brand()}
@@ -49,12 +50,19 @@ ${trial}`;
   const body = html`${Brand()}
 ${summaries}
 <form class="stack" method="post" action="/pix/pedidos" novalidate>
+${TrialFields(trialSession)}
 ${PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds })}
 ${EmailField({ value: email, error: emailError })}
 ${SubmitButton({ label: copy.pix.cta })}
 </form>
 ${trial}`;
   return page({ title: planTitle(selected), body, state, devBar });
+}
+
+// Sessão do teste grátis em campos ocultos: se o POST voltar à escolha, o link continua.
+function TrialFields(trial) {
+  if (!trial) return '';
+  return html`<input type="hidden" name="teste" value="1"><input type="hidden" name="dc_ler" value="${trial.dcLer}"><input type="hidden" name="dc_marcar" value="${trial.dcMarcar}">`;
 }
 
 // Venda pausada (PIX_SALES_ENABLED=false, sem provedor ou cenário "pausado").
@@ -127,8 +135,7 @@ ${Notice({ tone: 'info', title: copy.pending.title, body: copy.pending.body })}
 export function expiredScreen({ order, plan, devBar }) {
   const path = orderPath(order.token);
   const title = planTitle(plan);
-  const body = html`${StateIcon({ tone: 'warning' })}
-<h1 class="center">${title}</h1>
+  const body = html`<h1 class="center">${title}</h1>
 ${Notice({ tone: 'warning', title: copy.expired.title, body: copy.expired.body })}
 <form class="stack" method="post" action="${path}/renovar">
 ${SubmitButton({ label: copy.expired.cta })}
@@ -141,6 +148,6 @@ ${SubmitButton({ label: copy.expired.cta })}
 export function notFoundScreen({ devBar } = {}) {
   const body = html`${StateIcon({ tone: 'error' })}
 <div class="stack center"><h1>${copy.notFound.title}</h1><p>${copy.notFound.body}</p></div>
-${LinkButton({ label: copy.pix.cta, href: '/pix' })}`;
+${LinkButton({ label: copy.notFound.cta, href: '/pix' })}`;
   return page({ title: copy.notFound.title, body, state: 'not_found', devBar });
 }
