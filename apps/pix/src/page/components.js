@@ -173,13 +173,14 @@ ${backHref ? LinkButton({ label: copy.help.back, href: backHref, variant: 'plain
 }
 
 // Pedido do teste grátis: tokens do app em campos ocultos.
-export function TrialRequest({ dcLer, dcMarcar, email = '', error, action = '/pix/teste' }) {
+export function TrialRequest({ dcLer, dcMarcar, email = '', error, action = '/pix/teste', backHref = '/pix' }) {
   return html`<form class="stack" method="post" action="${action}">
+<input type="hidden" name="teste" value="1">
 <input type="hidden" name="dc_ler" value="${dcLer}">
 <input type="hidden" name="dc_marcar" value="${dcMarcar}">
 ${EmailField({ value: email, error })}
 ${SubmitButton({ label: copy.trial.cta })}
 <p class="note center">${copy.trial.help}</p>
 </form>
-${LinkButton({ label: copy.trial.back, href: '/pix', variant: 'plain' })}`;
+${LinkButton({ label: copy.trial.back, href: backHref, variant: 'plain' })}`;
 }

@@ -4,7 +4,7 @@ import { page } from './layout.js';
 import { brl, maskEmail, dateBR } from './format.js';
 import {
   Brand, PlanSwitcher, PlanSummary, EmailField, Notice, SubmitButton, LinkButton, planTitle,
-  StateIcon, PixPayment, PaymentStatus, CodeDelivery, CodeHelp,
+  StateIcon, PixPayment, PaymentStatus, CodeDelivery, CodeHelp, TrialRequest,
 } from './components.js';
 
 // Telas completas (página inteira). Cada uma aceita `devBar` (Task 9) e repassa ao layout.
@@ -157,4 +157,37 @@ export function notFoundScreen({ devBar } = {}) {
 <div class="stack center"><h1>${copy.notFound.title}</h1><p>${copy.notFound.body}</p></div>
 ${LinkButton({ label: copy.notFound.cta, href: '/pix' })}`;
   return page({ title: copy.notFound.title, body, state: 'not_found', devBar });
+}
+
+// Teste grátis: pedido do e-mail. Os tokens do app seguem em campos ocultos.
+export function trialRequestScreen({ dcLer, dcMarcar, email = '', error, backHref = '/pix', devBar }) {
+  const body = html`<div class="stack"><h1>${copy.trial.title}</h1><p>${copy.trial.sub}</p></div>
+${TrialRequest({ dcLer, dcMarcar, email, error, backHref })}`;
+  return page({ title: copy.trial.title, body, state: 'trial', devBar });
+}
+
+// Mesma mensagem para qualquer motivo (sem token, aparelho já usado).
+export function trialUsedScreen({ devBar } = {}) {
+  const body = html`${Brand()}
+${Notice({ tone: 'info', title: copy.trial.used, body: copy.trial.usedBody, heading: 'h1' })}
+${LinkButton({ label: copy.trial.seePlans, href: '/pix' })}`;
+  return page({ title: copy.trial.used, body, state: 'trial_used', devBar });
+}
+
+// Teste liberado: reusa a entrega do código (sem pedido, então sem link de ajuda).
+export function trialDeliveredScreen({ code, email, appStoreId, devBar }) {
+  const body = html`${StateIcon({ tone: 'success' })}
+<div class="stack center"><h1>${copy.trial.delivered}</h1><p>${copy.trial.after}</p></div>
+${CodeDelivery({ code, email, appStoreId })}`;
+  return page({ title: copy.trial.delivered, body, state: 'trial_delivered', devBar });
+}
+
+// Teste sem código em estoque.
+export function trialStockScreen({ devBar } = {}) {
+  const body = html`${Brand()}
+${Notice({
+    tone: 'warning', title: t(copy.stock.title, { plano: copy.trial.planName }), body: copy.stock.body, heading: 'h1',
+  })}
+${LinkButton({ label: copy.trial.seePlans, href: '/pix' })}`;
+  return page({ title: copy.trial.planName, body, state: 'trial_out_of_stock', devBar });
 }

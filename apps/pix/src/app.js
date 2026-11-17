@@ -2,10 +2,11 @@ import { Hono } from 'hono';
 import { PLANS, DEFAULT_PLAN_ID } from './plans.js';
 import { copy, t } from './page/copy.pt-BR.js';
 import { renderSVG } from 'uqr';
-import { createOrderService } from './orders.js';
+import { createOrderService, normalizeEmail } from './orders.js';
 import {
   chooseScreen, pausedScreen, errorScreen, choosePath, orderPath,
   payingScreen, deliveredScreen, pendingScreen, expiredScreen, notFoundScreen, helpScreen,
+  trialRequestScreen, trialUsedScreen, trialDeliveredScreen, trialStockScreen,
 } from './page/screens.js';
 
 // Tamanho máximo de um endereço de e-mail (RFC 5321); corta o ?email= pré-preenchido.
@@ -229,6 +230,29 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
       return c.html(errorScreen({ planName: plans[order.planId].name, retryHref: orderPath(token) }), 503);
     }
     return refusal(c, result.reason, { planId: order.planId, email: order.email });
+  });
+
+  // Teste grátis: não depende do Pix, só das lojas. A chave do aparelho é o dc_ler.
+  app.get('/teste', (c) => {
+    if (!stores || !config.salesEnabled) return c.html(pausedScreen());
+    const session = trialSession((k) => c.req.query(k));
+    if (!session || scenario(c) === 'teste-usado' || stores.trials.used(session.dcLer)) return c.html(trialUsedScreen());
+    return c.html(trialRequestScreen({ ...session, backHref: trialHref(session).replace('/teste?', '?') }));
+  });
+
+  app.post('/teste', async (c) => {
+    if (!stores || !config.salesEnabled) return c.html(pausedScreen());
+    const form = await c.req.parseBody();
+    const session = trialSession((k) => form[k]);
+    if (!session || stores.trials.used(session.dcLer)) return c.html(trialUsedScreen());
+    const rawEmail = (typeof form.email === 'string' ? form.email : '').trim().slice(0, MAX_EMAIL);
+    const backHref = trialHref(session).replace('/teste?', '?');
+    const email = normalizeEmail(rawEmail);
+    if (!email) return c.html(trialRequestScreen({ ...session, email: rawEmail, error: true, backHref }));
+    const code = stores.codes.claim(`trial:${session.dcLer}`, 'teste', email);
+    if (!code) return c.html(trialStockScreen());
+    stores.trials.mark(session.dcLer);
+    return c.html(trialDeliveredScreen({ code, email, appStoreId: config.appStoreId }));
   });
 
   return app;
