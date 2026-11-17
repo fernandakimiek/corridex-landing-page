@@ -5,3 +5,7 @@ compatibility_date = "2026-11-01"
 # Segredos (nunca no repositório):
 #   npx wrangler secret put NOME
 # Em desenvolvimento, use apps/pix/.dev.vars (ignorado pelo git).
+
+# Arquivos estáticos (pix.js em /pix/assets/). Servidos antes do worker.
+[assets]
+directory = "./public"

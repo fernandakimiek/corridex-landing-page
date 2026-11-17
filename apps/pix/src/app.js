@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { html } from 'hono/html';
 import { PLANS, DEFAULT_PLAN_ID } from './plans.js';
 import { copy, t, dev } from './page/copy.pt-BR.js';
-import { devBarView } from './page/layout.js';
+import { devBarView, page } from './page/layout.js';
 import { renderSVG } from 'uqr';
 import { createOrderService, normalizeEmail } from './orders.js';
 import {
@@ -275,22 +275,18 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     const TRIAL = '/pix/teste?teste=1&dc_ler=dev-ler&dc_marcar=dev-marcar';
     const li = (href, label) => html`<li><a href="${href}">${label}</a></li>`;
 
-    app.get('/dev', (c) => c.html(html`<!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${dev.title}</title></head>
-<body><main class="stack">
-<h1>${dev.title}</h1>
-<h2>${dev.choose}</h2>
-<ul>${li('/pix', dev.choose)}${li('/pix?plano=mensal', dev.chooseMonthly)}</ul>
-<h2>${dev.scenarios}</h2>
-<ul>${['sem-estoque', 'indisponivel-email', 'pausado', 'fora-do-ar'].map((n) => li(`/pix?cenario=${n}`, n))}</ul>
-<h2>${dev.trial}</h2>
-<ul>${li(TRIAL, dev.trialRequest)}${li(`${TRIAL}&cenario=teste-usado`, `${dev.trialUsed} (teste-usado)`)}</ul>
-<h2>${dev.orders}</h2>
-<form method="post" action="/pix/dev/pedido-exemplo"><button class="btn btn-secondary" type="submit">${dev.createOrder}</button></form>
-<h2>${dev.orderScenarios}</h2>
-<p class="note">${dev.orderHint}</p>
-<ul><li>vencido</li><li>pendente</li></ul>
-</main></body></html>`));
+    // Catálogo no mesmo layout das telas (legível no celular).
+    const section = (title, items) => html`<section class="card stack"><h2>${title}</h2>${items}</section>`;
+    app.get('/dev', (c) => c.html(page({
+      title: dev.label,
+      state: 'dev',
+      body: html`<h1>${dev.title}</h1>
+${section(dev.choose, html`<ul>${li('/pix', dev.choose)}${li('/pix?plano=mensal', dev.chooseMonthly)}</ul>`)}
+${section(dev.scenarios, html`<ul>${['sem-estoque', 'indisponivel-email', 'pausado', 'fora-do-ar'].map((n) => li(`/pix?cenario=${n}`, n))}</ul>`)}
+${section(dev.trial, html`<ul>${li(TRIAL, dev.trialRequest)}${li(`${TRIAL}&cenario=teste-usado`, `${dev.trialUsed} (teste-usado)`)}</ul>`)}
+${section(dev.orders, html`<form method="post" action="/pix/dev/pedido-exemplo"><button class="btn btn-primary" type="submit">${dev.createOrder}</button></form>`)}
+${section(dev.orderScenarios, html`<p class="note">${dev.orderHint}</p><ul><li>vencido</li><li>pendente</li></ul>`)}`,
+    })));
 
     app.post('/dev/pedido-exemplo', async (c) => {
       if (!orders) return c.notFound();
