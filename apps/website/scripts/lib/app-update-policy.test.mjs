@@ -27,10 +27,12 @@ function policy(rules) {
 }
 
 describe('arquivos publicados e exemplos', () => {
-  it('aceita app-update/v1.json sem regras', () => {
+  // O conteúdo de rules muda a cada PR de política; aqui só importa que o
+  // arquivo publicado seja válido. Exemplos sem regras: r9-vazio.json.
+  it('aceita o app-update/v1.json publicado', () => {
     const { doc, byteLength } = loadJson('app-update/v1.json');
     assert.equal(doc.schemaVersion, 1);
-    assert.deepEqual(doc.rules, []);
+    assert.ok(Array.isArray(doc.rules));
     assert.deepEqual(validatePolicy(doc, { byteLength }), []);
   });
 

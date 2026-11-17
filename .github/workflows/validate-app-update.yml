@@ -25,7 +25,7 @@ jobs:
           head="${{ github.event.pull_request.head.sha }}"
           files="$(git diff --name-only "$base" "$head")"
           printf '%s\n' "$files"
-          pattern='^(app-update/|schemas/app-update-|scripts/validate-app-update|scripts/lib/app-update-policy|\.github/workflows/validate-app-update\.yml)'
+          pattern='^(apps/website/app-update/|apps/website/schemas/app-update-|apps/website/scripts/validate-app-update|apps/website/scripts/lib/app-update-policy|\.github/workflows/validate-app-update\.yml)'
           if printf '%s\n' "$files" | grep -Eq "$pattern"; then
             echo "relevant=true" >> "$GITHUB_OUTPUT"
           else
@@ -45,8 +45,8 @@ jobs:
 
       - name: Testes
         if: steps.policy.outputs.relevant == 'true'
-        run: npm test
+        run: npm test -w apps/website
 
       - name: Validar contra a App Store
         if: steps.policy.outputs.relevant == 'true'
-        run: node scripts/validate-app-update.mjs --check-app-store
+        run: npm run validate:app-update:store -w apps/website
