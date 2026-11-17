@@ -1,15 +1,23 @@
 // Lojas em memória (pedidos, códigos, testes grátis). Estado vive só enquanto o processo vive.
 export function createMemoryStores({ codes: seed }) {
   const orders = new Map();
-  const slots = seed.map((code) => ({ code: { ...code }, state: 'free', holderId: null }));
+  const slots = seed.map((code) => ({ code: { ...code }, state: 'free', holderId: null, email: null }));
   const received = new Map(); // email -> Set<offerId>
   const trialKeys = new Set();
 
   const receivedBy = (email) => received.get(email) ?? new Set();
   const forHolder = (holderId) => slots.find((s) => s.holderId === holderId && s.state !== 'free');
-  const takeFree = (planId, email) => {
-    const seen = receivedBy(email);
-    return slots.find((s) => s.state === 'free' && s.code.planId === planId && !seen.has(s.code.offerId));
+  // Ofertas que o e-mail não pode receber: já recebidas ou já reservadas para ele por outro holder.
+  const blockedOffers = (email, holderId) => {
+    const blocked = new Set(receivedBy(email));
+    for (const s of slots) {
+      if (s.state === 'reserved' && s.email === email && s.holderId !== holderId) blocked.add(s.code.offerId);
+    }
+    return blocked;
+  };
+  const takeFree = (planId, email, holderId) => {
+    const blocked = blockedOffers(email, holderId);
+    return slots.find((s) => s.state === 'free' && s.code.planId === planId && !blocked.has(s.code.offerId));
   };
 
   return {
@@ -43,10 +51,11 @@ export function createMemoryStores({ codes: seed }) {
       reserve(planId, email, holderId) {
         const existing = forHolder(holderId);
         if (existing) return existing.code;
-        const slot = takeFree(planId, email);
+        const slot = takeFree(planId, email, holderId);
         if (!slot) return null;
         slot.state = 'reserved';
         slot.holderId = holderId;
+        slot.email = email;
         return slot.code;
       },
       release(holderId) {
@@ -54,14 +63,16 @@ export function createMemoryStores({ codes: seed }) {
         if (slot && slot.state === 'reserved') {
           slot.state = 'free';
           slot.holderId = null;
+          slot.email = null;
         }
       },
       claim(holderId, planId, email) {
         let slot = forHolder(holderId);
         if (!slot) {
-          slot = takeFree(planId, email);
+          slot = takeFree(planId, email, holderId);
           if (!slot) return null;
           slot.holderId = holderId;
+          slot.email = email;
         }
         if (slot.state !== 'delivered') {
           slot.state = 'delivered';

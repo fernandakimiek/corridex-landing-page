@@ -73,3 +73,27 @@ test('trials', () => {
   trials.mark('d');
   assert.equal(trials.used('d'), true);
 });
+
+test('mesmo e-mail com duas reservas pega ofertas diferentes', () => {
+  const { codes } = stores();
+  const a = codes.reserve('anual', 'a@x.com', 'h1');
+  const b = codes.reserve('anual', 'a@x.com', 'h2');
+  assert.ok(a && b);
+  assert.notEqual(a.offerId, b.offerId);
+  assert.equal(codes.reserve('anual', 'a@x.com', 'h3'), null);
+  assert.equal(codes.availability('anual', 'a@x.com'), 'unavailable_for_customer');
+  assert.equal(codes.claim('h4', 'anual', 'a@x.com'), null);
+  assert.equal(codes.availability('anual', 'b@x.com'), 'ok');
+  codes.release('h2');
+  assert.equal(codes.availability('anual', 'a@x.com'), 'ok');
+  assert.equal(codes.reserve('anual', 'a@x.com', 'h3').offerId, b.offerId);
+});
+
+test('reserva de um e-mail + oferta já recebida → nenhuma oferta elegível', () => {
+  const { codes } = stores();
+  const got = codes.claim('h1', 'mensal', 'a@x.com');
+  const held = codes.reserve('mensal', 'a@x.com', 'h2');
+  assert.notEqual(held.offerId, got.offerId);
+  assert.equal(codes.reserve('mensal', 'a@x.com', 'h3'), null);
+  assert.equal(codes.availability('mensal', 'a@x.com'), 'unavailable_for_customer');
+});
