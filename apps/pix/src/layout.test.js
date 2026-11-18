@@ -53,3 +53,11 @@ test('sem <footer> global', async () => {
   const d = await doc(page({ body: '', state: 'choose' }));
   assert.equal(d.querySelector('footer'), null);
 });
+
+test('CSS: campos têm scroll-margin, btn-plain 15px, toast vazio some', () => {
+  const out = String(page({ title: 'x', body: html`<p>x</p>` }));
+  assert.match(out, /\.field input,\.pixcode\{scroll-margin-bottom:11rem\}/);
+  assert.match(out, /\.btn-plain\{min-height:44px;[^}]*font-size:\.9375rem/);
+  assert.match(out, /\.bar>\.toast:empty\{[^}]*background:none/);
+  assert.match(out, /\.note\.inset\{padding-left:16px\}|\.note\.inset,|,\.note\.inset/);
+});

@@ -108,10 +108,11 @@ if (typeof document !== 'undefined') {
       if (toast) {
         toast.textContent = '';
         setTimeout(() => { toast.textContent = btn.dataset.copied; }, 100);
+        setTimeout(() => { toast.textContent = ''; }, 4000);
       }
     } catch {
       const field = screen.querySelector('#pix-code');
-      if (field) { field.closest('details').open = true; field.focus(); field.select(); }
+      if (field) { field.closest('details').open = true; field.focus(); field.select(); field.setSelectionRange(0, field.value.length); }
     }
   });
 

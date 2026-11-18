@@ -68,7 +68,7 @@ a{color:var(--info-text)}
 .btn-primary{background:var(--accent-fill);color:var(--accent-ink)}
 /* app: fill translúcido; azul sobre fill dá 4,0:1, então fundo surface (5,6:1) */
 .btn-secondary{background:var(--surface);color:var(--info-text)}
-.btn-plain{min-height:44px;background:none;color:var(--info-text);font-size:.8125rem;font-weight:400}
+.btn-plain{min-height:44px;background:none;color:var(--info-text);font-size:.9375rem;font-weight:400}
 .plans{position:relative;display:flex;flex-direction:column;gap:.75rem;min-width:0;margin:0;padding:0;border:0;list-style:none}
 .plan{position:relative;display:block;color:inherit;text-decoration:none;cursor:pointer}
 .plan input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:inherit}
@@ -91,7 +91,8 @@ a{color:var(--info-text)}
 /* Grupo inset do iOS: rótulo em caixa alta pequena, campo surface raio 12, nota embaixo */
 .field label{padding-left:16px;font-size:.8125rem;color:var(--label2);text-transform:uppercase;letter-spacing:.02em}
 .field input{width:100%;min-height:2.75rem;padding:.8125rem 1rem;border:1px solid transparent;border-radius:12px;background:var(--surface);color:var(--label);font:inherit}
-.field .note,.field .err{padding-left:16px}
+.field .note,.field .err,.note.inset{padding-left:16px}
+.field input,.pixcode{scroll-margin-bottom:11rem} /* a barra fixa (~150px) não cobre o campo focado */
 .field input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
 .field [aria-invalid=true]{border-color:var(--error-icon)}
 .err{color:var(--error-text);font-size:.9375rem}
@@ -143,7 +144,7 @@ summary::-webkit-details-marker{display:none}
 .dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--warning-icon);box-shadow:0 0 0 4px color-mix(in srgb,var(--warning-icon) 18%,transparent)}
 /* aviso de cópia flutua sobre a barra (não muda a altura dela); vazio não ocupa nada */
 .bar>.toast{position:absolute;left:0;right:0;bottom:100%;width:max-content;max-width:calc(100% - 40px);margin:0 auto 8px;padding:8px 14px;border-radius:999px;background:var(--surface);box-shadow:0 2px 12px #0000001F;color:var(--success-text);font-size:.9375rem;font-weight:600;text-align:center}
-.bar>.toast:empty{padding:0;box-shadow:none}
+.bar>.toast:empty{padding:0;margin:0;background:none;box-shadow:none}
 .links{text-align:center;font-size:.8125rem;color:var(--label2)}
 .links a{display:inline-block;padding:.75rem .5rem;min-height:44px;color:var(--info-text);text-decoration:none}
 /* Barra de dev: faixa estática no topo, fora do fluxo da barra de ação */

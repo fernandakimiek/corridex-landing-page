@@ -277,6 +277,6 @@ export function TrialRequest({ dcLer, dcMarcar, email = '', error, action = '/pi
   return html`<form class="stack" id="${id}" method="post" action="${action}">
 ${TrialFields({ dcLer, dcMarcar })}
 ${EmailField({ value: email, error })}
-<p class="note">${copy.trial.help}</p>
+<p class="note inset">${copy.trial.help}</p>
 </form>`;
 }
