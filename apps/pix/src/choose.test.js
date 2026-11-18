@@ -312,7 +312,7 @@ test('GET /pix?email=a@b.com ignora o e-mail', async () => {
   assertNoEmailInUrls(notice, 'indisponivel-email GET');
 });
 
-test('aviso Ver Trimestral com e-mail é botão de POST com email oculto', async () => {
+test('aviso Ver Trimestral com e-mail é botão de POST com o campo de e-mail editável', async () => {
   const doc = await dom(await post('/pix?cenario=sem-estoque', { plano: 'annual', email: 'a@b.com' }));
   const see = doc.querySelector('.bar button.btn-primary');
   assert.equal(see.textContent.trim(), 'Ver Mensal');
@@ -323,8 +323,10 @@ test('aviso Ver Trimestral com e-mail é botão de POST com email oculto', async
   const form = see.form;
   assert.equal(form.getAttribute('method'), 'post');
   assert.equal(form.getAttribute('action'), '/pix');
-  const hidden = form.querySelector('input[type=hidden][name=email]');
-  assert.equal(hidden.value, 'a@b.com');
+  const emails = [...form.elements].filter((el) => el.name === 'email');
+  assert.equal(emails.length, 1);
+  assert.equal(emails[0].type, 'email');
+  assert.equal(emails[0].value, 'a@b.com');
   assert.equal(doc.querySelectorAll('a.btn').length, 0);
   // Sem e-mail, continuam links.
   const plain = await dom(await get('/pix?cenario=sem-estoque'));

@@ -156,6 +156,9 @@ test('POST /pix/teste entrega código, marca o aparelho e apaga o cookie (Max-Ag
   assert.match(cleared, /^pix_trial=;/);
   assert.match(cleared, /; Max-Age=0/);
   assert.match(cleared, /; Path=\/pix(;|$)/);
+  assert.match(cleared, /; HttpOnly/);
+  assert.match(cleared, /; Secure/);
+  assert.match(cleared, /; SameSite=Lax/);
   const doc = await dom(res);
   assertResult(doc, '7 dias grátis liberados', 'info');
   assert.ok(doc.querySelector('.result-hero svg.tint'), 'ícone de presente');

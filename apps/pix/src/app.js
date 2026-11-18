@@ -148,6 +148,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
   function linkRedirect(c, planId) {
     const cenario = scenario(c);
     const extra = cenario ? `&cenario=${encodeURIComponent(cenario)}` : '';
+    c.header('Cache-Control', 'no-store');
     return c.redirect(`/pix?plano=${encodeURIComponent(planId)}${extra}`, 302);
   }
 
@@ -349,7 +350,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     if (!code) return c.html(trialStockScreen({ devBar: devBarFor(c) }));
     await deviceCheck.mark(session.deviceKey, session.markToken);
     stores.trialSessions.delete(session.id);
-    deleteCookie(c, TRIAL_COOKIE, { path: '/pix' });
+    deleteCookie(c, TRIAL_COOKIE, COOKIE_ATTRS);
     return c.html(trialDeliveredScreen({ devBar: devBarFor(c), code, email, appStoreId: config.appStoreId }));
   });
 

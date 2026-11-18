@@ -20,7 +20,7 @@ export const choosePath = (planId) => `/pix?${new URLSearchParams({ plano: planI
 // Com `notice` não há botão "Gerar Pix": os planos viram links para ?plano=<id>
 // (a página continua utilizável sem JS), o aviso fica logo abaixo do cabeçalho e a
 // barra traz "Ver {outro plano}" (notice.action = { label, planId }), se houver outro.
-// Com e-mail, planos e "Ver …" são botões de POST /pix (form="planos", e-mail oculto).
+// Com e-mail, planos e "Ver …" são botões de POST /pix (form="planos"; o campo de e-mail editável pertence a esse form).
 export function chooseScreen({
   plans, selectedPlanId, email = '', notice, unavailablePlanIds = [], trialHref, emailError,
   state = 'choose', nonce = '', devBar,
@@ -34,17 +34,24 @@ export function chooseScreen({
     const { action, ...info } = notice;
     // Trocar o e-mail recarrega a escolha deste plano (POST /pix), sem gerar Pix.
     // Sem estoque, o campo só aparece se já há e-mail (ex.: pedido vencido que não renovou).
-    const emailForm = state === 'unavailable_for_customer' || (state === 'plan_out_of_stock' && email)
-      ? html`<form class="stack" method="post" action="/pix">
+    const showEmail = state === 'unavailable_for_customer' || (state === 'plan_out_of_stock' && email);
+    // Com e-mail, o campo editável pertence ao form "planos": os botões de plano enviam o e-mail
+    // editado. O primeiro botão (invisível) é o padrão do Enter e mantém o plano atual.
+    const emailForm = !showEmail ? ''
+      : email
+        ? html`<div class="stack">
+${EmailField({ value: email, error: emailError, form: 'planos' })}
+${SubmitButton({ label: copy.email.change, variant: 'secondary', name: 'plano', value: selectedPlanId, form: 'planos' })}
+</div>`
+        : html`<form class="stack" method="post" action="/pix">
 <input type="hidden" name="plano" value="${selectedPlanId}">
 ${EmailField({ value: email, error: emailError })}
 ${SubmitButton({ label: copy.email.change, variant: 'secondary' })}
-</form>`
-      : '';
+</form>`;
     const body = html`${hero}
 ${Notice({ ...info, tone: info.tone ?? 'warning' })}
 ${email
-    ? html`<form id="planos" method="post" action="/pix"><input type="hidden" name="email" value="${email}">${PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds, submit: true })}</form>`
+    ? html`<form id="planos" method="post" action="/pix"><button type="submit" name="plano" value="${selectedPlanId}" class="vh" tabindex="-1" aria-hidden="true"></button>${PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds, submit: true })}</form>`
     : PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds, linkTo: choosePath })}
 ${emailForm}
 ${trial}

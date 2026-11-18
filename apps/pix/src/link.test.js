@@ -29,6 +29,7 @@ test('GET /pix?plano=monthly&t=<válido> → 302 para /pix?plano=monthly e Set-C
   assert.equal(res.status, 302);
   assert.equal(res.headers.get('location'), '/pix?plano=monthly');
   assert.doesNotMatch(res.headers.get('location'), /t=/);
+  assert.equal(res.headers.get('cache-control'), 'no-store');
   const cookie = res.headers.get('set-cookie');
   assert.match(cookie, /^pix_tok=[A-Za-z0-9_-]{22};/);
   assert.match(cookie, /; HttpOnly/);

@@ -132,12 +132,12 @@ export function PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds = [], l
 }
 
 // error: true (usa email.invalid) ou um texto. Erro ligado por aria-describedby.
-export function EmailField({ value = '', error, id = 'email' }) {
+export function EmailField({ value = '', error, id = 'email', form }) {
   const errorText = error === true ? copy.email.invalid : error;
   const describedBy = errorText ? `${id}-error ${id}-help` : `${id}-help`;
   return html`<div class="field">
 <label for="${id}">${copy.email.label}</label>
-<input id="${id}" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" required value="${value}" aria-describedby="${describedBy}"${errorText ? raw(' aria-invalid="true"') : ''}>
+<input id="${id}" name="email"${form ? html` form="${form}"` : ''} type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" required value="${value}" aria-describedby="${describedBy}"${errorText ? raw(' aria-invalid="true"') : ''}>
 ${errorText ? html`<p class="err" id="${id}-error">${errorText}</p>` : ''}
 <p class="note" id="${id}-help">${copy.email.help}</p>
 </div>`;

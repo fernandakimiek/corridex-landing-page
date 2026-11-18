@@ -271,11 +271,14 @@ test('renovar sem código disponível → escolha com aviso de estoque e e-mail'
   const doc = await dom(res);
   assert.equal(doc.querySelector('.screen').dataset.state, 'plan_out_of_stock');
   assert.match(text(doc), /O Anual está indisponível no Pix agora/);
-  // Os outros planos são botões de POST /pix que levam o e-mail num campo oculto, nunca na URL.
+  // Os outros planos são botões de POST /pix; o e-mail enviado é o do campo editável, nunca na URL.
   const card = doc.querySelector('ul.plans button.plan[value=monthly]');
   assert.equal(card.form.getAttribute('action'), '/pix');
-  assert.equal(card.form.querySelector('input[type=hidden][name=email]').value, EMAIL);
-  assert.equal(doc.querySelector('input[type=email]').value, EMAIL);
+  const emailControls = [...card.form.elements].filter((el) => el.name === 'email');
+  assert.equal(emailControls.length, 1);
+  assert.equal(emailControls[0], doc.querySelector('input[type=email]'));
+  assert.notEqual(emailControls[0].type, 'hidden');
+  assert.equal(emailControls[0].value, EMAIL);
   assertNoEmailInUrls(doc, 'renovar recusado');
 });
 
@@ -584,8 +587,10 @@ test('aviso com campo de e-mail tem botão "Usar este e-mail" e mantém o teste 
     const form = doc.querySelector('input[type=email]').form;
     assert.equal(form.getAttribute('method'), 'post', q);
     assert.equal(form.getAttribute('action'), '/pix', q);
-    assert.equal(form.querySelector('input[type=hidden][name=plano]').value, 'monthly', q);
-    const button = form.querySelector('button[type=submit]');
+    const button = [...doc.querySelectorAll('button[type=submit]')].find((b) => b.textContent.trim() === 'Usar este e-mail');
+    assert.equal(button.form, form, q);
+    assert.equal(button.name, 'plano', q);
+    assert.equal(button.value, 'monthly', q);
     assert.equal(button.textContent.trim(), 'Usar este e-mail', q);
     assert.ok(button.classList.contains('btn-secondary'), q);
     assert.equal(trialInputs(doc).length, 0, q);

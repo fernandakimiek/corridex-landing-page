@@ -35,8 +35,9 @@ O app iOS abre o site assim:
 - **Cookies:** a primeira visita grava só ids, `pix_tok` (token da Apple, 7 dias) e `pix_trial` (sessão do teste, 30 min). Os dois são `HttpOnly`, `Secure`, `SameSite=Lax` e `Path=/pix`.
 - **Redirect:** com qualquer um de `t`, `teste`, `dcq` ou `dcm`, a resposta é 302 para `/pix?plano=<id>`, sem tokens na URL.
 - **Pedido:** nasce com `origin` `app` (há token da Apple) ou `site` (não há), ligado ao token guardado.
-- **Teste grátis:** `/pix/teste` lê só o cookie `pix_trial`. Sessão inválida, vencida ou aparelho que já usou mostra "Este aparelho já usou o teste grátis". Ao entregar o código, o aparelho é marcado com o `dcm` e a sessão e o cookie são apagados.
-- **DeviceCheck simulado:** ainda não há DeviceCheck real. Em desenvolvimento a chave do aparelho é o próprio `dcq`, e marcar usa essa chave.
+- **Teste grátis:** `/pix/teste` lê só o cookie `pix_trial`. Sessão inválida, vencida ou aparelho que já usou mostra "Este aparelho já usou o teste grátis". Ao entregar o código, o aparelho é marcado (na simulação, pela chave `dcq`) e a sessão e o cookie são apagados.
+- **DeviceCheck simulado:** ainda não há DeviceCheck real. Em desenvolvimento a chave do aparelho é o próprio `dcq`, e marcar usa essa chave (o `dcm` é ignorado na simulação).
+- **Teste grátis por enquanto:** só funciona com `PIX_DEV_TOOLS=true`. Sem DeviceCheck nenhuma sessão do teste abre.
 - **E-mail nunca na URL:** `GET /pix` ignora `?email=`. Quem precisa reabrir a escolha com o e-mail preenchido (trocar e-mail, outro plano no aviso, tentar de novo) usa `POST /pix` com `plano` e `email`.
 
 ## Simulação
