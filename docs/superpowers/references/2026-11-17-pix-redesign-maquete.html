@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Proposta</title>
+<style>
+:root{--bg:#F2F2F7;--surface:#FFF;--label:#000;--label2:#6C6C70;--sep:rgba(60,60,67,.29);--accent:#007AFF;--fill:#0064D1;--info:#005FC7;--ok:#34C759;--okt:#0E6B2B;--warn:#FF9500;--warnt:#8C5000;--bar:rgba(249,249,249,.94)}
+*{box-sizing:border-box}html,body{margin:0}
+body{font:400 17px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;background:var(--bg);color:var(--label);-webkit-font-smoothing:antialiased}
+.screen{min-height:100dvh;display:flex;flex-direction:column}
+.nav{display:flex;align-items:center;justify-content:center;height:44px;font-weight:600;font-size:17px;position:relative}
+.nav .logo{width:22px;height:22px;border-radius:6px;background:#275BBC;margin-right:8px}
+.content{flex:1;padding:8px 20px 24px;display:flex;flex-direction:column;gap:24px}
+.content.center{justify-content:center;align-items:center;text-align:center;gap:12px;padding-bottom:40px}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px}
+.hero h1{font-size:22px;font-weight:700;margin:0}
+.big h1{font-size:28px}
+.sub{font-size:15px;color:var(--label2);margin:0}
+.glyph{width:44px;height:44px}
+.glyph.lg{width:64px;height:64px}
+.plans{display:flex;flex-direction:column;gap:12px}
+.pc{background:var(--surface);border:2px solid var(--sep);border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px}
+.pc.on{border-color:var(--accent)}
+.pc .r{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(60,60,67,.3);flex:none}
+.pc.on .r{border:0;background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M6.5 11.5l3 3 6-6.5' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.pc .t{flex:1}.pc .t b{display:block;font-weight:600}.pc .t span{font-size:13px;color:var(--label2)}
+.pc .p{font-weight:600}
+.pc .t .badge{display:inline;font-size:11px;font-weight:700;color:#fff;background:#8C5000;border-radius:99px;padding:2px 8px;margin-left:6px;vertical-align:2px}
+.group{display:flex;flex-direction:column;gap:6px}
+.group label{font-size:13px;color:var(--label2);text-transform:uppercase;letter-spacing:.02em;padding-left:16px}
+.field{background:var(--surface);border-radius:12px;padding:13px 16px;font-size:17px;color:var(--label2)}
+.foot{font-size:13px;color:var(--label2);padding-left:16px}
+.bar{position:sticky;bottom:0;background:var(--bar);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:.5px solid rgba(60,60,67,.29);padding:12px 20px max(12px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:999px;background:var(--fill);color:#fff;font-weight:600;font-size:17px;border:0;width:100%;gap:8px}
+.btn.plain{background:none;color:var(--info);min-height:44px;font-weight:400}
+.fine{font-size:12px;color:var(--label2);text-align:center}
+.links{display:flex;justify-content:center;gap:12px;font-size:13px;color:var(--label2)}.links a{color:var(--info);text-decoration:none}
+.card{background:var(--surface);border-radius:16px;padding:16px}
+.amount{font-size:34px;font-weight:700;letter-spacing:-.01em}
+.timer{display:inline-flex;align-items:center;gap:6px;font-size:15px;color:var(--label2)}
+.code{display:flex;align-items:center;gap:12px}
+.code .v{flex:1;font:15px ui-monospace,"SF Mono",Menlo,monospace;color:var(--label);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.copy{flex:none;display:inline-flex;align-items:center;gap:6px;background:rgba(0,122,255,.12);color:var(--info);font-weight:600;font-size:15px;border-radius:999px;padding:8px 14px}
+.steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+.steps li{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:.5px solid rgba(60,60,67,.18);font-size:15px}
+.steps li:first-child{border-top:0;padding-top:0}
+.steps .n{width:24px;height:24px;border-radius:50%;background:rgba(0,122,255,.12);color:var(--info);font-size:13px;font-weight:700;display:grid;place-items:center;flex:none}
+.disc{display:flex;justify-content:space-between;align-items:center;color:var(--info);font-size:17px}
+.qr{width:180px;margin:4px auto 0;background:#fff;padding:8px;border-radius:12px}.qr svg{width:100%;height:auto;display:block}
+.status{display:flex;align-items:center;justify-content:center;gap:10px;font-size:15px;color:var(--label2)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 4px rgba(255,149,0,.18)}
+.codebox{background:var(--surface);border-radius:16px;padding:18px 16px;text-align:center;width:100%}
+.codebox .k{font-size:13px;color:var(--label2);text-transform:uppercase;letter-spacing:.02em}
+.codebox .c{font:600 22px ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.06em;margin-top:6px}
+.codebox .m{font-size:13px;color:var(--label2);margin-top:8px}
+.summary{width:100%;background:var(--surface);border-radius:16px;padding:0 16px;text-align:left}
+.summary div{display:flex;justify-content:space-between;padding:12px 0;border-top:.5px solid rgba(60,60,67,.18);font-size:15px}
+.summary div:first-child{border-top:0}.summary span{color:var(--label2)}
+.devbar{display:none}
+</style></head>
+<body>
+<!-- ESCOLHA -->
+<section class="screen" id="escolha">
+  <div class="nav"><span class="logo"></span>Corridex</div>
+  <div class="content">
+    <div class="hero">
+      <svg class="glyph" viewBox="0 0 44 44"><circle cx="22" cy="22" r="22" fill="#007AFF" opacity=".12"/><path d="M24 9l-11 15h8l-2 11 11-15h-8z" fill="#007AFF"/></svg>
+      <h1>Assine o Corridex com Pix</h1>
+      <p class="sub">Pagamento único. Não renova sozinho.</p>
+    </div>
+    <div class="plans">
+      <div class="pc"><span class="r"></span><span class="t"><b>Mensal</b><span>1 mês</span></span><span class="p">R$ 9,90</span></div>
+      <div class="pc"><span class="r"></span><span class="t"><b>Trimestral</b><span>3 meses · R$ 8,63/mês</span></span><span class="p">R$ 25,90</span></div>
+      <div class="pc on"><span class="r"></span><span class="t"><b>Anual <span class="badge">Mais vantajoso</span></b><span>1 ano · R$ 8,33/mês</span></span><span class="p">R$ 99,90</span></div>
+    </div>
+    <div class="group">
+      <label>Seu e-mail</label>
+      <div class="field">nome@email.com</div>
+      <div class="foot">Enviamos o código e a nota fiscal para este e-mail.</div>
+    </div>
+    <div class="links"><a>Termos</a>·<a>Privacidade</a>·<a>Ajuda</a></div>
+  </div>
+  <div class="bar">
+    <div class="btn">Gerar Pix · R$ 99,90</div>
+    <div class="fine">Pagamento pelo Banco Inter</div>
+  </div>
+</section>
+
+<!-- PIX GERADO -->
+<section class="screen" id="pix">
+  <div class="nav">Pagamento</div>
+  <div class="content">
+    <div class="hero">
+      <span class="sub">Corridex Anual</span>
+      <span class="amount">R$ 99,90</span>
+      <span class="timer"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="#6C6C70" stroke-width="1.5"/><path d="M8 4.5V8l2.5 1.5" fill="none" stroke="#6C6C70" stroke-width="1.5" stroke-linecap="round"/></svg>Vale até 21:44 · 29 min</span>
+    </div>
+    <div class="group">
+      <label>Pix copia e cola</label>
+      <div class="card code"><span class="v">00020126610014br.gov.bcb.pix0118teste@corridex.app</span><span class="copy"><svg width="14" height="14" viewBox="0 0 14 14"><rect x="4" y="4" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M9.5 2.5V2a1 1 0 00-1-1H2.5a1 1 0 00-1 1v6a1 1 0 001 1H3" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Copiar</span></div>
+    </div>
+    <div class="card">
+      <ol class="steps">
+        <li><span class="n">1</span>Copie o código acima</li>
+        <li><span class="n">2</span>Abra o app do seu banco</li>
+        <li><span class="n">3</span>Escolha Pix Copia e Cola e cole</li>
+      </ol>
+    </div>
+    <div class="card"><div class="disc">Mostrar QR Code<svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div></div>
+    <div class="status"><span class="dot"></span>Aguardando pagamento. Esta tela muda sozinha.</div>
+  </div>
+  <div class="bar">
+    <div class="btn">Copiar código Pix</div>
+  </div>
+</section>
+
+<!-- PAGO -->
+<section class="screen" id="pago">
+  <div class="nav">Pagamento</div>
+  <div class="content center">
+    <svg class="glyph lg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#34C759"/><path d="M19 33l9 9 17-19" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div class="hero big"><h1>Pagamento confirmado</h1><p class="sub">Falta um toque para ativar seu acesso.</p></div>
+    <div style="height:12px"></div>
+    <div class="codebox"><div class="k">Seu código</div><div class="c">EXEMPA NB0000 000001</div><div class="m">Resgate até 16/05/2027 · enviado para m•••@email.com</div></div>
+    <div class="summary"><div>Corridex Anual<span>R$ 99,90</span></div><div>Pago em<span>17/11/2026 · Pix</span></div></div>
+  </div>
+  <div class="bar">
+    <div class="btn"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M9 2v9M5.5 7.5L9 11l3.5-3.5M3 13v2h12v-2" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Resgatar na App Store</div>
+    <div class="btn plain">O código não funcionou?</div>
+  </div>
+</section>
+
+<!-- VENCIDO -->
+<section class="screen" id="vencido">
+  <div class="nav">Pagamento</div>
+  <div class="content center">
+    <svg class="glyph lg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#FF9500" opacity=".15"/><circle cx="32" cy="32" r="18" fill="none" stroke="#8C5000" stroke-width="3.5"/><path d="M32 22v11l7 4" fill="none" stroke="#8C5000" stroke-width="3.5" stroke-linecap="round"/></svg>
+    <div class="hero big"><h1>Este Pix venceu</h1><p class="sub">Gere outro, leva um segundo. Se você já pagou, espere: esta tela avisa quando o pagamento for confirmado.</p></div>
+  </div>
+  <div class="bar">
+    <div class="btn">Gerar novo Pix</div>
+  </div>
+</section>
+<script>
+const s=new URLSearchParams(location.search).get('s')||'escolha';
+document.querySelectorAll('.screen').forEach(e=>e.style.display=e.id===s?'flex':'none');
+</script>
+</body></html>
