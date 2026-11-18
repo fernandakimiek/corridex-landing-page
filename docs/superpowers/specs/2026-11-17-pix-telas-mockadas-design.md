@@ -43,6 +43,7 @@ Escolha da Fernanda: abordagem 1, depois de confirmar que o código visível no 
 
 - `GET /pix?plano=anual` → tela `choose`. Formulário comum (`<form method="post">`), funciona até sem JS.
 - `POST /pix/pedidos` (plano, e-mail) → valida, checa estoque e pausa, cria cobrança no provedor, responde `303` para `/pix/pedido/:token`. Erros de escolha (`plan_out_of_stock`, `unavailable_for_customer`, e-mail inválido) voltam à tela `choose` com o aviso; não criam cobrança.
+- O formulário de escolha leva um `nonce` aleatório (campo oculto, 16 bytes base64url) que fica gravado no pedido. Um envio só reaproveita o pedido ativo (mesmo e-mail e plano, ainda pagando) se trouxer o mesmo `nonce` (duplo envio do mesmo formulário); sem ele ou com outro, é um pedido novo. Assim, saber o e-mail de alguém não leva ao link do pedido dessa pessoa.
 - `GET /pix/pedido/:token` → renderiza o estado atual do pedido: `paying`, `delivered`, `pending` ou `expired`. É a mesma URL da "página do pedido" do e-mail. Recarregar ou voltar do app do banco cai no estado certo.
 - `GET /pix/pedido/:token/status` → JSON `{ status }` para a consulta periódica.
 - `POST /pix/pedido/:token/renovar` → "Gerar novo Pix" a partir de `expired`, sem pedir e-mail de novo.

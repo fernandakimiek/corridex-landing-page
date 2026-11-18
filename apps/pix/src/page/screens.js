@@ -1,10 +1,10 @@
 import { html } from 'hono/html';
 import { copy, t } from './copy.pt-BR.js';
 import { page } from './layout.js';
-import { brl, maskEmail, dateBR } from './format.js';
+import { brl, maskEmail, dateBRFromMs } from './format.js';
 import {
   Brand, PlanSwitcher, PlanSummary, EmailField, Notice, SubmitButton, LinkButton, planTitle,
-  StateIcon, PixPayment, PaymentStatus, CodeDelivery, CodeHelp, TrialRequest,
+  StateIcon, PixPayment, PaymentStatus, CodeDelivery, CodeHelp, TrialRequest, TrialFields,
 } from './components.js';
 
 // Telas completas (página inteira). Cada uma aceita `devBar` (Task 9) e repassa ao layout.
@@ -22,7 +22,7 @@ export function choosePath(planId, email) {
 // (a página continua utilizável sem JS) e o aviso traz "Ver {outro plano}".
 export function chooseScreen({
   plans, selectedPlanId, email = '', notice, unavailablePlanIds = [], trialHref, trialSession, emailError,
-  state = 'choose', devBar,
+  state = 'choose', nonce = '', devBar,
 }) {
   const selected = plans[selectedPlanId];
   const trial = trialHref ? LinkButton({ label: copy.trial.link, href: trialHref, variant: 'plain' }) : '';
@@ -31,7 +31,11 @@ export function chooseScreen({
     // Trocar o e-mail recarrega a escolha deste plano (GET), sem gerar Pix.
     // Sem estoque, o campo só aparece se já há e-mail (ex.: pedido vencido que não renovou).
     const emailForm = state === 'unavailable_for_customer' || (state === 'plan_out_of_stock' && email)
-      ? html`<form method="get" action="/pix"><input type="hidden" name="plano" value="${selectedPlanId}">${EmailField({ value: email, error: emailError })}</form>`
+      ? html`<form class="stack" method="get" action="/pix">
+<input type="hidden" name="plano" value="${selectedPlanId}">${TrialFields(trialSession)}
+${EmailField({ value: email, error: emailError })}
+${SubmitButton({ label: copy.email.change, variant: 'secondary' })}
+</form>`
       : '';
     const body = html`${Brand()}
 <h1>${planTitle(selected)}</h1>
@@ -50,19 +54,13 @@ ${trial}`;
   const body = html`${Brand()}
 ${summaries}
 <form class="stack" method="post" action="/pix/pedidos" novalidate>
-${TrialFields(trialSession)}
+<input type="hidden" name="nonce" value="${nonce}">${TrialFields(trialSession)}
 ${PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds })}
 ${EmailField({ value: email, error: emailError })}
 ${SubmitButton({ label: copy.pix.cta })}
 </form>
 ${trial}`;
   return page({ title: planTitle(selected), body, state, devBar });
-}
-
-// Sessão do teste grátis em campos ocultos: se o POST voltar à escolha, o link continua.
-function TrialFields(trial) {
-  if (!trial) return '';
-  return html`<input type="hidden" name="teste" value="1"><input type="hidden" name="dc_ler" value="${trial.dcLer}"><input type="hidden" name="dc_marcar" value="${trial.dcMarcar}">`;
 }
 
 // Venda pausada (PIX_SALES_ENABLED=false, sem provedor ou cenário "pausado").
@@ -84,11 +82,6 @@ ${LinkButton({ label: copy.down.cta, href: retryHref })}`;
 // Endereços do pedido.
 export const orderPath = (token) => `/pix/pedido/${encodeURIComponent(token)}`;
 
-// ms → 'aaaa-mm-dd' no fuso de Brasília (en-CA formata como ISO).
-const isoDateBR = new Intl.DateTimeFormat('en-CA', {
-  timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit',
-});
-
 // Pagando: copiar código antes do QR; status ao vivo; link sem JS para atualizar.
 // O cliente (pix.js) consulta data-status-url e conta até data-expires-at.
 export function payingScreen({ order, qrSvg, nowMs, devBar }) {
@@ -104,7 +97,7 @@ ${PaymentStatus({ expiresAt: order.expiresAt, nowMs, refreshHref: path })}`;
 
 // Resumo do pedido: plano, preço e data do pagamento.
 function OrderSummary({ order, plan }) {
-  const paidOn = order.paidAt != null ? dateBR(isoDateBR.format(new Date(order.paidAt))) : null;
+  const paidOn = order.paidAt != null ? dateBRFromMs(order.paidAt) : null;
   return html`<section class="card stack">
 <h2>${copy.order.title}</h2>
 <p>${planTitle(plan)} · ${brl(order.amountCents)}</p>
@@ -182,12 +175,16 @@ ${CodeDelivery({ code, email, appStoreId })}`;
   return page({ title: copy.trial.delivered, body, state: 'trial_delivered', devBar });
 }
 
-// Teste sem código em estoque.
-export function trialStockScreen({ devBar } = {}) {
+// Teste sem código em estoque, ou (`forCustomer`) sem oferta nova para este e-mail.
+export function trialStockScreen({ forCustomer = false, devBar } = {}) {
+  const plano = copy.trial.planName;
+  const notice = forCustomer
+    ? { title: t(copy.customer.unavailable, { plano }), body: copy.customer.unavailableBody }
+    : { title: t(copy.stock.title, { plano }), body: copy.stock.body };
   const body = html`${Brand()}
-${Notice({
-    tone: 'warning', title: t(copy.stock.title, { plano: copy.trial.planName }), body: copy.stock.body, heading: 'h1',
-  })}
+${Notice({ tone: 'warning', ...notice, heading: 'h1' })}
 ${LinkButton({ label: copy.trial.seePlans, href: '/pix' })}`;
-  return page({ title: copy.trial.planName, body, state: 'trial_out_of_stock', devBar });
+  return page({
+    title: plano, body, state: forCustomer ? 'trial_unavailable_for_customer' : 'trial_out_of_stock', devBar,
+  });
 }

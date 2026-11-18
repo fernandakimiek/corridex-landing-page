@@ -14,6 +14,7 @@ export const copy = {
     label: 'Seu e-mail',
     help: 'Enviamos o código e a nota fiscal para este e-mail.',
     invalid: 'Confira o e-mail. Ele precisa ter @ e um domínio, como nome@email.com.',
+    change: 'Usar este e-mail',
   },
   pix: {
     cta: 'Gerar Pix',

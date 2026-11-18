@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { brl, maskEmail, groupCode, dateBR, timeBR, redeemUrl } from './format.js';
+import { brl, maskEmail, groupCode, dateBR, dateBRFromMs, timeBR, redeemUrl } from './format.js';
 import { t } from './copy.pt-BR.js';
 
 test('brl', () => {
@@ -36,4 +36,10 @@ test('redeemUrl', () => {
 test('t preenche placeholders', () => {
   assert.equal(t('Ver {plano}', { plano: 'Anual' }), 'Ver Anual');
   assert.equal(t('{a} e {b}', { a: 1 }), '1 e {b}');
+});
+
+test('dateBRFromMs usa o fuso de Brasília', () => {
+  assert.equal(dateBRFromMs(Date.UTC(2026, 10, 17, 15, 0, 0)), '17/11/2026');
+  // 01:30 UTC de 18/11 ainda é 17/11 em Brasília (UTC-3).
+  assert.equal(dateBRFromMs(Date.UTC(2026, 10, 18, 1, 30, 0)), '17/11/2026');
 });

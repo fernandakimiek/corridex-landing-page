@@ -35,9 +35,11 @@ export function createMemoryStores({ codes: seed }) {
         orders.set(token, next);
         return next;
       },
-      findActive(email, planId) {
+      // Com `nonce`, só o pedido aberto pelo mesmo formulário.
+      findActive(email, planId, nonce) {
         for (const o of orders.values()) {
-          if (o.email === email && o.planId === planId && o.status === 'paying') return o;
+          if (o.email === email && o.planId === planId && o.status === 'paying'
+            && (nonce === undefined || o.nonce === nonce)) return o;
         }
         return null;
       },

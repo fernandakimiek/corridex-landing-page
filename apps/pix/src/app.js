@@ -4,7 +4,7 @@ import { PLANS, DEFAULT_PLAN_ID } from './plans.js';
 import { copy, t, dev } from './page/copy.pt-BR.js';
 import { devBarView, page } from './page/layout.js';
 import { renderSVG } from 'uqr';
-import { createOrderService, normalizeEmail } from './orders.js';
+import { createOrderService, normalizeEmail, randomId } from './orders.js';
 import {
   chooseScreen, pausedScreen, errorScreen, choosePath, orderPath,
   payingScreen, deliveredScreen, pendingScreen, expiredScreen, notFoundScreen, helpScreen,
@@ -15,6 +15,22 @@ import {
 const MAX_EMAIL = 254;
 // Validade de cada Pix (30 min).
 const PIX_TTL_SECONDS = 1800;
+// Nonce do formulário: 22 caracteres; folga para não cortar um válido.
+const MAX_NONCE = 64;
+// Só recursos do próprio domínio; CSS inline (o layout embute o estilo) e SVG inline.
+const CSP = "default-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
+
+// Corpo do formulário; corpo malformado (ex.: multipart sem boundary válido) vira formulário vazio.
+async function readForm(c) {
+  try {
+    return await c.req.parseBody();
+  } catch {
+    return {};
+  }
+}
+
+// Campo de texto do formulário, aparado e cortado em `max`; ausente ou arquivo → ''.
+const formString = (form, key, max) => (typeof form[key] === 'string' ? form[key].trim().slice(0, max) : '');
 
 // Tudo vive sob /pix: o site (corridex.app) faz rewrite de /pix/* para este app,
 // então o mesmo caminho funciona no Cloudflare Workers hoje e na Vercel depois.
@@ -22,10 +38,6 @@ const PIX_TTL_SECONDS = 1800;
 // precisa rodar igual nas duas plataformas.
 export function createApp({ config, provider, stores, plans = PLANS, now = Date.now }) {
   const app = new Hono().basePath('/pix');
-  app.use('*', async (c, next) => {
-    c.set('deps', { config, provider, stores, plans, now });
-    await next();
-  });
 
   // Cabeçalhos das páginas HTML (o JSON de /health e /status fica como está).
   app.use('*', async (c, next) => {
@@ -34,6 +46,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
       c.res.headers.set('Cache-Control', 'no-store');
       c.res.headers.set('Referrer-Policy', 'no-referrer');
       c.res.headers.set('X-Robots-Tag', 'noindex');
+      c.res.headers.set('Content-Security-Policy', CSP);
     }
   });
 
@@ -73,15 +86,18 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     if (str(read('teste')) !== '1' || !dcLer || !dcMarcar) return null;
     return { dcLer, dcMarcar };
   }
-  const trialHref = (trial) => (trial
-    ? `/pix/teste?teste=1&dc_ler=${encodeURIComponent(trial.dcLer)}&dc_marcar=${encodeURIComponent(trial.dcMarcar)}`
-    : null);
+  // Query da sessão do teste (encodeURIComponent: espaço vira %20, como o app manda).
+  const trialQuery = (trial) => `teste=1&dc_ler=${encodeURIComponent(trial.dcLer)}&dc_marcar=${encodeURIComponent(trial.dcMarcar)}`;
+  const trialHref = (trial) => (trial ? `/pix/teste?${trialQuery(trial)}` : null);
+  // "Voltar aos planos" do teste: a escolha com a mesma sessão.
+  const trialBackHref = (trial) => `/pix?${trialQuery(trial)}`;
 
   app.get('/health', (c) => c.json({ ok: true }));
 
   // Tela de escolha. `outOfStock` marca o plano como sem estoque (cenário ou pedido
   // recusado); `customerUnavailable`, indisponível para este e-mail.
-  function chooseView(c, { selectedPlanId, email = '', outOfStock, customerUnavailable, emailError, trial }) {
+  // `nonce`: o do formulário enviado (recusa reexibida) ou um novo.
+  function chooseView(c, { selectedPlanId, email = '', outOfStock, customerUnavailable, emailError, trial, nonce }) {
     const session = trial === undefined ? trialSession((k) => c.req.query(k)) : trial;
     const selected = plans[selectedPlanId];
     // Disponibilidade geral; a checagem por e-mail acontece no POST.
@@ -110,6 +126,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     return c.html(chooseScreen({
       devBar: devBarFor(c),
       plans, selectedPlanId, email, notice, unavailablePlanIds, trialHref: trialHref(session), trialSession: session, state, emailError,
+      nonce: nonce || randomId(),
     }));
   }
 
@@ -137,8 +154,8 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     : null;
 
   // Recusa do serviço → tela. Estoque e e-mail voltam à escolha com o aviso.
-  function refusal(c, reason, { planId, email, trial = null }) {
-    const base = { selectedPlanId: planId, email, trial };
+  function refusal(c, reason, { planId, email, trial = null, nonce }) {
+    const base = { selectedPlanId: planId, email, trial, nonce };
     if (reason === 'invalid_email') return chooseView(c, { ...base, emailError: true });
     if (reason === 'plan_out_of_stock') return chooseView(c, { ...base, outOfStock: true });
     if (reason === 'unavailable_for_customer') return chooseView(c, { ...base, customerUnavailable: true });
@@ -148,19 +165,20 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
 
   app.post('/pedidos', async (c) => {
     if (salesPaused()) return c.html(pausedScreen({ devBar: devBarFor(c) }));
-    const form = await c.req.parseBody();
-    const rawPlan = typeof form.plano === 'string' ? form.plano : '';
-    const email = (typeof form.email === 'string' ? form.email : '').trim().slice(0, MAX_EMAIL);
+    const form = await readForm(c);
+    const rawPlan = formString(form, 'plano', 32);
+    const email = formString(form, 'email', MAX_EMAIL);
+    const nonce = formString(form, 'nonce', MAX_NONCE);
     const trial = trialSession((k) => form[k]);
-    if (!Object.hasOwn(plans, rawPlan)) return chooseView(c, { selectedPlanId: DEFAULT_PLAN_ID, email, trial });
+    if (!Object.hasOwn(plans, rawPlan)) return chooseView(c, { selectedPlanId: DEFAULT_PLAN_ID, email, trial, nonce });
 
     let result;
     try {
-      result = await orders.create({ planId: rawPlan, email });
+      result = await orders.create({ planId: rawPlan, email, nonce });
     } catch {
       result = { ok: false, reason: 'pix_unavailable' };
     }
-    if (!result.ok) return refusal(c, result.reason, { planId: rawPlan, email, trial });
+    if (!result.ok) return refusal(c, result.reason, { planId: rawPlan, email, trial, nonce });
     return c.redirect(orderPath(result.order.token), 303);
   });
 
@@ -239,10 +257,8 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     }
     if (result.ok || result.reason === 'not_expired') return c.redirect(orderPath(token), 303);
     if (result.reason === 'not_found') return notFound(c);
+    if (result.reason === 'pix_unavailable') return orderError(c, token);
     const order = stores.orders.get(token);
-    if (result.reason === 'pix_unavailable') {
-      return c.html(errorScreen({ devBar: devBarFor(c), planName: plans[order.planId].name, retryHref: orderPath(token) }), 503);
-    }
     return refusal(c, result.reason, { planId: order.planId, email: order.email });
   });
 
@@ -251,18 +267,23 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     if (!stores || !config.salesEnabled) return c.html(pausedScreen({ devBar: devBarFor(c) }));
     const session = trialSession((k) => c.req.query(k));
     if (!session || scenario(c) === 'teste-usado' || stores.trials.used(session.dcLer)) return c.html(trialUsedScreen({ devBar: devBarFor(c) }));
-    return c.html(trialRequestScreen({ devBar: devBarFor(c), ...session, backHref: trialHref(session).replace('/teste?', '?') }));
+    return c.html(trialRequestScreen({ devBar: devBarFor(c), ...session, backHref: trialBackHref(session) }));
   });
 
   app.post('/teste', async (c) => {
     if (!stores || !config.salesEnabled) return c.html(pausedScreen({ devBar: devBarFor(c) }));
-    const form = await c.req.parseBody();
+    const form = await readForm(c);
     const session = trialSession((k) => form[k]);
     if (!session || stores.trials.used(session.dcLer)) return c.html(trialUsedScreen({ devBar: devBarFor(c) }));
-    const rawEmail = (typeof form.email === 'string' ? form.email : '').trim().slice(0, MAX_EMAIL);
-    const backHref = trialHref(session).replace('/teste?', '?');
+    const rawEmail = formString(form, 'email', MAX_EMAIL);
     const email = normalizeEmail(rawEmail);
-    if (!email) return c.html(trialRequestScreen({ devBar: devBarFor(c), ...session, email: rawEmail, error: true, backHref }));
+    if (!email) {
+      return c.html(trialRequestScreen({ devBar: devBarFor(c), ...session, email: rawEmail, error: true, backHref: trialBackHref(session) }));
+    }
+    // E-mail que já recebeu todas as ofertas do teste: aviso "para este e-mail", não o de estoque.
+    if (stores.codes.availability('teste', email) === 'unavailable_for_customer') {
+      return c.html(trialStockScreen({ devBar: devBarFor(c), forCustomer: true }));
+    }
     const code = stores.codes.claim(`trial:${session.dcLer}`, 'teste', email);
     if (!code) return c.html(trialStockScreen({ devBar: devBarFor(c) }));
     stores.trials.mark(session.dcLer);
@@ -309,6 +330,15 @@ ${section(dev.orderScenarios, html`<p class="note">${dev.orderHint}</p><ul><li>v
       return c.redirect(orderPath(token), 303);
     });
   }
+
+  // Rota inexistente: mesma tela amigável do pedido não encontrado.
+  app.notFound((c) => notFound(c));
+
+  // Erro inesperado: registra e mostra "Pix indisponível" (503), nunca um 500 cru.
+  app.onError((err, c) => {
+    console.error(err);
+    return c.html(errorScreen({ devBar: devBarFor(c), planName: plans[DEFAULT_PLAN_ID].name, retryHref: '/pix' }), 503);
+  });
 
   return app;
 }

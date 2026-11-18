@@ -39,6 +39,8 @@ Abra `http://localhost:8787/pix/dev`. O catálogo tem links para cada tela e cen
 
 Sem `PIX_DEV_TOOLS=true` (produção), `/pix/dev` e as rotas `/pix/dev/*` respondem 404, `?cenario=` é ignorado e a barra não aparece.
 
+Enquanto o Pix real (Banco Inter + banco de dados) não existe, sem `PIX_DEV_TOOLS=true` não há provedor nem lojas: a página inteira mostra "A venda por Pix está pausada" (falha fechada), não só as rotas de simulação somem.
+
 ### No celular
 
 - **Mesma rede Wi‑Fi:** rode `npx wrangler dev --ip 0.0.0.0` dentro de `apps/pix` e abra no celular `http://<ip-do-mac>:8787/pix/dev` (o IP aparece em Ajustes do Sistema → Wi‑Fi → Detalhes, ou com `ipconfig getifaddr en0`).

@@ -89,14 +89,28 @@ test('normaliza e-mail', async () => {
   assert.equal(r.order.email, 'motorista@email.com');
 });
 
-test('duplo envio reaproveita pedido ativo', async () => {
+test('duplo envio do mesmo formulário (mesmo nonce) reaproveita pedido ativo', async () => {
   const { service, stores, chargeCalls } = setup();
-  const a = await service.create({ planId: 'anual', email: 'a@x.com' });
-  const b = await service.create({ planId: 'anual', email: 'A@x.com ' });
+  const a = await service.create({ planId: 'anual', email: 'a@x.com', nonce: 'n1' });
+  assert.equal(a.order.nonce, 'n1');
+  const b = await service.create({ planId: 'anual', email: 'A@x.com ', nonce: 'n1' });
   assert.equal(b.ok, true);
   assert.equal(b.order.token, a.order.token);
   assert.equal(chargeCalls(), 1);
   assert.equal(freeCount(stores, 'anual'), 5);
+});
+
+test('outro nonce (ou nenhum) nunca devolve o pedido de outra pessoa', async () => {
+  const { service } = setup();
+  const victim = await service.create({ planId: 'anual', email: 'a@x.com', nonce: 'vitima' });
+  for (const nonce of ['outro', '', undefined]) {
+    const r = await service.create({ planId: 'anual', email: 'a@x.com', nonce });
+    if (r.ok) assert.notEqual(r.order.token, victim.order.token, String(nonce));
+    else assert.equal(r.reason, 'unavailable_for_customer');
+  }
+  // A primeira tentativa nova pega a outra oferta; as seguintes ficam indisponíveis para o e-mail.
+  const again = await service.create({ planId: 'anual', email: 'a@x.com', nonce: 'mais-um' });
+  assert.deepEqual(again, { ok: false, reason: 'unavailable_for_customer' });
 });
 
 test('pago → delivered com código', async () => {

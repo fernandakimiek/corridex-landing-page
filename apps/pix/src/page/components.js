@@ -172,12 +172,16 @@ ${LinkButton({ label: copy.help.cta, href: supportUrl, rel: 'noopener' })}
 ${backHref ? LinkButton({ label: copy.help.back, href: backHref, variant: 'plain' }) : ''}`;
 }
 
+// Sessão do teste grátis em campos ocultos: se o formulário voltar à escolha, o link continua.
+export function TrialFields(trial) {
+  if (!trial) return '';
+  return html`<input type="hidden" name="teste" value="1"><input type="hidden" name="dc_ler" value="${trial.dcLer}"><input type="hidden" name="dc_marcar" value="${trial.dcMarcar}">`;
+}
+
 // Pedido do teste grátis: tokens do app em campos ocultos.
 export function TrialRequest({ dcLer, dcMarcar, email = '', error, action = '/pix/teste', backHref = '/pix' }) {
   return html`<form class="stack" method="post" action="${action}">
-<input type="hidden" name="teste" value="1">
-<input type="hidden" name="dc_ler" value="${dcLer}">
-<input type="hidden" name="dc_marcar" value="${dcMarcar}">
+${TrialFields({ dcLer, dcMarcar })}
 ${EmailField({ value: email, error })}
 ${SubmitButton({ label: copy.trial.cta })}
 <p class="note center">${copy.trial.help}</p>

@@ -8,7 +8,8 @@ export function normalizeEmail(raw) {
   return EMAIL_RE.test(email) ? email : null;
 }
 
-function newToken() {
+// 16 bytes aleatórios em base64url (22 caracteres): token do pedido e nonce do formulário.
+export function randomId() {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
   return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
@@ -73,25 +74,27 @@ export function createOrderService({ provider, stores, plans, now, pixTtlSeconds
   }
 
   return {
-    async create({ planId, email: rawEmail }) {
+    // `nonce` vem do formulário de escolha. Só o mesmo formulário (duplo envio)
+    // reaproveita o pedido ativo: saber o e-mail de alguém não leva ao pedido dele.
+    async create({ planId, email: rawEmail, nonce = '' }) {
       const plan = Object.hasOwn(plans, planId) ? plans[planId] : null;
       if (!plan) return { ok: false, reason: 'invalid_plan' };
       const email = normalizeEmail(rawEmail);
       if (!email) return { ok: false, reason: 'invalid_email' };
 
-      const active = orders.findActive(email, planId);
-      if (active) {
-        if (now() < active.expiresAt) return { ok: true, order: active };
-        await sync(active); // vencido: libera a reserva antes de tentar de novo
-      }
+      const mine = nonce ? orders.findActive(email, planId, nonce) : null;
+      if (mine && now() < mine.expiresAt) return { ok: true, order: mine };
+      const stale = mine ?? orders.findActive(email, planId);
+      if (stale && now() >= stale.expiresAt) await sync(stale); // vencido: libera a reserva antes de tentar de novo
 
-      const token = newToken();
+      const token = randomId();
       const r = await reserveAndCharge(token, planId, email, plan.amountCents);
       if (!r.ok) return r;
       const order = {
         token,
         planId,
         email,
+        nonce,
         amountCents: plan.amountCents,
         txids: [r.txid],
         copiaECola: r.copiaECola,

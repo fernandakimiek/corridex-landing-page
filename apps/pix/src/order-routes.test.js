@@ -351,3 +351,105 @@ test('renovar sem provedor configurado → venda pausada, sem erro', async () =>
   assert.equal(res.status, 200);
   assert.equal((await dom(res)).querySelector('main').dataset.state, 'sales_paused');
 });
+
+// Corpo multipart com boundary quebrado: parseBody lança; a rota não pode dar 500.
+const badMultipart = (app, path) => app.request(path, {
+  method: 'POST',
+  headers: { 'content-type': 'multipart/form-data; boundary=quebrado' },
+  body: 'isto não é multipart',
+});
+
+test('POST /pix/pedidos com multipart malformado → escolha, nunca 500', async () => {
+  const ctx = setup();
+  const res = await badMultipart(ctx.app, '/pix/pedidos');
+  assert.notEqual(res.status, 500);
+  assert.equal(res.status, 200);
+  assert.equal((await dom(res)).querySelector('main').dataset.state, 'choose');
+});
+
+test('erro inesperado → tela "Pix indisponível" 503 (onError), com log', async (t) => {
+  const errors = t.mock.method(console, 'error', () => {});
+  const ctx = setup();
+  ctx.stores.codes.availability = () => { throw new Error('quebrou'); };
+  const res = await ctx.app.request('/pix');
+  assert.equal(res.status, 503);
+  assert.equal(res.headers.get('cache-control'), 'no-store');
+  const doc = await dom(res);
+  assert.equal(doc.querySelector('main').dataset.state, 'error');
+  assert.match(text(doc), /O Pix está indisponível agora/);
+  assert.equal(errors.mock.callCount(), 1);
+});
+
+const nonceOf = (doc) => doc.querySelector('form[action="/pix/pedidos"] input[type=hidden][name=nonce]')?.value;
+
+test('formulário de escolha traz nonce aleatório (16 bytes base64url)', async () => {
+  const ctx = setup();
+  const a = nonceOf(await dom(await ctx.app.request('/pix')));
+  const b = nonceOf(await dom(await ctx.app.request('/pix')));
+  assert.match(a, /^[A-Za-z0-9_-]{22}$/);
+  assert.notEqual(a, b);
+});
+
+test('duplo envio com o mesmo nonce → mesmo pedido; outro nonce nunca leva ao pedido de outra pessoa', async () => {
+  const ctx = setup();
+  const first = await createOrder(ctx, { plano: 'anual', email: EMAIL, nonce: 'form-1' });
+  const again = await createOrder(ctx, { plano: 'anual', email: EMAIL, nonce: 'form-1' });
+  assert.equal(again.location, first.location);
+  for (const nonce of [undefined, '', 'form-do-atacante']) {
+    const fields = { plano: 'anual', email: EMAIL };
+    if (nonce !== undefined) fields.nonce = nonce;
+    const res = await post(ctx.app, '/pix/pedidos', fields);
+    assert.notEqual(res.headers.get('location'), first.location, String(nonce));
+  }
+});
+
+test('escolha reexibida após recusa mantém o nonce enviado', async () => {
+  const ctx = setup();
+  const doc = await dom(await post(ctx.app, '/pix/pedidos', { plano: 'anual', email: 'sem-arroba', nonce: 'meu-nonce' }));
+  assert.equal(nonceOf(doc), 'meu-nonce');
+  const unknown = await dom(await post(ctx.app, '/pix/pedidos', { plano: 'vitalicio', email: EMAIL, nonce: 'meu-nonce' }));
+  assert.equal(nonceOf(unknown), 'meu-nonce');
+});
+
+test('aviso com campo de e-mail tem botão "Usar este e-mail" e mantém o teste grátis', async () => {
+  const ctx = setup();
+  const trial = 'teste=1&dc_ler=LER1&dc_marcar=MAR1';
+  for (const q of [`cenario=indisponivel-email&plano=mensal&${trial}`, `cenario=sem-estoque&plano=mensal&email=m%40email.com&${trial}`]) {
+    const doc = await dom(await ctx.app.request(`/pix?${q}`));
+    const form = doc.querySelector('input[name=email]').form;
+    assert.equal(form.getAttribute('method'), 'get', q);
+    const button = form.querySelector('button[type=submit]');
+    assert.equal(button.textContent.trim(), 'Usar este e-mail', q);
+    assert.ok(button.classList.contains('btn-secondary'), q);
+    assert.equal(form.querySelector('input[name=teste]').value, '1', q);
+    assert.equal(form.querySelector('input[name=dc_ler]').value, 'LER1', q);
+    assert.equal(form.querySelector('input[name=dc_marcar]').value, 'MAR1', q);
+  }
+});
+
+test('rota inexistente → tela amigável 404 com barra de simulação', async () => {
+  const ctx = setup();
+  const res = await ctx.app.request('/pix/nada');
+  assert.equal(res.status, 404);
+  const doc = await dom(res);
+  assert.equal(doc.querySelector('main').dataset.state, 'not_found');
+  assert.match(doc.body.textContent, /Simulação/);
+});
+
+test('páginas HTML levam Content-Security-Policy; JSON não', async () => {
+  const ctx = setup();
+  const res = await ctx.app.request('/pix');
+  assert.equal(
+    res.headers.get('content-security-policy'),
+    "default-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+  );
+  // O script do cliente é do mesmo domínio (permitido por default-src 'self') e não há script inline.
+  const doc = await dom(res);
+  const scripts = [...doc.querySelectorAll('script')];
+  assert.ok(scripts.length > 0);
+  for (const s of scripts) {
+    assert.match(s.getAttribute('src') ?? '', /^\/pix\//);
+    assert.equal(s.textContent.trim(), '');
+  }
+  assert.equal((await ctx.app.request('/pix/health')).headers.get('content-security-policy'), null);
+});

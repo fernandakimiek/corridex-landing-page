@@ -75,3 +75,24 @@ test('sem lojas ou venda pausada → tela de pausa', async () => {
     assert.match(doc.querySelector('h1').textContent, /pausad|indispon|volt/i);
   }
 });
+
+test('POST /pix/teste com multipart malformado → nunca 500', async () => {
+  const ctx = makeApp();
+  const res = await ctx.app.request('/pix/teste', {
+    method: 'POST',
+    headers: { 'content-type': 'multipart/form-data; boundary=quebrado' },
+    body: 'isto não é multipart',
+  });
+  assert.notEqual(res.status, 500);
+  assert.equal(res.status, 200);
+});
+
+test('e-mail que já recebeu todas as ofertas do teste → aviso "para este e-mail", aparelho não marcado', async () => {
+  const ctx = makeApp();
+  ctx.stores.codes.claim('x1', 'teste', 'motorista@email.com');
+  ctx.stores.codes.claim('x2', 'teste', 'motorista@email.com');
+  const doc = await dom(await post(ctx, ok));
+  assert.equal(doc.querySelector('h1').textContent.trim(), 'Para este e-mail, o Teste grátis fica disponível em algumas horas');
+  assert.match(doc.body.textContent, /Tente mais tarde ou assine pela App Store no app/);
+  assert.equal(ctx.stores.trials.used('LER1'), false);
+});

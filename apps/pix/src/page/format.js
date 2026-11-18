@@ -25,6 +25,16 @@ export function dateBR(iso) {
   return `${d}/${m}/${y}`;
 }
 
+// ms → 'aaaa-mm-dd' no fuso de Brasília (en-CA formata como ISO).
+const isoDateFmt = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+
+// ms → 'dd/mm/aaaa' no fuso de Brasília.
+export function dateBRFromMs(ms) {
+  return dateBR(isoDateFmt.format(new Date(ms)));
+}
+
 const timeFmt = new Intl.DateTimeFormat('pt-BR', {
   timeZone: 'America/Sao_Paulo',
   hour: '2-digit',
