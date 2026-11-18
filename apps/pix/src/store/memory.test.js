@@ -74,6 +74,19 @@ test('trials', () => {
   assert.equal(trials.used('d'), true);
 });
 
+test('trialSessions: cria, lê até vencer, apaga', () => {
+  const { trialSessions } = stores();
+  const id = trialSessions.create({ deviceKey: 'd', markToken: 'm', expiresAt: 1000 });
+  assert.match(id, /^[A-Za-z0-9_-]{22}$/);
+  assert.notEqual(trialSessions.create({ deviceKey: 'd', markToken: 'm', expiresAt: 1000 }), id);
+  assert.deepEqual(trialSessions.get(id, 999), { deviceKey: 'd', markToken: 'm', expiresAt: 1000 });
+  assert.equal(trialSessions.get(id, 1000), null);
+  assert.equal(trialSessions.get('outro', 0), null);
+  const other = trialSessions.create({ deviceKey: 'e', markToken: 'n', expiresAt: 1000 });
+  trialSessions.delete(other);
+  assert.equal(trialSessions.get(other, 0), null);
+});
+
 test('mesmo e-mail com duas reservas pega ofertas diferentes', () => {
   const { codes } = stores();
   const a = codes.reserve('annual', 'a@x.com', 'h1');

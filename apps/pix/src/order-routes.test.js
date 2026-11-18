@@ -13,7 +13,14 @@ function setup(overrides) {
   return ctx;
 }
 
-const post = (app, path, fields = {}) => app.request(path, { method: 'POST', body: new URLSearchParams(fields) });
+const post = (app, path, fields = {}, headers = {}) => app.request(path, { method: 'POST', body: new URLSearchParams(fields), headers });
+
+// Sessão do teste grátis: o link do app grava o cookie pix_trial; devolve o cabeçalho Cookie.
+async function trialHeaders(app) {
+  const res = await app.request('/pix?teste=1&dcq=DCQ&dcm=DCM');
+  return { Cookie: res.headers.getSetCookie().find((c) => c.startsWith('pix_trial=')).split(';')[0] };
+}
+const trialInputs = (doc) => doc.querySelectorAll('input[name=teste], input[name=dcq], input[name=dcm], input[name=dc_ler], input[name=dc_marcar]');
 
 async function createOrder(ctx, fields = { plano: 'annual', email: EMAIL }) {
   const res = await post(ctx.app, '/pix/pedidos', fields);
@@ -474,30 +481,18 @@ test('telas de resultado: todo texto visível vem do copy', async () => {
   }
 });
 
-test('e-mail inválido com sessão de teste grátis mantém o link do teste', async () => {
+test('e-mail inválido com sessão de teste grátis mantém o link do teste (pelo cookie)', async () => {
   const ctx = setup();
-  const res = await post(ctx.app, '/pix/pedidos', {
-    plano: 'annual', email: 'sem-arroba', teste: '1', dc_ler: 'a b', dc_marcar: 'x&y',
-  });
+  const headers = await trialHeaders(ctx.app);
+  const res = await post(ctx.app, '/pix/pedidos', { plano: 'annual', email: 'sem-arroba' }, headers);
   assert.equal(res.status, 200);
   const doc = await dom(res);
   const link = doc.querySelector('a[href^="/pix/teste"]');
   assert.ok(link);
-  assert.equal(link.getAttribute('href'), '/pix/teste?teste=1&dc_ler=a%20b&dc_marcar=x%26y');
-  // E os campos ocultos continuam no formulário para o próximo envio.
-  const form = doc.querySelector('form[action="/pix/pedidos"]');
-  assert.equal(form.querySelector('input[name=dc_ler]').value, 'a b');
-  assert.equal(form.querySelector('input[name=dc_marcar]').value, 'x&y');
-  assert.equal(form.querySelector('input[name=teste]').value, '1');
-});
-
-test('escolha via GET com sessão de teste leva os campos ocultos no formulário', async () => {
-  const doc = await dom(await setup().app.request('/pix?teste=1&dc_ler=abc&dc_marcar=def'));
-  const form = doc.querySelector('form[action="/pix/pedidos"]');
-  assert.equal(form.querySelector('input[name=dc_ler]').value, 'abc');
-  assert.equal(form.querySelector('input[name=dc_marcar]').value, 'def');
-  const plain = await dom(await setup().app.request('/pix'));
-  assert.equal(plain.querySelector('form[action="/pix/pedidos"] input[name=dc_ler]'), null);
+  assert.equal(link.getAttribute('href'), '/pix/teste');
+  assert.equal(trialInputs(doc).length, 0);
+  const plain = await dom(await post(ctx.app, '/pix/pedidos', { plano: 'annual', email: 'sem-arroba' }));
+  assert.equal(plain.querySelector('a[href^="/pix/teste"]'), null);
 });
 
 test('renovar sem provedor configurado → venda pausada, sem erro', async () => {
@@ -568,17 +563,16 @@ test('escolha reexibida após recusa mantém o nonce enviado', async () => {
 
 test('aviso com campo de e-mail tem botão "Usar este e-mail" e mantém o teste grátis', async () => {
   const ctx = setup();
-  const trial = 'teste=1&dc_ler=LER1&dc_marcar=MAR1';
-  for (const q of [`cenario=indisponivel-email&plano=monthly&${trial}`, `cenario=sem-estoque&plano=monthly&email=m%40email.com&${trial}`]) {
-    const doc = await dom(await ctx.app.request(`/pix?${q}`));
+  const headers = await trialHeaders(ctx.app);
+  for (const q of ['cenario=indisponivel-email&plano=monthly', 'cenario=sem-estoque&plano=monthly&email=m%40email.com']) {
+    const doc = await dom(await ctx.app.request(`/pix?${q}`, { headers }));
     const form = doc.querySelector('input[name=email]').form;
     assert.equal(form.getAttribute('method'), 'get', q);
     const button = form.querySelector('button[type=submit]');
     assert.equal(button.textContent.trim(), 'Usar este e-mail', q);
     assert.ok(button.classList.contains('btn-secondary'), q);
-    assert.equal(form.querySelector('input[name=teste]').value, '1', q);
-    assert.equal(form.querySelector('input[name=dc_ler]').value, 'LER1', q);
-    assert.equal(form.querySelector('input[name=dc_marcar]').value, 'MAR1', q);
+    assert.equal(trialInputs(doc).length, 0, q);
+    assert.equal(doc.querySelector('a[href="/pix/teste"]').closest('.bar'), null, q);
   }
 });
 

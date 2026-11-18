@@ -44,8 +44,11 @@ test('devTools: /pix/dev lista os 7 cenários e links principais', async () => {
   assert.ok(hrefs.includes('/pix'));
   assert.ok(hrefs.includes('/pix?plano=monthly'));
   assert.ok(hrefs.includes('/pix?cenario=pausado'));
-  assert.ok(hrefs.includes('/pix/teste?teste=1&dc_ler=dev-ler&dc_marcar=dev-marcar'));
-  assert.ok(hrefs.includes('/pix/teste?teste=1&dc_ler=dev-ler&dc_marcar=dev-marcar&cenario=teste-usado'));
+  const trial = hrefs.filter((h) => h.startsWith('/pix?teste=1&dcq=dev-'));
+  assert.equal(trial.length, 1);
+  assert.match(trial[0], /^\/pix\?teste=1&dcq=dev-[A-Za-z0-9_-]{22}&dcm=dev-marcar$/);
+  assert.ok(hrefs.includes('/pix/teste?cenario=teste-usado'));
+  assert.ok(!html.includes('dc_ler') && !html.includes('dc_marcar'));
   assert.ok(doc.querySelector('form[method=post][action="/pix/dev/pedido-exemplo"]'));
 });
 
@@ -84,4 +87,21 @@ test('sem devTools: /pix/dev, pagar e pedido-exemplo → 404 e nenhuma barra', a
   const html = await (await ctx.app.request('/pix')).text();
   assert.ok(!html.includes('class="devbar"'));
   assert.ok(!html.includes('Simulação'));
+});
+
+test('devTools: link do teste do catálogo é um aparelho novo a cada carga e abre o pedido do teste', async () => {
+  const ctx = makeApp();
+  const trialHref = async () => [...(await dom(await ctx.app.request('/pix/dev'))).querySelectorAll('a')]
+    .map((a) => a.getAttribute('href')).find((h) => h.startsWith('/pix?teste=1'));
+  const a = await trialHref();
+  const b = await trialHref();
+  assert.notEqual(a, b);
+  const res = await ctx.app.request(a);
+  assert.equal(res.status, 302);
+  const cookie = res.headers.getSetCookie().find((c) => c.startsWith('pix_trial='));
+  assert.ok(cookie);
+  const doc = await dom(await ctx.app.request('/pix/teste', { headers: { Cookie: cookie.split(';')[0] } }));
+  assert.equal(doc.querySelector('h1').textContent.trim(), 'Testar 7 dias grátis');
+  const used = await dom(await ctx.app.request('/pix/teste?cenario=teste-usado', { headers: { Cookie: cookie.split(';')[0] } }));
+  assert.equal(used.querySelector('h1').textContent.trim(), 'Este aparelho já usou o teste grátis');
 });

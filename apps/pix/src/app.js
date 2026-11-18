@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { html } from 'hono/html';
-import { getCookie, setCookie } from 'hono/cookie';
+import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import { PLANS, DEFAULT_PLAN_ID } from './plans.js';
 import { copy, t, dev } from './page/copy.pt-BR.js';
 import { devBarView, page } from './page/layout.js';
@@ -21,7 +21,14 @@ const PIX_TTL_SECONDS = 1800;
 const MAX_NONCE = 64;
 // Cookie com o id do token da Apple (7 dias, a validade padrão do token).
 const TOKEN_COOKIE = 'pix_tok';
-const TOKEN_COOKIE_OPTIONS = { httpOnly: true, secure: true, sameSite: 'Lax', path: '/pix', maxAge: 604800 };
+const COOKIE_ATTRS = { httpOnly: true, secure: true, sameSite: 'Lax', path: '/pix' };
+const TOKEN_COOKIE_OPTIONS = { ...COOKIE_ATTRS, maxAge: 604800 };
+// Cookie com o id da sessão do teste grátis (30 min); dcq/dcm ficam só no servidor.
+const TRIAL_COOKIE = 'pix_trial';
+const TRIAL_TTL_SECONDS = 1800;
+const TRIAL_COOKIE_OPTIONS = { ...COOKIE_ATTRS, maxAge: TRIAL_TTL_SECONDS };
+// Tamanho máximo de dcq/dcm (tokens do DeviceCheck em base64 ficam bem abaixo).
+const MAX_DEVICE_TOKEN = 4096;
 // Só recursos do próprio domínio; CSS inline (o layout embute o estilo) e SVG inline.
 const CSP = "default-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 
@@ -41,7 +48,8 @@ const formString = (form, key, max) => (typeof form[key] === 'string' ? form[key
 // então o mesmo caminho funciona no Cloudflare Workers hoje e na Vercel depois.
 // Não use APIs exclusivas da Cloudflare aqui (D1, KV, bindings): este arquivo
 // precisa rodar igual nas duas plataformas.
-export function createApp({ config, provider, stores, plans = PLANS, now = Date.now }) {
+// `deviceCheck` ({ isUsed(dcq), mark(deviceKey, dcm) }): sem ele o teste grátis não abre.
+export function createApp({ config, provider, stores, plans = PLANS, now = Date.now, deviceCheck = null }) {
   const app = new Hono().basePath('/pix');
 
   // Cabeçalhos das páginas HTML (o JSON de /health e /status fica como está).
@@ -82,28 +90,21 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     return null;
   }
 
-  // Sessão do teste grátis: só quando o app manda teste=1 e os dois tokens.
-  // `read(nome)` lê da query (GET) ou do formulário (POST, campos ocultos).
-  function trialSession(read) {
-    const str = (v) => (typeof v === 'string' ? v : '');
-    const dcLer = str(read('dc_ler'));
-    const dcMarcar = str(read('dc_marcar'));
-    if (str(read('teste')) !== '1' || !dcLer || !dcMarcar) return null;
-    return { dcLer, dcMarcar };
+  // Sessão do teste grátis do cookie: { id, deviceKey, markToken } ou null (sem cookie,
+  // forjado, vencido, ou sem DeviceCheck configurado).
+  function trialSession(c) {
+    if (!stores || !deviceCheck) return null;
+    const id = getCookie(c, TRIAL_COOKIE);
+    const session = id ? stores.trialSessions.get(id, now()) : null;
+    return session ? { ...session, id } : null;
   }
-  // Query da sessão do teste (encodeURIComponent: espaço vira %20, como o app manda).
-  const trialQuery = (trial) => `teste=1&dc_ler=${encodeURIComponent(trial.dcLer)}&dc_marcar=${encodeURIComponent(trial.dcMarcar)}`;
-  const trialHref = (trial) => (trial ? `/pix/teste?${trialQuery(trial)}` : null);
-  // "Voltar aos planos" do teste: a escolha com a mesma sessão.
-  const trialBackHref = (trial) => `/pix?${trialQuery(trial)}`;
 
   app.get('/health', (c) => c.json({ ok: true }));
 
   // Tela de escolha. `outOfStock` marca o plano como sem estoque (cenário ou pedido
   // recusado); `customerUnavailable`, indisponível para este e-mail.
   // `nonce`: o do formulário enviado (recusa reexibida) ou um novo.
-  function chooseView(c, { selectedPlanId, email = '', outOfStock, customerUnavailable, emailError, trial, nonce }) {
-    const session = trial === undefined ? trialSession((k) => c.req.query(k)) : trial;
+  function chooseView(c, { selectedPlanId, email = '', outOfStock, customerUnavailable, emailError, nonce }) {
     const selected = plans[selectedPlanId];
     // Disponibilidade geral; a checagem por e-mail acontece no POST.
     const unavailablePlanIds = planIds().filter((id) => stores.codes.availability(id, '') === 'out_of_stock');
@@ -130,7 +131,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
 
     return c.html(chooseScreen({
       devBar: devBarFor(c),
-      plans, selectedPlanId, email, notice, unavailablePlanIds, trialHref: trialHref(session), trialSession: session, state, emailError,
+      plans, selectedPlanId, email, notice, unavailablePlanIds, trialHref: trialSession(c) ? '/pix/teste' : null, state, emailError,
       nonce: nonce || randomId(),
     }));
   }
@@ -153,11 +154,26 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     setCookie(c, TOKEN_COOKIE, id, TOKEN_COOKIE_OPTIONS);
   }
 
-  app.get('/', (c) => {
-    // Primeira visita do app: processa e redireciona sempre (a URL limpa mostra a pausa, se houver).
-    const rawToken = c.req.query('t');
-    if (rawToken !== undefined) {
-      rememberPurchaseToken(c, rawToken);
+  // Link do teste grátis (teste=1, dcq, dcm): aparelho que nunca usou → sessão no servidor,
+  // o cookie leva só o id. Incompleto, já usado ou sem DeviceCheck é ignorado.
+  async function openTrialSession(c) {
+    if (!stores || !deviceCheck) return;
+    const token = (v) => typeof v === 'string' && v.length > 0 && v.length <= MAX_DEVICE_TOKEN;
+    const dcq = c.req.query('dcq');
+    const dcm = c.req.query('dcm');
+    if (c.req.query('teste') !== '1' || !token(dcq) || !token(dcm)) return;
+    if (await deviceCheck.isUsed(dcq)) return;
+    const id = stores.trialSessions.create({ deviceKey: dcq, markToken: dcm, expiresAt: now() + TRIAL_TTL_SECONDS * 1000 });
+    setCookie(c, TRIAL_COOKIE, id, TRIAL_COOKIE_OPTIONS);
+  }
+
+  app.get('/', async (c) => {
+    // Primeira visita do app (t, teste, dcq ou dcm): processa e redireciona sempre
+    // (a URL limpa mostra a pausa, se houver). Os dois cookies saem no mesmo 302.
+    if (['t', 'teste', 'dcq', 'dcm'].some((k) => c.req.query(k) !== undefined)) {
+      const rawToken = c.req.query('t');
+      if (rawToken !== undefined) rememberPurchaseToken(c, rawToken);
+      await openTrialSession(c);
       return linkRedirect(c, validPlanId(c.req.query('plano')));
     }
 
@@ -182,8 +198,8 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     : null;
 
   // Recusa do serviço → tela. Estoque e e-mail voltam à escolha com o aviso.
-  function refusal(c, reason, { planId, email, trial = null, nonce }) {
-    const base = { selectedPlanId: planId, email, trial, nonce };
+  function refusal(c, reason, { planId, email, nonce }) {
+    const base = { selectedPlanId: planId, email, nonce };
     if (reason === 'invalid_email') return chooseView(c, { ...base, emailError: true });
     if (reason === 'plan_out_of_stock') return chooseView(c, { ...base, outOfStock: true });
     if (reason === 'unavailable_for_customer') return chooseView(c, { ...base, customerUnavailable: true });
@@ -197,8 +213,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     const rawPlan = formString(form, 'plano', 32);
     const email = formString(form, 'email', MAX_EMAIL);
     const nonce = formString(form, 'nonce', MAX_NONCE);
-    const trial = trialSession((k) => form[k]);
-    if (!Object.hasOwn(plans, rawPlan)) return chooseView(c, { selectedPlanId: DEFAULT_PLAN_ID, email, trial, nonce });
+    if (!Object.hasOwn(plans, rawPlan)) return chooseView(c, { selectedPlanId: DEFAULT_PLAN_ID, email, nonce });
 
     // Só um id que o servidor conhece liga o pedido ao app; cookie forjado vira pedido do site.
     const tokenId = getCookie(c, TOKEN_COOKIE);
@@ -209,7 +224,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     } catch {
       result = { ok: false, reason: 'pix_unavailable' };
     }
-    if (!result.ok) return refusal(c, result.reason, { planId: rawPlan, email, trial, nonce });
+    if (!result.ok) return refusal(c, result.reason, { planId: rawPlan, email, nonce });
     return c.redirect(orderPath(result.order.token), 303);
   });
 
@@ -293,38 +308,35 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     return refusal(c, result.reason, { planId: order.planId, email: order.email });
   });
 
-  // Teste grátis: não depende do Pix, só das lojas. A chave do aparelho é o dc_ler.
+  // Teste grátis: não depende do Pix, só das lojas e do DeviceCheck. A sessão vem do cookie.
   app.get('/teste', (c) => {
     if (!stores || !config.salesEnabled) return c.html(pausedScreen({ devBar: devBarFor(c) }));
-    const session = trialSession((k) => c.req.query(k));
-    if (!session || scenario(c) === 'teste-usado' || stores.trials.used(session.dcLer)) return c.html(trialUsedScreen({ devBar: devBarFor(c) }));
-    return c.html(trialRequestScreen({ devBar: devBarFor(c), ...session, backHref: trialBackHref(session) }));
+    if (scenario(c) === 'teste-usado' || !trialSession(c)) return c.html(trialUsedScreen({ devBar: devBarFor(c) }));
+    return c.html(trialRequestScreen({ devBar: devBarFor(c) }));
   });
 
   app.post('/teste', async (c) => {
     if (!stores || !config.salesEnabled) return c.html(pausedScreen({ devBar: devBarFor(c) }));
+    const session = trialSession(c);
+    if (!session) return c.html(trialUsedScreen({ devBar: devBarFor(c) }));
     const form = await readForm(c);
-    const session = trialSession((k) => form[k]);
-    if (!session || stores.trials.used(session.dcLer)) return c.html(trialUsedScreen({ devBar: devBarFor(c) }));
     const rawEmail = formString(form, 'email', MAX_EMAIL);
     const email = normalizeEmail(rawEmail);
-    if (!email) {
-      return c.html(trialRequestScreen({ devBar: devBarFor(c), ...session, email: rawEmail, error: true, backHref: trialBackHref(session) }));
-    }
-    // E-mail que já recebeu todas as ofertas do teste: aviso "para este e-mail", não o de estoque.
-    if (stores.codes.availability('teste', email) === 'unavailable_for_customer') {
-      return c.html(trialStockScreen({ devBar: devBarFor(c), forCustomer: true }));
-    }
-    const code = stores.codes.claim(`trial:${session.dcLer}`, 'teste', email);
+    if (!email) return c.html(trialRequestScreen({ devBar: devBarFor(c), email: rawEmail, error: true }));
+    // Sem estoque ou e-mail que já recebeu o teste: a mesma tela de sem estoque.
+    const code = stores.codes.availability('teste', email) === 'ok'
+      ? stores.codes.claim(`trial:${session.deviceKey}`, 'teste', email)
+      : null;
     if (!code) return c.html(trialStockScreen({ devBar: devBarFor(c) }));
-    stores.trials.mark(session.dcLer);
+    await deviceCheck.mark(session.deviceKey, session.markToken);
+    stores.trialSessions.delete(session.id);
+    deleteCookie(c, TRIAL_COOKIE, { path: '/pix' });
     return c.html(trialDeliveredScreen({ devBar: devBarFor(c), code, email, appStoreId: config.appStoreId }));
   });
 
   // Ferramentas de simulação: só existem com devTools; sem ele, 404 normal.
   if (config.devTools) {
     const SAMPLE = { planId: 'annual', email: 'motorista@email.com' };
-    const TRIAL = '/pix/teste?teste=1&dc_ler=dev-ler&dc_marcar=dev-marcar';
     const li = (href, label) => html`<li><a href="${href}">${label}</a></li>`;
 
     // Catálogo no mesmo layout das telas (legível no celular).
@@ -335,7 +347,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
       body: html`<h1>${dev.title}</h1>
 ${section(dev.choose, html`<ul>${li('/pix', dev.choose)}${li('/pix?plano=monthly', dev.chooseMonthly)}</ul>`)}
 ${section(dev.scenarios, html`<ul>${['sem-estoque', 'indisponivel-email', 'pausado', 'fora-do-ar'].map((n) => li(`/pix?cenario=${n}`, n))}</ul>`)}
-${section(dev.trial, html`<ul>${li(TRIAL, dev.trialRequest)}${li(`${TRIAL}&cenario=teste-usado`, `${dev.trialUsed} (teste-usado)`)}</ul>`)}
+${section(dev.trial, html`<ul>${li(`/pix?teste=1&dcq=dev-${randomId()}&dcm=dev-marcar`, dev.trialRequest)}${li('/pix/teste?cenario=teste-usado', `${dev.trialUsed} (teste-usado)`)}</ul>`)}
 ${section(dev.orders, html`<form method="post" action="/pix/dev/pedido-exemplo"><button class="btn btn-primary" type="submit">${dev.createOrder}</button></form>`)}
 ${section(dev.orderScenarios, html`<p class="note">${dev.orderHint}</p><ul><li>vencido</li><li>pendente</li></ul>`)}`,
     })));

@@ -7,6 +7,12 @@ const text = (doc) => doc.body.textContent.replace(/\s+/g, ' ');
 
 const barButton = (doc) => doc.querySelector('.bar button[form=pedido]');
 
+// Sessão do teste grátis: o link do app grava o cookie pix_trial; devolve o cabeçalho Cookie.
+async function trialHeaders(app) {
+  const res = await app.request('/pix?teste=1&dcq=DCQ&dcm=DCM');
+  return { Cookie: res.headers.getSetCookie().find((c) => c.startsWith('pix_trial=')).split(';')[0] };
+}
+
 test('GET /pix mostra Anual selecionado com R$ 99,90', async () => {
   const res = await get('/pix');
   assert.equal(res.status, 200);
@@ -73,7 +79,8 @@ test('barra: "Gerar Pix · R$ 99,90" com form="pedido", fora do form, e "Pagamen
 });
 
 test('Termos, Privacidade e Ajuda no conteúdo (sem o texto do banco); link do teste no conteúdo', async () => {
-  const doc = await dom(await get('/pix?teste=1&dc_ler=L&dc_marcar=M'));
+  const { app } = makeApp();
+  const doc = await dom(await app.request('/pix', { headers: await trialHeaders(app) }));
   const row = doc.querySelector('main .links');
   assert.deepEqual([...row.querySelectorAll('a')].map((a) => a.textContent.trim()), ['Termos', 'Privacidade', 'Ajuda']);
   assert.doesNotMatch(row.textContent, /Banco Inter/);
@@ -82,16 +89,16 @@ test('Termos, Privacidade e Ajuda no conteúdo (sem o texto do banco); link do t
   assert.equal(trial.closest('.bar'), null);
 });
 
-test('envio do formulário completo (rádio, e-mail, nonce, teste) → 303 para o pedido', async () => {
+test('envio do formulário completo (rádio, e-mail, nonce) com sessão do teste → 303 para o pedido', async () => {
   const { app } = makeApp();
-  const doc = await dom(await app.request('/pix?teste=1&dc_ler=L&dc_marcar=M&email=m%40email.com'));
+  const doc = await dom(await app.request('/pix?email=m%40email.com', { headers: await trialHeaders(app) }));
   const form = doc.getElementById('pedido');
   const fields = [...doc.querySelectorAll('input, button, select, textarea')]
     .filter((el) => el.form === form && el.name && !el.disabled)
     .filter((el) => !(el.type === 'radio' || el.type === 'checkbox') || el.checked)
     .filter((el) => el.tagName !== 'BUTTON');
   const body = new URLSearchParams(fields.map((el) => [el.name, el.value]));
-  assert.deepEqual([...new Set(body.keys())].sort(), ['dc_ler', 'dc_marcar', 'email', 'nonce', 'plano', 'teste']);
+  assert.deepEqual([...new Set(body.keys())].sort(), ['email', 'nonce', 'plano']);
   assert.equal(body.get('plano'), 'annual');
   const res = await app.request(form.getAttribute('action'), { method: 'POST', body });
   assert.equal(res.status, 303);
@@ -135,16 +142,6 @@ test('cabeçalhos no-store, no-referrer, noindex', async () => {
   assert.equal(res.headers.get('x-robots-tag'), 'noindex');
   const health = await get('/pix/health');
   assert.equal(health.headers.get('x-robots-tag'), null);
-});
-
-test('link do teste só com teste=1 e dois tokens', async () => {
-  const without = await dom(await get('/pix?teste=1&dc_ler=abc'));
-  assert.equal(without.querySelector('a[href^="/pix/teste"]'), null);
-  const doc = await dom(await get('/pix?teste=1&dc_ler=a%20b&dc_marcar=x%26y'));
-  const link = doc.querySelector('a[href^="/pix/teste"]');
-  assert.ok(link);
-  assert.equal(link.getAttribute('href'), '/pix/teste?teste=1&dc_ler=a%20b&dc_marcar=x%26y');
-  assert.match(link.textContent, /Testar 7 dias grátis/);
 });
 
 test('?cenario=pausado → "A venda por Pix está pausada"; sem devTools o cenário é ignorado', async () => {

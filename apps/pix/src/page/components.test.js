@@ -80,8 +80,9 @@ test('HelpList e TrialRequest', async () => {
   const help = await frag(HelpList());
   assert.deepEqual([...help.querySelectorAll('.card.rows h2')].map((h) => h.textContent), [copy.help.account, copy.help.wait]);
   assert.equal(help.querySelector('a, button'), null);
-  const trial = await frag(TrialRequest({ dcLer: 'a"b', dcMarcar: 'c', email: '' }));
-  assert.equal(trial.querySelector('[name=dc_ler]').value, 'a"b');
+  const trial = await frag(TrialRequest({ email: 'a"b' }));
+  assert.equal(trial.querySelector('[name=email]').value, 'a"b');
+  assert.equal(trial.querySelectorAll('input[type=hidden]').length, 0);
   // O botão fica na barra de ação (form="teste"), fora do formulário.
   assert.equal(trial.querySelector('form').id, 'teste');
   assert.equal(trial.querySelector('button'), null);

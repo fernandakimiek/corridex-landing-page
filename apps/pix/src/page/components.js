@@ -265,17 +265,10 @@ export function HelpList() {
 </div>`;
 }
 
-// Sessão do teste grátis em campos ocultos: se o formulário voltar à escolha, o link continua.
-export function TrialFields(trial) {
-  if (!trial) return '';
-  return html`<input type="hidden" name="teste" value="1"><input type="hidden" name="dc_ler" value="${trial.dcLer}"><input type="hidden" name="dc_marcar" value="${trial.dcMarcar}">`;
-}
-
-// Pedido do teste grátis: tokens do app em campos ocultos. O botão de envio fica na
-// barra de ação (SubmitButton com form="teste"), fora do formulário.
-export function TrialRequest({ dcLer, dcMarcar, email = '', error, action = '/pix/teste', id = 'teste' }) {
+// Pedido do teste grátis: só o e-mail (a sessão do aparelho vem do cookie). O botão de
+// envio fica na barra de ação (SubmitButton com form="teste"), fora do formulário.
+export function TrialRequest({ email = '', error, action = '/pix/teste', id = 'teste' }) {
   return html`<form class="stack" id="${id}" method="post" action="${action}">
-${TrialFields({ dcLer, dcMarcar })}
 ${EmailField({ value: email, error })}
 <p class="note inset">${copy.trial.help}</p>
 </form>`;

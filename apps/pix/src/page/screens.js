@@ -5,7 +5,7 @@ import { brl, maskEmail } from './format.js';
 import {
   PlanSwitcher, EmailField, Notice, SubmitButton, LinkButton, planTitle, ActionBar, Hero, ResultHero, ctaLabel,
   FooterLinks, PixPayment, PaymentStatus, PayHero, CopyButton, CopyToast, RefreshNoJs,
-  CodeCard, OrderSummary, HelpList, RedeemButton, TrialRequest, TrialFields,
+  CodeCard, OrderSummary, HelpList, RedeemButton, TrialRequest,
 } from './components.js';
 
 // Telas completas (página inteira). Cada uma aceita `devBar` (Task 9) e repassa ao layout.
@@ -24,7 +24,7 @@ export function choosePath(planId, email) {
 // (a página continua utilizável sem JS), o aviso fica logo abaixo do cabeçalho e a
 // barra traz "Ver {outro plano}" (notice.action), se houver outro.
 export function chooseScreen({
-  plans, selectedPlanId, email = '', notice, unavailablePlanIds = [], trialHref, trialSession, emailError,
+  plans, selectedPlanId, email = '', notice, unavailablePlanIds = [], trialHref, emailError,
   state = 'choose', nonce = '', devBar,
 }) {
   const selected = plans[selectedPlanId];
@@ -38,7 +38,7 @@ export function chooseScreen({
     // Sem estoque, o campo só aparece se já há e-mail (ex.: pedido vencido que não renovou).
     const emailForm = state === 'unavailable_for_customer' || (state === 'plan_out_of_stock' && email)
       ? html`<form class="stack" method="get" action="/pix">
-<input type="hidden" name="plano" value="${selectedPlanId}">${TrialFields(trialSession)}
+<input type="hidden" name="plano" value="${selectedPlanId}">
 ${EmailField({ value: email, error: emailError })}
 ${SubmitButton({ label: copy.email.change, variant: 'secondary' })}
 </form>`
@@ -55,7 +55,7 @@ ${FooterLinks()}`;
 
   const body = html`${hero}
 <form class="stack" id="pedido" method="post" action="/pix/pedidos" novalidate>
-<input type="hidden" name="nonce" value="${nonce}">${TrialFields(trialSession)}
+<input type="hidden" name="nonce" value="${nonce}">
 ${PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds })}
 ${EmailField({ value: email, error: emailError })}
 </form>
@@ -165,19 +165,19 @@ export function notFoundScreen({ devBar } = {}) {
   return result({ title: copy.notFound.title, nav: { brand: true }, body, bar: plansBar(copy.notFound.cta), state: 'not_found', devBar });
 }
 
-// Teste grátis: pedido do e-mail. Os tokens do app seguem em campos ocultos;
+// Teste grátis: pedido do e-mail (a sessão do aparelho vem do cookie, não do formulário).
 // "Liberar 7 dias grátis" fica na barra (form="teste") com "Voltar aos planos".
-export function trialRequestScreen({ dcLer, dcMarcar, email = '', error, backHref = '/pix', devBar }) {
+export function trialRequestScreen({ email = '', error, devBar } = {}) {
   const body = html`${Hero({ icon: 'gift', title: copy.trial.title, sub: copy.trial.sub })}
-${TrialRequest({ dcLer, dcMarcar, email, error, id: 'teste' })}`;
+${TrialRequest({ email, error, id: 'teste' })}`;
   const bar = ActionBar({
     primary: SubmitButton({ label: copy.trial.cta, form: 'teste' }),
-    secondary: LinkButton({ label: copy.trial.back, href: backHref, variant: 'plain' }),
+    secondary: LinkButton({ label: copy.trial.back, href: '/pix', variant: 'plain' }),
   });
   return page({ title: copy.trial.title, nav: { title: copy.nav.trial }, body, bar, state: 'trial', devBar });
 }
 
-// Mesma mensagem para qualquer motivo (sem token, aparelho já usado).
+// Mesma mensagem para qualquer motivo (sem sessão, sessão vencida, aparelho já usado).
 export function trialUsedScreen({ devBar } = {}) {
   const body = ResultHero({ tone: 'info', title: copy.trial.used, body: copy.trial.usedBody });
   return result({
@@ -193,18 +193,15 @@ ${CodeCard({ code, email })}`;
   return result({ title: copy.trial.delivered, nav: { title: copy.nav.trial }, body, bar, state: 'trial_delivered', devBar });
 }
 
-// Teste sem código em estoque, ou (`forCustomer`) sem oferta nova para este e-mail.
-export function trialStockScreen({ forCustomer = false, devBar } = {}) {
+// Teste sem código em estoque (ou sem oferta nova para este e-mail: mesma tela).
+export function trialStockScreen({ devBar } = {}) {
   const plano = copy.trial.planName;
-  const msg = forCustomer
-    ? { title: t(copy.customer.unavailable, { plano }), body: copy.customer.unavailableBody }
-    : { title: t(copy.stock.title, { plano }), body: copy.stock.body };
   return result({
     title: plano,
     nav: { title: copy.nav.trial },
-    body: ResultHero({ tone: 'warning', ...msg }),
+    body: ResultHero({ tone: 'warning', title: t(copy.stock.title, { plano }), body: copy.stock.body }),
     bar: plansBar(copy.trial.seePlans),
-    state: forCustomer ? 'trial_unavailable_for_customer' : 'trial_out_of_stock',
+    state: 'trial_out_of_stock',
     devBar,
   });
 }

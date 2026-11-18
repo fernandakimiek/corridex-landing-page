@@ -4,6 +4,7 @@ import { PLANS } from '../plans.js';
 import { createMockPixProvider } from '../pix/mock-provider.js';
 import { createMemoryStores } from '../store/memory.js';
 import { seedCodes } from '../dev/seed.js';
+import { createMockDeviceCheck } from '../devicecheck/mock.js';
 
 export function makeApp(overrides = {}) {
   let t = null;
@@ -22,9 +23,12 @@ export function makeApp(overrides = {}) {
     ? overrides.stores
     : createMemoryStores({ codes: seedCodes() });
   const plans = 'plans' in overrides ? overrides.plans : PLANS;
+  const deviceCheck = 'deviceCheck' in overrides
+    ? overrides.deviceCheck
+    : (stores ? createMockDeviceCheck({ trials: stores.trials }) : null);
   const now = 'now' in overrides ? overrides.now : () => clock.now();
-  const app = createApp({ config, provider, stores, plans, now });
-  return { app, provider, stores, clock };
+  const app = createApp({ config, provider, stores, plans, now, deviceCheck });
+  return { app, provider, stores, deviceCheck, clock };
 }
 
 export async function dom(res) {

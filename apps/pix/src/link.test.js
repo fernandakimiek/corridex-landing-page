@@ -100,9 +100,29 @@ test('cookie forjado → origin site', async () => {
 
 test('GET /pix sem parâmetros do app → 200 (sem redirect)', async () => {
   const { app } = setup();
-  for (const path of ['/pix', '/pix?plano=monthly', '/pix?teste=1&dc_ler=a&dc_marcar=b']) {
+  for (const path of ['/pix', '/pix?plano=monthly', '/pix?plano=monthly&email=m%40email.com']) {
     const res = await get(app, path);
     assert.equal(res.status, 200, path);
     assert.equal(res.headers.get('set-cookie'), null, path);
   }
+});
+
+test('qualquer parâmetro do app (t, teste, dcq, dcm) → 302 para a URL limpa', async () => {
+  const { app } = setup();
+  for (const q of ['t=', 'teste=1', 'teste=0', 'dcq=a', 'dcm=b', 'teste=1&dcq=a&dcm=b']) {
+    const res = await get(app, `/pix?plano=monthly&${q}`);
+    assert.equal(res.status, 302, q);
+    assert.equal(res.headers.get('location'), '/pix?plano=monthly', q);
+  }
+});
+
+test('t e teste juntos → dois Set-Cookie num 302', async () => {
+  const { app } = setup();
+  const res = await get(app, `/pix?plano=monthly&t=${appToken()}&teste=1&dcq=DCQ&dcm=DCM`);
+  assert.equal(res.status, 302);
+  assert.equal(res.headers.get('location'), '/pix?plano=monthly');
+  const cookies = res.headers.getSetCookie();
+  assert.equal(cookies.length, 2);
+  assert.ok(cookies.some((c) => /^pix_tok=[A-Za-z0-9_-]{22};.*Max-Age=604800/.test(c)));
+  assert.ok(cookies.some((c) => /^pix_trial=[A-Za-z0-9_-]{22};.*Max-Age=1800/.test(c)));
 });

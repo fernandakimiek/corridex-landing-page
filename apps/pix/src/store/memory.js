@@ -1,11 +1,12 @@
 import { randomId } from '../orders.js';
 
-// Lojas em memória (pedidos, códigos, testes grátis, tokens da Apple). Estado vive só enquanto o processo vive.
+// Lojas em memória (pedidos, códigos, testes grátis e suas sessões, tokens da Apple). Estado vive só enquanto o processo vive.
 export function createMemoryStores({ codes: seed }) {
   const orders = new Map();
   const slots = seed.map((code) => ({ code: { ...code }, state: 'free', holderId: null, email: null }));
   const received = new Map(); // email -> Set<offerId>
   const trialKeys = new Set();
+  const trialSessionsById = new Map();
   const tokensById = new Map();
   const tokenIdByPurchase = new Map(); // externalPurchaseId -> id
 
@@ -91,6 +92,25 @@ export function createMemoryStores({ codes: seed }) {
     trials: {
       used: (deviceKey) => trialKeys.has(deviceKey),
       mark: (deviceKey) => void trialKeys.add(deviceKey),
+    },
+    // Sessão do teste grátis aberta pelo link do app; o cookie guarda só o `id`.
+    trialSessions: {
+      create({ deviceKey, markToken, expiresAt }) {
+        const id = randomId();
+        trialSessionsById.set(id, { deviceKey, markToken, expiresAt });
+        return id;
+      },
+      // Vencida (nowMs >= expiresAt) conta como inexistente e é descartada.
+      get(id, nowMs) {
+        const session = trialSessionsById.get(id);
+        if (!session) return null;
+        if (nowMs >= session.expiresAt) {
+          trialSessionsById.delete(id);
+          return null;
+        }
+        return { ...session };
+      },
+      delete: (id) => void trialSessionsById.delete(id),
     },
     // Token da Apple já decodificado; o cookie guarda só o `id`.
     tokens: {
