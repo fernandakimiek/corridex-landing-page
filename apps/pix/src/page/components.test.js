@@ -1,27 +1,38 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { PixPayment, PaymentStatus, CodeDelivery, CodeHelp, TrialRequest, Notice, EmailField } from './components.js';
+import { PixPayment, PayHero, PaymentStatus, CodeDelivery, CodeHelp, TrialRequest, Notice, EmailField } from './components.js';
 import { copy } from './copy.pt-BR.js';
 
 const frag = async (h) => new JSDOM(`<body>${await h}</body>`).window.document;
 
-test('PixPayment: copiar antes do QR, QR com rótulo, role=status', async () => {
+test('PixPayment: código com "Copiar" no resumo, textarea, passos e QR recolhido com rótulo', async () => {
   const doc = await frag(PixPayment({ copiaECola: '000201<x>', qrSvg: '<svg></svg>' }));
-  const button = doc.querySelector('[data-copy]');
-  assert.equal(button.textContent, copy.pix.copy);
+  const button = doc.querySelector('details.code summary [data-copy]');
+  assert.equal(button.textContent, copy.pix.copyShort);
   assert.equal(button.dataset.copy, '000201<x>');
-  const qr = doc.querySelector('[role=img]');
+  assert.equal(button.dataset.copied, copy.pix.copied);
+  assert.equal(doc.querySelector('#pix-code').value, '000201<x>');
+  const qr = doc.querySelector('details.qr [role=img]');
   assert.equal(qr.getAttribute('aria-label'), copy.pix.qrAlt);
-  assert.ok(button.compareDocumentPosition(qr) & 4); // botão vem antes
-  assert.ok(doc.querySelector('[role=status]'));
+  assert.ok(button.compareDocumentPosition(qr) & 4); // código vem antes
+  assert.equal(doc.querySelectorAll('ol.steps li').length, 3);
 });
 
-test('PaymentStatus: aria-live polite, hora e minutos', async () => {
-  const doc = await frag(PaymentStatus({ expiresAt: Date.UTC(2026, 10, 17, 15, 30), nowMs: Date.UTC(2026, 10, 17, 15, 0) }));
-  assert.match(doc.querySelector('[aria-live=polite]').textContent, /Aguardando pagamento…/);
-  assert.match(doc.body.textContent, /Vale até 12:30 \(30 min\)/);
+test('PayHero: plano, valor e "Vale até HH:MM · N min"', async () => {
+  const doc = await frag(PayHero({
+    plan: { name: 'Anual' }, amountCents: 9990,
+    expiresAt: Date.UTC(2026, 10, 17, 15, 30), nowMs: Date.UTC(2026, 10, 17, 15, 0),
+  }));
+  assert.equal(doc.querySelector('h1.amount').textContent, 'R$ 99,90');
+  assert.match(doc.body.textContent.replace(/\s+/g, ' '), /Corridex Anual R\$ 99,90 Vale até 12:30 · 30 min/);
   assert.equal(doc.querySelector('[data-minutes]').textContent, '30');
+});
+
+test('PaymentStatus: aria-live polite e link de atualizar só em <noscript>', async () => {
+  const doc = await frag(PaymentStatus({ refreshHref: '/pix/pedido/x' }));
+  assert.equal(doc.querySelector('[aria-live=polite]').textContent, copy.pix.waitingLong);
+  assert.equal(doc.querySelector('noscript a').getAttribute('href'), '/pix/pedido/x');
 });
 
 test('CodeDelivery: link de resgate, código agrupado e soletrado, e-mail mascarado', async () => {

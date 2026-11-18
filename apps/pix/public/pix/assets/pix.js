@@ -13,6 +13,18 @@ export function remaining(expiresAtMs, nowMs) {
 // Rótulo do botão da barra da escolha ("Gerar Pix · R$ X") para o rádio de plano.
 export const ctaLabelFor = (radio) => radio?.dataset?.cta ?? null;
 
+// Troca a .screen inteira pela do HTML novo. <noscript> parseado viraria HTML visível.
+export function swapScreen(doc, text) {
+  const d = new doc.defaultView.DOMParser().parseFromString(text, 'text/html');
+  const next = d.querySelector('.screen');
+  const cur = doc.querySelector('.screen');
+  if (!next || !cur) throw new Error('sem .screen');
+  next.querySelectorAll('noscript').forEach((n) => n.remove());
+  cur.replaceWith(next);
+  if (d.title) doc.title = d.title;
+  return next;
+}
+
 if (typeof document !== 'undefined') {
   const start = Date.now();
   let screen = document.querySelector('.screen');
@@ -46,18 +58,14 @@ if (typeof document !== 'undefined') {
     schedule();
   }
 
-  // Busca a página de novo e troca só a .screen (título, conteúdo e barra); foco vai para o h1.
+  // Busca a página de novo e troca a .screen inteira; foco vai para o h1.
   async function swap() {
     const res = await fetch(location.href, { cache: 'no-store' });
     if (!res.ok) throw new Error(res.status);
-    const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
-    const next = doc.querySelector('.screen');
-    if (!next) throw new Error('sem .screen');
+    const prev = screen.dataset.state;
+    const next = swapScreen(document, await res.text());
     // Mesmo estado (ex.: ?cenario= na URL): troca, mas não consulta em ciclo.
-    const changed = next.dataset.state !== screen.dataset.state;
-    screen.replaceWith(next);
-    if (doc.title) document.title = doc.title;
-    init(next, changed);
+    init(next, next.dataset.state !== prev);
     const h1 = next.querySelector('h1');
     if (h1) { h1.tabIndex = -1; h1.focus(); }
   }
@@ -90,10 +98,12 @@ if (typeof document !== 'undefined') {
     poll();
   });
 
-  // Copiar: aviso no role=status; se a área de transferência falhar, seleciona o código.
+  // Copiar: aviso no role=status; se falhar, abre o cartão e seleciona o código.
+  // preventDefault: o "Copiar" do cartão não abre/fecha o <details>.
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest && e.target.closest('[data-copy]');
     if (!btn) return;
+    e.preventDefault();
     const toast = screen.querySelector('[data-toast]');
     try {
       await navigator.clipboard.writeText(btn.dataset.copy);
@@ -103,7 +113,7 @@ if (typeof document !== 'undefined') {
       }
     } catch {
       const field = screen.querySelector('#pix-code');
-      if (field) { field.focus(); field.select(); }
+      if (field) { field.closest('details').open = true; field.focus(); field.select(); }
     }
   });
 

@@ -4,7 +4,7 @@ import { page } from './layout.js';
 import { brl, maskEmail, dateBRFromMs } from './format.js';
 import {
   Brand, PlanSwitcher, EmailField, Notice, SubmitButton, LinkButton, planTitle, ActionBar, Hero, ctaLabel,
-  StateIcon, FooterLinks, PixPayment, PaymentStatus, CodeDelivery, CodeHelp, TrialRequest, TrialFields,
+  StateIcon, FooterLinks, PixPayment, PaymentStatus, PayHero, CopyButton, CopyToast, CodeDelivery, CodeHelp, TrialRequest, TrialFields,
 } from './components.js';
 
 // Telas completas (página inteira). Cada uma aceita `devBar` (Task 9) e repassa ao layout.
@@ -86,16 +86,23 @@ ${LinkButton({ label: copy.down.cta, href: retryHref })}`;
 // Endereços do pedido.
 export const orderPath = (token) => `/pix/pedido/${encodeURIComponent(token)}`;
 
-// Pagando: copiar código antes do QR; status ao vivo; link sem JS para atualizar.
+// Pagando (formato dos apps de Pix): valor e validade no topo, código com "Copiar",
+// passos, QR recolhido e status ao vivo; "Copiar código Pix" na barra.
 // O cliente (pix.js) consulta data-status-url e conta até data-expires-at.
-export function payingScreen({ order, qrSvg, nowMs, devBar }) {
+export function payingScreen({ order, plan, qrSvg, nowMs, devBar }) {
   const path = orderPath(order.token);
-  const title = t(copy.pix.payTitle, { valor: brl(order.amountCents) });
-  const body = html`<h1>${title}</h1>
+  const body = html`${PayHero({ plan, amountCents: order.amountCents, expiresAt: order.expiresAt, nowMs })}
 ${PixPayment({ copiaECola: order.copiaECola, qrSvg })}
-${PaymentStatus({ expiresAt: order.expiresAt, nowMs, refreshHref: path })}`;
+${PaymentStatus({ refreshHref: path })}`;
+  const bar = ActionBar({ primary: CopyButton({ copiaECola: order.copiaECola }), secondary: CopyToast() });
   return page({
-    title, body, state: 'paying', data: { statusUrl: `${path}/status`, expiresAt: order.expiresAt }, devBar,
+    title: t(copy.pix.payTitle, { valor: brl(order.amountCents) }),
+    nav: { title: copy.nav.payment },
+    body,
+    bar,
+    state: 'paying',
+    data: { statusUrl: `${path}/status`, expiresAt: order.expiresAt },
+    devBar,
   });
 }
 

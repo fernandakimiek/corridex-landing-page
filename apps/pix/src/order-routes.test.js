@@ -31,39 +31,104 @@ test('POST válido → 303 para /pix/pedido/<token>', async () => {
   assert.equal(ctx.stores.orders.get(token).status, 'paying');
 });
 
-test('paying: botão "Copiar código Pix" antes do QR, SVG com aria-label, "Aguardando pagamento…" em aria-live=polite, "Vale até"', async () => {
+const FOLLOWING = 4; // Node.DOCUMENT_POSITION_FOLLOWING
+const before = (a, b) => Boolean(a.compareDocumentPosition(b) & FOLLOWING);
+
+async function payingDoc() {
   const ctx = setup();
   const { location, order } = await createOrder(ctx);
   const res = await ctx.app.request(location);
   assert.equal(res.status, 200);
   assert.equal(res.headers.get('cache-control'), 'no-store');
-  const doc = await dom(res);
-  assert.equal(doc.querySelector('h1').textContent, 'Pague R$ 99,90 com Pix');
-  const button = doc.querySelector('button[data-copy]');
-  assert.equal(button.textContent.trim(), 'Copiar código Pix');
-  assert.equal(button.dataset.copy, order().copiaECola);
-  assert.equal(doc.querySelector('textarea[readonly]').value, order().copiaECola);
-  const qr = doc.querySelector('.qr[role=img]');
-  assert.equal(qr.getAttribute('aria-label'), 'QR Code do Pix');
-  const svg = qr.querySelector('svg');
-  assert.ok(svg);
-  assert.equal(svg.getAttribute('aria-hidden'), 'true');
-  assert.ok(button.compareDocumentPosition(qr) & doc.defaultView.Node.DOCUMENT_POSITION_FOLLOWING);
-  const live = doc.querySelector('[aria-live=polite]');
-  assert.match(live.textContent, /Aguardando pagamento…/);
+  return { ctx, location, order, doc: await dom(res) };
+}
+
+test('paying: barra "Pagamento", plano, valor e "Vale até HH:MM · N min" no topo', async () => {
+  const { doc } = await payingDoc();
+  assert.equal(doc.querySelector('.nav').textContent.trim(), 'Pagamento');
+  assert.equal(doc.title, 'Pague R$ 99,90 com Pix · Corridex');
+  const h1s = doc.querySelectorAll('h1');
+  assert.equal(h1s.length, 1);
+  assert.equal(h1s[0].textContent.trim(), 'R$ 99,90');
+  assert.ok(h1s[0].classList.contains('amount'));
+  const top = h1s[0].parentElement;
+  assert.match(top.textContent.replace(/\s+/g, ' '), /Corridex Anual/);
   // 30 min de validade a partir das 12:00 de Brasília.
-  assert.match(text(doc), /Vale até 12:30 \(30 min\)/);
-  const refresh = [...doc.querySelectorAll('a')].find((a) => a.textContent.trim() === 'Já paguei, atualizar');
+  const valid = doc.querySelector('[data-minutes]').closest('p');
+  assert.equal(valid.textContent.replace(/\s+/g, ' ').trim(), 'Vale até 12:30 · 30 min');
+  assert.equal(doc.querySelector('[data-minutes]').textContent, '30');
+  assert.ok(top.contains(valid));
+});
+
+test('paying: cartão do código com "Copiar" no resumo, passos e QR recolhido, nessa ordem', async () => {
+  const { doc, order } = await payingDoc();
+  const code = doc.querySelector('details.code');
+  assert.ok(code);
+  assert.equal(code.open, false);
+  const summary = code.querySelector('summary');
+  const short = summary.querySelector('[data-copy]');
+  assert.ok(short, 'botão Copiar dentro do resumo do cartão do código');
+  assert.equal(short.getAttribute('type'), 'button');
+  assert.equal(short.textContent.trim(), 'Copiar');
+  assert.equal(summary.querySelector('.v').textContent, order().copiaECola);
+  const area = code.querySelector('textarea#pix-code[readonly]');
+  assert.equal(area.value, order().copiaECola);
+  assert.ok(!summary.contains(area));
+
+  const steps = doc.querySelector('ol.steps');
+  assert.deepEqual([...steps.querySelectorAll('li')].map((li) => li.textContent.replace(/\d/g, '').trim()), [
+    'Copie o código acima', 'Abra o app do seu banco', 'Escolha Pix Copia e Cola e cole',
+  ]);
+
+  const qrDetails = doc.querySelector('details.qr');
+  assert.equal(qrDetails.open, false);
+  assert.equal(qrDetails.querySelector('summary').textContent.trim(), 'Mostrar QR Code');
+  const qr = qrDetails.querySelector('[role=img]');
+  assert.equal(qr.getAttribute('aria-label'), 'QR Code do Pix');
+  assert.equal(qr.querySelector('svg').getAttribute('aria-hidden'), 'true');
+  assert.match(qrDetails.textContent, /Ou leia o QR Code com outro aparelho\./);
+
+  assert.ok(before(code, steps), 'código antes dos passos');
+  assert.ok(before(steps, qrDetails), 'passos antes do QR');
+});
+
+test('paying: dois [data-copy] com o mesmo valor e um único role=status para o aviso', async () => {
+  const { doc, order } = await payingDoc();
+  const buttons = [...doc.querySelectorAll('[data-copy]')];
+  assert.equal(buttons.length, 2);
+  for (const b of buttons) {
+    assert.equal(b.dataset.copy, order().copiaECola);
+    assert.equal(b.dataset.copied, 'Código copiado. Cole no app do seu banco.');
+  }
+  const statuses = doc.querySelectorAll('[role=status]');
+  assert.equal(statuses.length, 1);
+  assert.ok(doc.querySelector('.screen').contains(statuses[0]));
+  assert.ok(buttons.every((b) => !b.contains(statuses[0])));
+});
+
+test('paying: barra com "Copiar código Pix"; status ao vivo; "Já paguei, atualizar" só sem JS', async () => {
+  const { doc, location, order } = await payingDoc();
+  const bar = doc.querySelector('.screen > .bar');
+  const main = bar.querySelector('button.btn-primary[data-copy]');
+  assert.equal(main.textContent.trim(), 'Copiar código Pix');
+  assert.equal(main.getAttribute('type'), 'button');
+  assert.equal(main.dataset.copy, order().copiaECola);
+  assert.equal(bar.querySelectorAll('.btn').length, 1);
+
+  const live = doc.querySelector('[aria-live=polite]');
+  assert.equal(live.textContent.trim(), 'Aguardando pagamento. Esta tela muda sozinha.');
+  assert.ok(live.querySelector('.dot'));
+  // jsdom roda sem scripts: o conteúdo de <noscript> vira HTML de verdade.
+  const refresh = [...doc.querySelectorAll('noscript a')].find((a) => a.textContent.trim() === 'Já paguei, atualizar');
   assert.equal(refresh.getAttribute('href'), location);
 });
 
 test('paying: data-status-url e data-expires-at na .screen', async () => {
-  const ctx = setup();
-  const { location, order } = await createOrder(ctx);
-  const main = (await dom(await ctx.app.request(location))).querySelector('.screen');
-  assert.equal(main.dataset.state, 'paying');
-  assert.equal(main.dataset.statusUrl, `${location}/status`);
-  assert.equal(main.dataset.expiresAt, String(order().expiresAt));
+  const { doc, location, order } = await payingDoc();
+  const screen = doc.querySelector('.screen');
+  assert.equal(screen.dataset.state, 'paying');
+  assert.equal(screen.dataset.statusUrl, `${location}/status`);
+  assert.equal(screen.dataset.expiresAt, String(order().expiresAt));
 });
 
 test('após markPaid: delivered com "Resgatar código" → href apps.apple.com/redeem?ctx=offercodes&id=6756681755&code=…, código agrupado, e-mail mascarado, "Resgate até 16/05/2027"', async () => {

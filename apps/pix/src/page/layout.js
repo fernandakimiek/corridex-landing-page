@@ -102,15 +102,37 @@ a{color:var(--info-text)}
 .notice>.ic{grid-column:1;grid-row:1/span 2;width:28px;height:28px;color:var(--tone-text)}
 .notice>h1,.notice>h2{font-size:1.0625rem;font-weight:600;color:var(--tone-text)}
 .notice>.btn{grid-column:1/-1;margin-top:.75rem}
-.code{display:block;padding:1rem;border-radius:16px;background:var(--surface);font:600 1.25rem/1.3 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.08em;font-variant-numeric:tabular-nums;text-align:center;word-break:break-all}
-.pixcode{width:100%;padding:.5rem;border:1px solid var(--field-border);border-radius:10px;background:var(--surface);color:var(--label2);font:.8125rem ui-monospace,Menlo,monospace;resize:none}
+output.code{display:block;padding:1rem;border-radius:16px;background:var(--surface);font:600 1.25rem/1.3 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.08em;font-variant-numeric:tabular-nums;text-align:center;word-break:break-all}
+/* Pix gerado: topo com valor 34 px, cartão do código, passos, QR recolhido e status */
+.pay-hero{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.amount{font-size:2.125rem;font-weight:700;letter-spacing:-.01em}
+.timer{display:inline-flex;align-items:center;gap:6px;font-size:.9375rem;color:var(--label2)}
+.timer .i{flex:none;width:16px;height:16px}
+.group{display:flex;flex-direction:column;gap:6px}
+.glabel{padding-left:16px;font-size:.8125rem;color:var(--label2);text-transform:uppercase;letter-spacing:.02em}
+summary{list-style:none;cursor:pointer}
+summary::-webkit-details-marker{display:none}
+.code summary{display:flex;align-items:center;gap:12px}
+.code .v{flex:1;min-width:0;font:.9375rem ui-monospace,"SF Mono",Menlo,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* tint azul 12%: --info-text dá 4,5:1 (claro) e 4,7:1 (escuro) */
+.copy{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border:0;border-radius:999px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--info-text);font:inherit;font-size:.9375rem;font-weight:600;cursor:pointer}
+.copy .i{width:14px;height:14px}
+.pixcode{display:block;width:100%;margin-top:12px;padding:.5rem;border:1px solid var(--field-border);border-radius:10px;background:var(--surface);color:var(--label);font:.8125rem ui-monospace,Menlo,monospace;resize:none;word-break:break-all}
+.steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+.steps li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:.5px solid var(--card-border);font-size:.9375rem}
+.steps li:first-child{border-top:0;padding-top:0}
+.steps li:last-child{padding-bottom:0}
+.steps .n{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--info-text);font-size:.8125rem;font-weight:700}
+.qr summary{display:flex;align-items:center;justify-content:space-between;min-height:24px;color:var(--info-text)}
+.chev{width:12px;height:12px}
+.qr[open] .chev{transform:rotate(180deg)}
+.qr figure{margin-top:16px}
 /* QR legível por outro celular: até 13rem, quadrado, fundo branco mesmo no tema escuro */
-.qr{width:min(13rem,70vw);aspect-ratio:1;margin:0 auto;padding:6px;background:#FFF;border-radius:8px}
-.qr svg{display:block;width:100%;height:100%}
-.status{display:flex;align-items:center;justify-content:center;gap:.5rem;font-weight:600}
-.spin{width:1rem;height:1rem;border:2px solid var(--fill);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(1turn)}}
-.toast{min-height:1.4em;text-align:center;color:var(--success-text);font-weight:600}
+.qrimg{width:min(13rem,70vw);aspect-ratio:1;margin:0 auto;padding:6px;background:#FFF;border-radius:8px}
+.qrimg svg{display:block;width:100%;height:100%}
+.status{display:flex;align-items:center;justify-content:center;gap:10px;font-size:.9375rem;color:var(--label2)}
+.dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--warning-icon);box-shadow:0 0 0 4px color-mix(in srgb,var(--warning-icon) 18%,transparent)}
+.toast{text-align:center;color:var(--success-text);font-size:.9375rem;font-weight:600}
 .links{text-align:center;font-size:.8125rem;color:var(--label2)}
 .links a{display:inline-block;padding:.75rem .5rem;min-height:44px;color:var(--info-text);text-decoration:none}
 /* Barra de dev: faixa estática no topo, fora do fluxo da barra de ação */

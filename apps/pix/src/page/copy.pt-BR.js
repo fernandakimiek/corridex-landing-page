@@ -38,11 +38,9 @@ export const copy = {
     copy: 'Copiar código Pix',
     payTitle: 'Pague {valor} com Pix',
     copied: 'Código copiado. Cole no app do seu banco.',
-    codeLabel: 'Código Pix copia e cola',
+    codeLabel: 'Pix copia e cola',
     qrHint: 'Ou leia o QR Code com outro aparelho.',
     qrAlt: 'QR Code do Pix',
-    waiting: 'Aguardando pagamento…',
-    validUntil: 'Vale até {hora} ({minutos} min). Pode deixar esta página aberta: ela muda sozinha quando o Pix cair.',
     refresh: 'Já paguei, atualizar',
   },
   paid: {

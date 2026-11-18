@@ -215,7 +215,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
       default: {
         // SVG do QR é decorativo para leitor de tela: o rótulo fica no contêiner role=img.
         const qrSvg = renderSVG(order.copiaECola, { border: 2 }).replace('<svg ', '<svg aria-hidden="true" focusable="false" ');
-        return c.html(payingScreen({ devBar: devBarFor(c, { orderToken: token, payToken: token }), order, qrSvg, nowMs: now() }));
+        return c.html(payingScreen({ devBar: devBarFor(c, { orderToken: token, payToken: token }), order, plan, qrSvg, nowMs: now() }));
       }
     }
   });
