@@ -112,12 +112,13 @@ output.code{display:block;padding:1rem;border-radius:16px;background:var(--surfa
 .glabel{padding-left:16px;font-size:.8125rem;color:var(--label2);text-transform:uppercase;letter-spacing:.02em}
 summary{list-style:none;cursor:pointer}
 summary::-webkit-details-marker{display:none}
-.code summary{display:flex;align-items:center;gap:12px}
+.code .row{display:flex;align-items:center;gap:12px}
 .code .v{flex:1;min-width:0;font:.9375rem ui-monospace,"SF Mono",Menlo,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* tint azul 12%: --info-text dá 4,5:1 (claro) e 4,7:1 (escuro) */
 .copy{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border:0;border-radius:999px;background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--info-text);font:inherit;font-size:.9375rem;font-weight:600;cursor:pointer}
 .copy .i{width:14px;height:14px}
-.pixcode{display:block;width:100%;margin-top:12px;padding:.5rem;border:1px solid var(--field-border);border-radius:10px;background:var(--surface);color:var(--label);font:.8125rem ui-monospace,Menlo,monospace;resize:none;word-break:break-all}
+.more summary{display:flex;align-items:center;min-height:44px;margin-top:4px;color:var(--info-text);font-size:.8125rem}
+.pixcode{display:block;width:100%;margin-top:4px;padding:.5rem;border:1px solid var(--field-border);border-radius:10px;background:var(--surface);color:var(--label);font:.8125rem ui-monospace,Menlo,monospace;resize:none;word-break:break-all}
 .steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
 .steps li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:.5px solid var(--card-border);font-size:.9375rem}
 .steps li:first-child{border-top:0;padding-top:0}
@@ -132,7 +133,9 @@ summary::-webkit-details-marker{display:none}
 .qrimg svg{display:block;width:100%;height:100%}
 .status{display:flex;align-items:center;justify-content:center;gap:10px;font-size:.9375rem;color:var(--label2)}
 .dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--warning-icon);box-shadow:0 0 0 4px color-mix(in srgb,var(--warning-icon) 18%,transparent)}
-.toast{text-align:center;color:var(--success-text);font-size:.9375rem;font-weight:600}
+/* aviso de cópia flutua sobre a barra (não muda a altura dela); vazio não ocupa nada */
+.bar>.toast{position:absolute;left:0;right:0;bottom:100%;width:max-content;max-width:calc(100% - 40px);margin:0 auto 8px;padding:8px 14px;border-radius:999px;background:var(--surface);box-shadow:0 2px 12px #0000001F;color:var(--success-text);font-size:.9375rem;font-weight:600;text-align:center}
+.bar>.toast:empty{padding:0;box-shadow:none}
 .links{text-align:center;font-size:.8125rem;color:var(--label2)}
 .links a{display:inline-block;padding:.75rem .5rem;min-height:44px;color:var(--info-text);text-decoration:none}
 /* Barra de dev: faixa estática no topo, fora do fluxo da barra de ação */
@@ -174,6 +177,7 @@ export function page({ title, nav = { brand: true }, body, bar, layout = 'flow',
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <title>${title ? `${title} · ${copy.brand}` : copy.brand}</title>
 <style>${raw(CSS)}</style>
+<noscript><style>[data-copy]{display:none}</style></noscript>
 <script type="module" src="/pix/assets/pix.js"></script>
 </head>
 <body>

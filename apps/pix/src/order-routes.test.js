@@ -49,7 +49,11 @@ test('paying: barra "Pagamento", plano, valor e "Vale até HH:MM · N min" no to
   assert.equal(doc.title, 'Pague R$ 99,90 com Pix · Corridex');
   const h1s = doc.querySelectorAll('h1');
   assert.equal(h1s.length, 1);
-  assert.equal(h1s[0].textContent.trim(), 'R$ 99,90');
+  // Visível só o valor; o leitor de tela ouve "Pague R$ 99,90 com Pix".
+  assert.equal(h1s[0].textContent, 'Pague R$ 99,90 com Pix');
+  const visible = h1s[0].cloneNode(true);
+  visible.querySelectorAll('.vh').forEach((n) => n.remove());
+  assert.equal(visible.textContent, 'R$ 99,90');
   assert.ok(h1s[0].classList.contains('amount'));
   const top = h1s[0].parentElement;
   assert.match(top.textContent.replace(/\s+/g, ' '), /Corridex Anual/);
@@ -60,20 +64,27 @@ test('paying: barra "Pagamento", plano, valor e "Vale até HH:MM · N min" no to
   assert.ok(top.contains(valid));
 });
 
-test('paying: cartão do código com "Copiar" no resumo, passos e QR recolhido, nessa ordem', async () => {
+test('paying: cartão do código com "Copiar" ao lado, código completo recolhido, passos e QR, nessa ordem', async () => {
   const { doc, order } = await payingDoc();
-  const code = doc.querySelector('details.code');
+  const code = doc.querySelector('.card.code');
   assert.ok(code);
-  assert.equal(code.open, false);
-  const summary = code.querySelector('summary');
-  const short = summary.querySelector('[data-copy]');
-  assert.ok(short, 'botão Copiar dentro do resumo do cartão do código');
+  const short = code.querySelector('.row [data-copy]');
+  assert.ok(short, 'botão Copiar na linha do código');
   assert.equal(short.getAttribute('type'), 'button');
   assert.equal(short.textContent.trim(), 'Copiar');
-  assert.equal(summary.querySelector('.v').textContent, order().copiaECola);
-  const area = code.querySelector('textarea#pix-code[readonly]');
+  assert.equal(short.getAttribute('aria-label'), 'Copiar código Pix');
+  const v = code.querySelector('.row .v');
+  assert.equal(v.textContent, order().copiaECola);
+  assert.equal(v.getAttribute('aria-hidden'), 'true');
+  const more = code.querySelector('details');
+  assert.equal(more.open, false);
+  assert.equal(more.querySelector('summary').textContent.trim(), 'Ver código completo');
+  const area = more.querySelector('textarea#pix-code[readonly]');
   assert.equal(area.value, order().copiaECola);
-  assert.ok(!summary.contains(area));
+  assert.ok(area.getAttribute('aria-labelledby') || doc.querySelector('label[for=pix-code]'));
+  assert.ok(!more.querySelector('summary').contains(area));
+  // Nenhum controle dentro de <summary> (Review: nome acessível e interação aninhada).
+  assert.equal(doc.querySelectorAll('summary button, summary a, summary input, summary textarea').length, 0);
 
   const steps = doc.querySelector('ol.steps');
   assert.deepEqual([...steps.querySelectorAll('li')].map((li) => li.textContent.replace(/\d/g, '').trim()), [
@@ -113,14 +124,18 @@ test('paying: barra com "Copiar código Pix"; status ao vivo; "Já paguei, atual
   assert.equal(main.textContent.trim(), 'Copiar código Pix');
   assert.equal(main.getAttribute('type'), 'button');
   assert.equal(main.dataset.copy, order().copiaECola);
-  assert.equal(bar.querySelectorAll('.btn').length, 1);
+  assert.equal(bar.querySelectorAll('[data-copy]').length, 1);
 
   const live = doc.querySelector('[aria-live=polite]');
   assert.equal(live.textContent.trim(), 'Aguardando pagamento. Esta tela muda sozinha.');
   assert.ok(live.querySelector('.dot'));
   // jsdom roda sem scripts: o conteúdo de <noscript> vira HTML de verdade.
-  const refresh = [...doc.querySelectorAll('noscript a')].find((a) => a.textContent.trim() === 'Já paguei, atualizar');
+  // Na barra, para ela nunca ficar vazia sem JS (os botões de copiar somem).
+  const refresh = [...bar.querySelectorAll('noscript a')].find((a) => a.textContent.trim() === 'Já paguei, atualizar');
   assert.equal(refresh.getAttribute('href'), location);
+  assert.equal(doc.querySelectorAll('noscript a').length, 1);
+  // Sem JS, [data-copy] fica escondido (estilo dentro de <noscript> no head).
+  assert.match(doc.querySelector('head noscript style').textContent, /\[data-copy\]\{display:none\}/);
 });
 
 test('paying: data-status-url e data-expires-at na .screen', async () => {

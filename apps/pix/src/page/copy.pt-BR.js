@@ -33,6 +33,7 @@ export const copy = {
     step2: 'Abra o app do seu banco',
     step3: 'Escolha Pix Copia e Cola e cole',
     showQr: 'Mostrar QR Code',
+    showCode: 'Ver código completo',
     waitingLong: 'Aguardando pagamento. Esta tela muda sozinha.',
     validShort: 'Vale até {hora} · {minutos} min',
     copy: 'Copiar código Pix',

@@ -162,11 +162,13 @@ const CHEVRON = svg('i chev', '<path d="M3 4.5l3 3 3-3" fill="none" stroke="curr
 const minutesLeft = (expiresAt, nowMs) => Math.max(0, Math.ceil((expiresAt - nowMs) / 60_000));
 
 // Topo do Pix gerado: plano, valor (h1, 34 px) e "Vale até HH:MM · N min".
-// [data-minutes] é atualizado pelo cliente (pix.js).
+// O h1 mostra só o valor; o resto de pix.payTitle ("Pague … com Pix") fica oculto (.vh)
+// para o leitor de tela. [data-minutes] é atualizado pelo cliente (pix.js).
 export function PayHero({ plan, amountCents, expiresAt, nowMs }) {
+  const [pre, post] = copy.pix.payTitle.split('{valor}');
   return html`<div class="pay-hero">
 ${plan ? html`<p class="sub">${planTitle(plan)}</p>` : ''}
-<h1 class="amount">${brl(amountCents)}</h1>
+<h1 class="amount">${pre ? html`<span class="vh">${pre}</span>` : ''}${brl(amountCents)}${post ? html`<span class="vh">${post}</span>` : ''}</h1>
 <p class="timer">${raw(CLOCK)}<span>${tHtml(copy.pix.validShort, {
     hora: timeBR(expiresAt),
     minutos: html`<span data-minutes>${minutesLeft(expiresAt, nowMs)}</span>`,
@@ -186,16 +188,20 @@ export function CopyButton({ copiaECola }) {
 // Aviso "Código copiado…" compartilhado pelos dois botões de copiar.
 export const CopyToast = () => html`<p class="toast" role="status" data-toast></p>`;
 
-// Pix copia e cola (cartão com o código numa linha e "Copiar" ao lado), passos e QR recolhido.
-// Sem JS, tocar no cartão abre o código inteiro num textarea selecionável (também é o
-// alvo do cliente quando a área de transferência falha). O QR fica num <details>.
+// Pix copia e cola: cartão com o código numa linha (decorativo, aria-hidden) e "Copiar"
+// ao lado; embaixo, "Ver código completo" (<details>) abre o textarea selecionável,
+// caminho sem JS e alvo do cliente quando a área de transferência falha.
+// Nenhum controle fica dentro de <summary>. Passos e QR recolhido em seguida.
 export function PixPayment({ copiaECola, qrSvg }) {
   return html`<div class="group">
 <p class="glabel" id="pix-code-label">${copy.pix.codeLabel}</p>
-<details class="card code">
-<summary><span class="v">${copiaECola}</span><button type="button" class="copy" ${copyAttrs(copiaECola)}>${raw(COPY_IC)}${copy.pix.copyShort}</button></summary>
+<div class="card code">
+<div class="row"><span class="v" aria-hidden="true">${copiaECola}</span><button type="button" class="copy" aria-label="${copy.pix.copy}" ${copyAttrs(copiaECola)}>${raw(COPY_IC)}${copy.pix.copyShort}</button></div>
+<details class="more">
+<summary>${copy.pix.showCode}</summary>
 <textarea id="pix-code" class="pixcode" rows="4" readonly aria-labelledby="pix-code-label">${copiaECola}</textarea>
 </details>
+</div>
 </div>
 <div class="card"><ol class="steps">
 ${[copy.pix.step1, copy.pix.step2, copy.pix.step3].map((step, i) => html`<li><span class="n" aria-hidden="true">${i + 1}</span>${step}</li>`)}
@@ -209,11 +215,13 @@ ${[copy.pix.step1, copy.pix.step2, copy.pix.step3].map((step, i) => html`<li><sp
 </details>`;
 }
 
-// Status do pagamento (aria-live=polite). Sem JS, link para recarregar.
-export function PaymentStatus({ refreshHref }) {
-  return html`<div class="status" aria-live="polite"><span class="dot" aria-hidden="true"></span><span>${copy.pix.waitingLong}</span></div>
-${refreshHref ? html`<noscript>${LinkButton({ label: copy.pix.refresh, href: refreshHref, variant: 'plain' })}</noscript>` : ''}`;
+// Status do pagamento (aria-live=polite).
+export function PaymentStatus() {
+  return html`<div class="status" aria-live="polite"><span class="dot" aria-hidden="true"></span><span>${copy.pix.waitingLong}</span></div>`;
 }
+
+// Sem JS (os botões de copiar somem): "Já paguei, atualizar" recarrega a página.
+export const RefreshNoJs = ({ href }) => html`<noscript>${LinkButton({ label: copy.pix.refresh, href, variant: 'secondary' })}</noscript>`;
 
 const spelled = (value) => value.split('').join(' ');
 

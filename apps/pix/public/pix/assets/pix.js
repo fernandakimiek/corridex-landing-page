@@ -98,12 +98,10 @@ if (typeof document !== 'undefined') {
     poll();
   });
 
-  // Copiar: aviso no role=status; se falhar, abre o cartão e seleciona o código.
-  // preventDefault: o "Copiar" do cartão não abre/fecha o <details>.
+  // Copiar: aviso no role=status; se falhar, abre "Ver código completo" e seleciona.
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest && e.target.closest('[data-copy]');
     if (!btn) return;
-    e.preventDefault();
     const toast = screen.querySelector('[data-toast]');
     try {
       await navigator.clipboard.writeText(btn.dataset.copy);

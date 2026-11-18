@@ -4,7 +4,7 @@ import { page } from './layout.js';
 import { brl, maskEmail, dateBRFromMs } from './format.js';
 import {
   Brand, PlanSwitcher, EmailField, Notice, SubmitButton, LinkButton, planTitle, ActionBar, Hero, ctaLabel,
-  StateIcon, FooterLinks, PixPayment, PaymentStatus, PayHero, CopyButton, CopyToast, CodeDelivery, CodeHelp, TrialRequest, TrialFields,
+  StateIcon, FooterLinks, PixPayment, PaymentStatus, PayHero, CopyButton, CopyToast, RefreshNoJs, CodeDelivery, CodeHelp, TrialRequest, TrialFields,
 } from './components.js';
 
 // Telas completas (página inteira). Cada uma aceita `devBar` (Task 9) e repassa ao layout.
@@ -93,8 +93,12 @@ export function payingScreen({ order, plan, qrSvg, nowMs, devBar }) {
   const path = orderPath(order.token);
   const body = html`${PayHero({ plan, amountCents: order.amountCents, expiresAt: order.expiresAt, nowMs })}
 ${PixPayment({ copiaECola: order.copiaECola, qrSvg })}
-${PaymentStatus({ refreshHref: path })}`;
-  const bar = ActionBar({ primary: CopyButton({ copiaECola: order.copiaECola }), secondary: CopyToast() });
+${PaymentStatus()}`;
+  // Sem JS, [data-copy] some (layout) e a barra mostra "Já paguei, atualizar".
+  const bar = ActionBar({
+    primary: CopyButton({ copiaECola: order.copiaECola }),
+    secondary: html`${CopyToast()}${RefreshNoJs({ href: path })}`,
+  });
   return page({
     title: t(copy.pix.payTitle, { valor: brl(order.amountCents) }),
     nav: { title: copy.nav.payment },
