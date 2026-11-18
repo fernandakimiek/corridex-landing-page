@@ -87,7 +87,7 @@ test('POST entrega código e link de resgate; segundo POST → já usou', async 
   assert.match(doc.querySelector('main .card .note').textContent, /enviado para m•••@email\.com$/);
   assert.equal(doc.querySelector('main dl'), null);
   const redeem = bar(doc).querySelector('a.btn-primary');
-  assert.equal(redeem.textContent.trim(), 'Resgatar na App Store');
+  assert.equal(redeem.textContent.trim(), 'Resgatar código');
   assert.match(redeem.getAttribute('href'), /^https:\/\/apps\.apple\.com\/redeem\?ctx=offercodes&id=6756681755&code=.+/);
   assert.equal(bar(doc).querySelectorAll('a').length, 1);
   assert.ok(![...doc.querySelectorAll('a')].some((a) => a.textContent.includes('não funcionou')));

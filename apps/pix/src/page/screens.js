@@ -114,7 +114,7 @@ ${PaymentStatus()}`;
   });
 }
 
-// Pago e entregue: código pronto para resgatar; "Resgatar na App Store" e a ajuda na barra.
+// Pago e entregue: código pronto para resgatar; "Resgatar código" e a ajuda na barra.
 export function deliveredScreen({ order, plan, appStoreId, devBar }) {
   const body = html`${ResultHero({ tone: 'success', title: copy.paid.title, body: copy.paid.next })}
 ${CodeCard({ code: order.code, email: order.email })}

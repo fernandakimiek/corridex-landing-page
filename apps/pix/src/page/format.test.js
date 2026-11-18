@@ -46,8 +46,8 @@ test('dateBRFromMs usa o fuso de Brasília', () => {
 });
 
 test('perMonth: preço por mês dos planos de mais de 1 mês', () => {
-  assert.equal(perMonth(PLANS.mensal), null);
-  assert.equal(perMonth(PLANS.trimestral), 'R$ 8,63');
-  assert.equal(perMonth(PLANS.anual), 'R$ 8,33');
+  assert.equal(perMonth(PLANS.monthly), null);
+  assert.equal(perMonth(PLANS.quarterly), 'R$ 8,63');
+  assert.equal(perMonth(PLANS.annual), 'R$ 8,33');
   assert.deepEqual(Object.values(PLANS).map((p) => p.months), [1, 3, 12]);
 });

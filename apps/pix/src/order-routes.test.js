@@ -15,7 +15,7 @@ function setup(overrides) {
 
 const post = (app, path, fields = {}) => app.request(path, { method: 'POST', body: new URLSearchParams(fields) });
 
-async function createOrder(ctx, fields = { plano: 'anual', email: EMAIL }) {
+async function createOrder(ctx, fields = { plano: 'annual', email: EMAIL }) {
   const res = await post(ctx.app, '/pix/pedidos', fields);
   assert.equal(res.status, 303);
   const location = res.headers.get('location');
@@ -157,7 +157,7 @@ test('paying: data-status-url e data-expires-at na .screen', async () => {
   assert.equal(screen.dataset.expiresAt, String(order().expiresAt));
 });
 
-test('após markPaid: delivered centralizado; cartão "Seu código" com prazo e e-mail; resumo em lista; barra "Resgatar na App Store" e ajuda', async () => {
+test('após markPaid: delivered centralizado; cartão "Seu código" com prazo e e-mail; resumo em lista; barra "Resgatar código" e ajuda', async () => {
   const ctx = setup();
   const { location, order } = await createOrder(ctx);
   ctx.provider.markPaid(lastTxid(order()));
@@ -185,7 +185,7 @@ test('após markPaid: delivered centralizado; cartão "Seu código" com prazo e 
   // Barra: resgate (link exato, ícone decorativo) e "O código não funcionou?".
   const b = bar(doc);
   const redeem = b.querySelector('a.btn-primary');
-  assert.equal(redeem.textContent.trim(), 'Resgatar na App Store');
+  assert.equal(redeem.textContent.trim(), 'Resgatar código');
   assert.equal(redeem.getAttribute('href'), `https://apps.apple.com/redeem?ctx=offercodes&id=6756681755&code=${code}`);
   assert.equal(redeem.querySelector('svg').getAttribute('aria-hidden'), 'true');
   const help = [...b.querySelectorAll('a')].find((a) => a.textContent.trim() === 'O código não funcionou?');
@@ -258,7 +258,7 @@ test('renovar sem código disponível → escolha com aviso de estoque e e-mail'
   ctx.clock.set(T0 + 1801 * 1000);
   await ctx.app.request(location); // vence e libera
   // Outro motorista leva todos os códigos do anual.
-  for (let i = 0; i < 6; i++) ctx.stores.codes.reserve('anual', `outro${i}@email.com`, `h${i}`);
+  for (let i = 0; i < 6; i++) ctx.stores.codes.reserve('annual', `outro${i}@email.com`, `h${i}`);
   const res = await post(ctx.app, `${location}/renovar`);
   assert.equal(res.status, 200);
   const doc = await dom(res);
@@ -274,21 +274,22 @@ test('pending: centralizado, "Seu código está a caminho", para onde vai e sem 
   ctx.provider.markPaid(lastTxid(order()));
   // Sem código para entregar: a reserva sumiu e o estoque acabou.
   ctx.stores.codes.release(order().token);
-  for (let i = 0; i < 6; i++) ctx.stores.codes.reserve('anual', `outro${i}@email.com`, `h${i}`);
+  for (let i = 0; i < 6; i++) ctx.stores.codes.reserve('annual', `outro${i}@email.com`, `h${i}`);
   const doc = await dom(await ctx.app.request(location));
   assert.equal(doc.querySelector('.screen').dataset.state, 'pending');
   assertResult(doc, 'Pagamento confirmado');
   assert.equal(doc.querySelector('.nav').textContent.trim(), 'Pagamento');
   assert.ok(doc.querySelector('.result-hero[data-tone=success]'));
   assert.match(text(doc), /Seu código está a caminho/);
-  assert.match(text(doc), /Ele chega por e-mail em até 2 horas/);
+  assert.match(text(doc), /Ele chega por e-mail em algumas horas/);
+  assert.doesNotMatch(text(doc), /2 horas/);
   assert.match(text(doc), /Enviaremos para m•••@email\.com\./);
   assert.equal(bar(doc), null);
 });
 
 test('e-mail inválido volta à escolha com mensagem ligada por aria-describedby', async () => {
   const ctx = setup();
-  const res = await post(ctx.app, '/pix/pedidos', { plano: 'mensal', email: 'sem-arroba' });
+  const res = await post(ctx.app, '/pix/pedidos', { plano: 'monthly', email: 'sem-arroba' });
   assert.equal(res.status, 200);
   const doc = await dom(res);
   assert.equal(doc.querySelector('.screen').dataset.state, 'choose');
@@ -298,7 +299,7 @@ test('e-mail inválido volta à escolha com mensagem ligada por aria-describedby
   const ids = input.getAttribute('aria-describedby').split(' ');
   const err = doc.getElementById(ids[0]);
   assert.equal(err.textContent, 'Confira o e-mail. Ele precisa ter @ e um domínio, como nome@email.com.');
-  assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'mensal');
+  assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'monthly');
 });
 
 test('token inexistente → 404 com página amigável; /status → 404 JSON', async () => {
@@ -326,8 +327,8 @@ test('token inexistente → 404 com página amigável; /status → 404 JSON', as
 
 test('POST com plano sem estoque → escolha com aviso', async () => {
   const ctx = setup();
-  for (let i = 0; i < 6; i++) ctx.stores.codes.reserve('mensal', `outro${i}@email.com`, `h${i}`);
-  const res = await post(ctx.app, '/pix/pedidos', { plano: 'mensal', email: EMAIL });
+  for (let i = 0; i < 6; i++) ctx.stores.codes.reserve('monthly', `outro${i}@email.com`, `h${i}`);
+  const res = await post(ctx.app, '/pix/pedidos', { plano: 'monthly', email: EMAIL });
   assert.equal(res.status, 200);
   const doc = await dom(res);
   assert.equal(doc.querySelector('.screen').dataset.state, 'plan_out_of_stock');
@@ -336,10 +337,10 @@ test('POST com plano sem estoque → escolha com aviso', async () => {
 
 test('POST para quem já recebeu os códigos do plano → aviso por e-mail', async () => {
   const ctx = setup();
-  // O e-mail já recebeu as duas ofertas do mensal.
-  ctx.stores.codes.claim('x1', 'mensal', EMAIL);
-  ctx.stores.codes.claim('x2', 'mensal', EMAIL);
-  const res = await post(ctx.app, '/pix/pedidos', { plano: 'mensal', email: EMAIL });
+  // O e-mail já recebeu as duas ofertas do monthly.
+  ctx.stores.codes.claim('x1', 'monthly', EMAIL);
+  ctx.stores.codes.claim('x2', 'monthly', EMAIL);
+  const res = await post(ctx.app, '/pix/pedidos', { plano: 'monthly', email: EMAIL });
   assert.equal(res.status, 200);
   const doc = await dom(res);
   assert.equal(doc.querySelector('.screen').dataset.state, 'unavailable_for_customer');
@@ -354,14 +355,14 @@ test('POST com plano desconhecido ou ausente → escolha com o plano padrão', a
     assert.equal(res.status, 200);
     const doc = await dom(res);
     assert.equal(doc.querySelector('.screen').dataset.state, 'choose');
-    assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'anual');
+    assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'annual');
     assert.equal(doc.querySelector('input[type=email]').value, EMAIL);
   }
 });
 
 test('POST com venda pausada → tela de pausa, sem pedido', async () => {
   const ctx = setup({ config: { salesEnabled: false } });
-  const res = await post(ctx.app, '/pix/pedidos', { plano: 'anual', email: EMAIL });
+  const res = await post(ctx.app, '/pix/pedidos', { plano: 'annual', email: EMAIL });
   assert.equal(res.status, 200);
   const doc = await dom(res);
   assert.equal(doc.querySelector('.screen').dataset.state, 'sales_paused');
@@ -381,7 +382,7 @@ test('pedido já pago continua visível com a venda pausada', async () => {
 
 test('Pix fora do ar ao criar → tela de erro 503', async () => {
   const ctx = setup({ provider: { createCharge: async () => { throw new Error('x'); }, getCharge: async () => null } });
-  const res = await post(ctx.app, '/pix/pedidos', { plano: 'trimestral', email: EMAIL });
+  const res = await post(ctx.app, '/pix/pedidos', { plano: 'quarterly', email: EMAIL });
   assert.equal(res.status, 503);
   const doc = await dom(res);
   assert.equal(doc.querySelector('.screen').dataset.state, 'error');
@@ -390,7 +391,7 @@ test('Pix fora do ar ao criar → tela de erro 503', async () => {
   assert.match(doc.title, /Corridex Trimestral/);
   const retry = bar(doc).querySelector('a.btn-primary');
   assert.equal(retry.textContent.trim(), 'Tentar de novo');
-  assert.equal(retry.getAttribute('href'), '/pix?plano=trimestral&email=motorista%40email.com');
+  assert.equal(retry.getAttribute('href'), '/pix?plano=quarterly&email=motorista%40email.com');
 });
 
 test('falha ao consultar o Pix → 503 (página e status), nunca 500', async () => {
@@ -476,7 +477,7 @@ test('telas de resultado: todo texto visível vem do copy', async () => {
 test('e-mail inválido com sessão de teste grátis mantém o link do teste', async () => {
   const ctx = setup();
   const res = await post(ctx.app, '/pix/pedidos', {
-    plano: 'anual', email: 'sem-arroba', teste: '1', dc_ler: 'a b', dc_marcar: 'x&y',
+    plano: 'annual', email: 'sem-arroba', teste: '1', dc_ler: 'a b', dc_marcar: 'x&y',
   });
   assert.equal(res.status, 200);
   const doc = await dom(res);
@@ -546,11 +547,11 @@ test('formulário de escolha traz nonce aleatório (16 bytes base64url)', async 
 
 test('duplo envio com o mesmo nonce → mesmo pedido; outro nonce nunca leva ao pedido de outra pessoa', async () => {
   const ctx = setup();
-  const first = await createOrder(ctx, { plano: 'anual', email: EMAIL, nonce: 'form-1' });
-  const again = await createOrder(ctx, { plano: 'anual', email: EMAIL, nonce: 'form-1' });
+  const first = await createOrder(ctx, { plano: 'annual', email: EMAIL, nonce: 'form-1' });
+  const again = await createOrder(ctx, { plano: 'annual', email: EMAIL, nonce: 'form-1' });
   assert.equal(again.location, first.location);
   for (const nonce of [undefined, '', 'form-do-atacante']) {
-    const fields = { plano: 'anual', email: EMAIL };
+    const fields = { plano: 'annual', email: EMAIL };
     if (nonce !== undefined) fields.nonce = nonce;
     const res = await post(ctx.app, '/pix/pedidos', fields);
     assert.notEqual(res.headers.get('location'), first.location, String(nonce));
@@ -559,7 +560,7 @@ test('duplo envio com o mesmo nonce → mesmo pedido; outro nonce nunca leva ao 
 
 test('escolha reexibida após recusa mantém o nonce enviado', async () => {
   const ctx = setup();
-  const doc = await dom(await post(ctx.app, '/pix/pedidos', { plano: 'anual', email: 'sem-arroba', nonce: 'meu-nonce' }));
+  const doc = await dom(await post(ctx.app, '/pix/pedidos', { plano: 'annual', email: 'sem-arroba', nonce: 'meu-nonce' }));
   assert.equal(nonceOf(doc), 'meu-nonce');
   const unknown = await dom(await post(ctx.app, '/pix/pedidos', { plano: 'vitalicio', email: EMAIL, nonce: 'meu-nonce' }));
   assert.equal(nonceOf(unknown), 'meu-nonce');
@@ -568,7 +569,7 @@ test('escolha reexibida após recusa mantém o nonce enviado', async () => {
 test('aviso com campo de e-mail tem botão "Usar este e-mail" e mantém o teste grátis', async () => {
   const ctx = setup();
   const trial = 'teste=1&dc_ler=LER1&dc_marcar=MAR1';
-  for (const q of [`cenario=indisponivel-email&plano=mensal&${trial}`, `cenario=sem-estoque&plano=mensal&email=m%40email.com&${trial}`]) {
+  for (const q of [`cenario=indisponivel-email&plano=monthly&${trial}`, `cenario=sem-estoque&plano=monthly&email=m%40email.com&${trial}`]) {
     const doc = await dom(await ctx.app.request(`/pix?${q}`));
     const form = doc.querySelector('input[name=email]').form;
     assert.equal(form.getAttribute('method'), 'get', q);

@@ -8,7 +8,7 @@ const SUPPORT = 'https://wa.me/message/ON3GNOTDII42F1';
 async function createOrder(ctx) {
   ctx.clock.set(T0);
   const res = await ctx.app.request('/pix/pedidos', {
-    method: 'POST', body: new URLSearchParams({ plano: 'anual', email: 'motorista@email.com' }),
+    method: 'POST', body: new URLSearchParams({ plano: 'annual', email: 'motorista@email.com' }),
   });
   return res.headers.get('location');
 }

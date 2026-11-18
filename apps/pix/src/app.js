@@ -66,7 +66,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
   const salesPaused = () => !config.salesEnabled || !provider || !stores;
   const planIds = () => Object.keys(plans);
 
-  // Próximo plano disponível: mensal → trimestral → anual → mensal.
+  // Próximo plano disponível: monthly → quarterly → annual → monthly.
   function nextPlanId(fromId, unavailable) {
     const ids = planIds();
     const start = ids.indexOf(fromId);
@@ -292,7 +292,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
 
   // Ferramentas de simulação: só existem com devTools; sem ele, 404 normal.
   if (config.devTools) {
-    const SAMPLE = { planId: 'anual', email: 'motorista@email.com' };
+    const SAMPLE = { planId: 'annual', email: 'motorista@email.com' };
     const TRIAL = '/pix/teste?teste=1&dc_ler=dev-ler&dc_marcar=dev-marcar';
     const li = (href, label) => html`<li><a href="${href}">${label}</a></li>`;
 
@@ -302,7 +302,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
       title: dev.label,
       state: 'dev',
       body: html`<h1>${dev.title}</h1>
-${section(dev.choose, html`<ul>${li('/pix', dev.choose)}${li('/pix?plano=mensal', dev.chooseMonthly)}</ul>`)}
+${section(dev.choose, html`<ul>${li('/pix', dev.choose)}${li('/pix?plano=monthly', dev.chooseMonthly)}</ul>`)}
 ${section(dev.scenarios, html`<ul>${['sem-estoque', 'indisponivel-email', 'pausado', 'fora-do-ar'].map((n) => li(`/pix?cenario=${n}`, n))}</ul>`)}
 ${section(dev.trial, html`<ul>${li(TRIAL, dev.trialRequest)}${li(`${TRIAL}&cenario=teste-usado`, `${dev.trialUsed} (teste-usado)`)}</ul>`)}
 ${section(dev.orders, html`<form method="post" action="/pix/dev/pedido-exemplo"><button class="btn btn-primary" type="submit">${dev.createOrder}</button></form>`)}

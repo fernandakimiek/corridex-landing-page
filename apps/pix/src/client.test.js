@@ -39,14 +39,14 @@ test('swapScreen: troca a .screen inteira (paying → delivered), inclusive a ba
   const { PLANS } = await import('./plans.js');
   const T0 = Date.UTC(2026, 10, 17, 15, 0);
   const order = { token: 'tok123', amountCents: 9990, copiaECola: '000201abc', expiresAt: T0 + 30 * 60_000 };
-  const paying = String(await payingScreen({ order, plan: PLANS.anual, qrSvg: '<svg></svg>', nowMs: T0 }));
+  const paying = String(await payingScreen({ order, plan: PLANS.annual, qrSvg: '<svg></svg>', nowMs: T0 }));
   const { document } = new JSDOM(paying).window;
   assert.match(document.querySelector('.bar').textContent, /Copiar código Pix/);
 
   const delivered = `<!doctype html><title>Pagamento confirmado · Corridex</title><body>
 <div class="screen" data-state="delivered"><header class="nav">Pagamento</header>
 <main class="content"><h1>Pagamento confirmado</h1><noscript><a href="/x">sem js</a></noscript></main>
-<div class="bar"><a class="btn btn-primary" href="https://apps.apple.com/redeem">Resgatar na App Store</a></div></div></body>`;
+<div class="bar"><a class="btn btn-primary" href="https://apps.apple.com/redeem">Resgatar código</a></div></div></body>`;
   const next = swapScreen(document, delivered);
 
   const screens = document.querySelectorAll('.screen');
@@ -55,7 +55,7 @@ test('swapScreen: troca a .screen inteira (paying → delivered), inclusive a ba
   assert.equal(next.dataset.state, 'delivered');
   const bars = document.querySelectorAll('.bar');
   assert.equal(bars.length, 1);
-  assert.equal(bars[0].textContent.trim(), 'Resgatar na App Store');
+  assert.equal(bars[0].textContent.trim(), 'Resgatar código');
   assert.doesNotMatch(document.body.textContent, /Copiar código Pix/);
   assert.equal(document.querySelectorAll('[data-copy]').length, 0);
   assert.equal(document.title, 'Pagamento confirmado · Corridex');

@@ -50,7 +50,7 @@ export const copy = {
   },
   code: {
     label: 'Seu código',
-    redeemStore: 'Resgatar na App Store',
+    redeem: 'Resgatar código',
     meta: 'Resgate até {data} · enviado para {email}',
     sentTo: 'Também enviamos para {email}. O código vale uma vez só.',
     redeemBy: 'Resgate até {data}.',
@@ -58,7 +58,7 @@ export const copy = {
   },
   pending: {
     title: 'Seu código está a caminho',
-    body: 'Ele chega por e-mail em até 2 horas. Pode fechar esta página.',
+    body: 'Ele chega por e-mail em algumas horas. Pode fechar esta página.',
     sentTo: 'Enviaremos para {email}.',
   },
   expired: {

@@ -1,5 +1,5 @@
 // Códigos de exemplo para desenvolvimento. Não são códigos reais.
-const PLAN_TAGS = { mensal: 'ME', trimestral: 'TR', anual: 'AN', teste: 'TE' };
+const PLAN_TAGS = { monthly: 'ME', quarterly: 'TR', annual: 'AN', teste: 'TE' };
 
 export function seedCodes() {
   const codes = [];

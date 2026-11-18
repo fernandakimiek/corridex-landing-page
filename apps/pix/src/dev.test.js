@@ -6,7 +6,7 @@ const post = (app, path, fields = {}) => app.request(path, { method: 'POST', bod
 const SCENARIOS = ['sem-estoque', 'indisponivel-email', 'pausado', 'fora-do-ar', 'vencido', 'pendente', 'teste-usado'];
 
 async function newOrder(ctx) {
-  const res = await post(ctx.app, '/pix/pedidos', { plano: 'anual', email: 'motorista@email.com' });
+  const res = await post(ctx.app, '/pix/pedidos', { plano: 'annual', email: 'motorista@email.com' });
   return res.headers.get('location');
 }
 
@@ -42,7 +42,7 @@ test('devTools: /pix/dev lista os 7 cenários e links principais', async () => {
   const doc = await dom(new Response(html));
   const hrefs = [...doc.querySelectorAll('a')].map((a) => a.getAttribute('href'));
   assert.ok(hrefs.includes('/pix'));
-  assert.ok(hrefs.includes('/pix?plano=mensal'));
+  assert.ok(hrefs.includes('/pix?plano=monthly'));
   assert.ok(hrefs.includes('/pix?cenario=pausado'));
   assert.ok(hrefs.includes('/pix/teste?teste=1&dc_ler=dev-ler&dc_marcar=dev-marcar'));
   assert.ok(hrefs.includes('/pix/teste?teste=1&dc_ler=dev-ler&dc_marcar=dev-marcar&cenario=teste-usado'));
@@ -56,7 +56,7 @@ test('devTools: pedido-exemplo cria pedido anual e redireciona', async () => {
   const loc = res.headers.get('location');
   assert.match(loc, /^\/pix\/pedido\//);
   const order = ctx.stores.orders.get(loc.split('/').pop());
-  assert.equal(order.planId, 'anual');
+  assert.equal(order.planId, 'annual');
   assert.equal(order.email, 'motorista@email.com');
 });
 

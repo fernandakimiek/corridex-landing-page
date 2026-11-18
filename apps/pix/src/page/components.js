@@ -87,7 +87,7 @@ export function FooterLinks() {
 }
 
 // Plano com o selo "Mais vantajoso" (menor preço por mês).
-const BEST_PLAN_ID = 'anual';
+const BEST_PLAN_ID = 'annual';
 
 // Rótulo do botão da barra da escolha com o preço do plano.
 export const ctaLabel = (plan) => t(copy.pix.ctaWithPrice, { valor: brl(plan.amountCents) });
@@ -222,9 +222,9 @@ const spelled = (value) => value.split('').join(' ');
 // square.and.arrow.down: ícone do botão de resgate.
 const DOWNLOAD = svg('i', '<path d="M9 2v9M5.5 7.5 9 11l3.5-3.5M3 13v2h12v-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>', 18);
 
-// "Resgatar na App Store": abre a App Store com o código já preenchido.
+// "Resgatar código": abre a App Store com o código já preenchido.
 export const RedeemButton = ({ appStoreId, code }) => LinkButton({
-  label: copy.code.redeemStore, href: redeemUrl(appStoreId, code), icon: DOWNLOAD,
+  label: copy.code.redeem, href: redeemUrl(appStoreId, code), icon: DOWNLOAD,
 });
 
 // Linha do cartão do código: prazo e e-mail mascarado (ou só o que existir).

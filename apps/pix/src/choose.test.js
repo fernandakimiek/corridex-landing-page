@@ -16,7 +16,7 @@ test('GET /pix mostra Anual selecionado com R$ 99,90', async () => {
   const radios = group.querySelectorAll('input[type=radio][name=plano]');
   assert.equal(radios.length, 3);
   const checked = group.querySelector('input:checked');
-  assert.equal(checked.value, 'anual');
+  assert.equal(checked.value, 'annual');
   // Rádio nativo: o estado "checked" (aria-checked computado) vem do próprio input.
   assert.equal(checked.checked, true);
   assert.equal(group.querySelectorAll('[aria-checked]').length, 0);
@@ -45,14 +45,14 @@ test('cartões: duração e preço por mês; Mensal só "1 mês"; selo só no An
   const doc = await dom(await get('/pix'));
   const card = (id) => doc.querySelector(`input[name=plano][value=${id}]`).closest('label');
   const sub = (id) => card(id).querySelector('.pd').textContent.trim();
-  assert.equal(sub('mensal'), '1 mês');
-  assert.equal(sub('trimestral'), '3 meses · R$ 8,63/mês');
-  assert.equal(sub('anual'), '1 ano · R$ 8,33/mês');
-  assert.match(card('trimestral').textContent, /R\$ 25,90/);
+  assert.equal(sub('monthly'), '1 mês');
+  assert.equal(sub('quarterly'), '3 meses · R$ 8,63/mês');
+  assert.equal(sub('annual'), '1 ano · R$ 8,33/mês');
+  assert.match(card('quarterly').textContent, /R\$ 25,90/);
   const badges = doc.querySelectorAll('.badge');
   assert.equal(badges.length, 1);
   assert.equal(badges[0].textContent.trim(), 'Mais vantajoso');
-  assert.ok(card('anual').contains(badges[0]));
+  assert.ok(card('annual').contains(badges[0]));
 });
 
 test('barra: "Gerar Pix · R$ 99,90" com form="pedido", fora do form, e "Pagamento pelo Banco Inter"', async () => {
@@ -92,22 +92,28 @@ test('envio do formulário completo (rádio, e-mail, nonce, teste) → 303 para 
     .filter((el) => el.tagName !== 'BUTTON');
   const body = new URLSearchParams(fields.map((el) => [el.name, el.value]));
   assert.deepEqual([...new Set(body.keys())].sort(), ['dc_ler', 'dc_marcar', 'email', 'nonce', 'plano', 'teste']);
-  assert.equal(body.get('plano'), 'anual');
+  assert.equal(body.get('plano'), 'annual');
   const res = await app.request(form.getAttribute('action'), { method: 'POST', body });
   assert.equal(res.status, 303);
   assert.match(res.headers.get('location'), /^\/pix\/pedido\//);
 });
 
-test('?plano=mensal seleciona Mensal e a barra mostra "Gerar Pix · R$ 9,90"', async () => {
-  const doc = await dom(await get('/pix?plano=mensal'));
-  assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'mensal');
+test('?plano=monthly seleciona Mensal e a barra mostra "Gerar Pix · R$ 9,90"', async () => {
+  const doc = await dom(await get('/pix?plano=monthly'));
+  assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'monthly');
   assert.equal(barButton(doc).textContent.trim(), 'Gerar Pix · R$ 9,90');
   assert.match(doc.title, /Corridex Mensal/);
 });
 
+test('plano=mensal (id antigo) cai no Anual', async () => {
+  const doc = await dom(await get('/pix?plano=mensal'));
+  assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'annual');
+  assert.equal(barButton(doc).textContent.trim(), 'Gerar Pix · R$ 99,90');
+});
+
 test('?plano=xyz cai no Anual', async () => {
   const doc = await dom(await get('/pix?plano=xyz'));
-  assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'anual');
+  assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'annual');
 });
 
 test('email: type=email, autocomplete=email, inputmode=email', async () => {
@@ -171,7 +177,7 @@ test('?cenario=sem-estoque → Anual riscado com texto "indisponível" e Notice 
   assert.ok(notice.previousElementSibling.classList.contains('hero'));
   const see = doc.querySelector('.bar a.btn-primary');
   assert.equal(see.textContent.trim(), 'Ver Mensal');
-  assert.equal(see.getAttribute('href'), '/pix?plano=mensal');
+  assert.equal(see.getAttribute('href'), '/pix?plano=monthly');
   assert.doesNotMatch(doc.querySelector('.bar').textContent, /Gerar Pix/);
   assert.equal([...doc.querySelectorAll('button')].filter((b) => /Gerar Pix/.test(b.textContent)).length, 0);
 });
@@ -181,11 +187,11 @@ test('sem botão de envio, os outros planos viram links ?plano= (sem rádios sol
   assert.equal(doc.querySelectorAll('input[type=radio]').length, 0);
   assert.equal(doc.querySelector('form[action="/pix/pedidos"]'), null);
   const hrefs = [...doc.querySelectorAll('ul.plans a.plan')].map((a) => a.getAttribute('href'));
-  assert.deepEqual(hrefs, ['/pix?plano=mensal', '/pix?plano=trimestral']);
+  assert.deepEqual(hrefs, ['/pix?plano=monthly', '/pix?plano=quarterly']);
 });
 
 test('?cenario=fora-do-ar → "O Pix está indisponível agora" e botão "Tentar de novo"', async () => {
-  const doc = await dom(await get('/pix?cenario=fora-do-ar&plano=trimestral'));
+  const doc = await dom(await get('/pix?cenario=fora-do-ar&plano=quarterly'));
   assert.ok(doc.querySelector('.screen > main.content.result'));
   assert.equal(doc.querySelectorAll('h1').length, 1);
   assert.equal(doc.querySelector('h1').textContent.trim(), 'O Pix está indisponível agora');
@@ -195,16 +201,16 @@ test('?cenario=fora-do-ar → "O Pix está indisponível agora" e botão "Tentar
   assert.ok(doc.querySelector('header.nav .brand'));
   const retry = doc.querySelector('.screen > .bar a.btn-primary');
   assert.equal(retry.textContent.trim(), 'Tentar de novo');
-  assert.equal(retry.getAttribute('href'), '/pix?plano=trimestral');
+  assert.equal(retry.getAttribute('href'), '/pix?plano=quarterly');
   assert.equal(doc.querySelector('.screen').dataset.state, 'error');
 });
 
-test('?cenario=indisponivel-email&plano=mensal → mensagem e botão "Ver Trimestral"', async () => {
-  const doc = await dom(await get('/pix?cenario=indisponivel-email&plano=mensal&email=m%40email.com'));
+test('?cenario=indisponivel-email&plano=monthly → mensagem e botão "Ver Trimestral"', async () => {
+  const doc = await dom(await get('/pix?cenario=indisponivel-email&plano=monthly&email=m%40email.com'));
   assert.match(text(doc), /Para este e-mail, o Mensal fica disponível em algumas horas/);
   const see = doc.querySelector('.bar a.btn-primary');
   assert.equal(see.textContent.trim(), 'Ver Trimestral');
-  assert.equal(see.getAttribute('href'), '/pix?plano=trimestral&email=m%40email.com');
+  assert.equal(see.getAttribute('href'), '/pix?plano=quarterly&email=m%40email.com');
   assert.ok(doc.querySelector('.notice').previousElementSibling.classList.contains('hero'));
   assert.equal(doc.querySelector('h1').textContent.trim(), 'Assine o Corridex com Pix');
   assert.match(doc.title, /Corridex Mensal/);
@@ -213,7 +219,7 @@ test('?cenario=indisponivel-email&plano=mensal → mensagem e botão "Ver Trimes
   // Plano atual marcado; os outros são links que mantêm o e-mail; nada gera Pix.
   assert.match(doc.querySelector('.plan[aria-current=true]').textContent, /Mensal/);
   const hrefs = [...doc.querySelectorAll('ul.plans a.plan')].map((a) => a.getAttribute('href'));
-  assert.deepEqual(hrefs, ['/pix?plano=trimestral&email=m%40email.com', '/pix?plano=anual&email=m%40email.com']);
+  assert.deepEqual(hrefs, ['/pix?plano=quarterly&email=m%40email.com', '/pix?plano=annual&email=m%40email.com']);
   assert.equal(doc.querySelectorAll('input[type=radio]').length, 0);
   assert.equal(doc.querySelector('form[action="/pix/pedidos"]'), null);
   const input = doc.querySelector('input[name=email]');
@@ -223,13 +229,13 @@ test('?cenario=indisponivel-email&plano=mensal → mensagem e botão "Ver Trimes
 
 test('sem estoque real no armazenamento marca o plano indisponível', async () => {
   const { app, stores } = makeApp();
-  for (let i = 0; i < 6; i++) stores.codes.reserve('anual', `x${i}@e.com`, `h${i}`);
-  const doc = await dom(await app.request('/pix?plano=mensal'));
-  const anual = doc.querySelector('input[name=plano][value=anual]');
+  for (let i = 0; i < 6; i++) stores.codes.reserve('annual', `x${i}@e.com`, `h${i}`);
+  const doc = await dom(await app.request('/pix?plano=monthly'));
+  const anual = doc.querySelector('input[name=plano][value=annual]');
   assert.ok(anual.disabled);
   assert.ok(anual.closest('label').classList.contains('off')); // cursor not-allowed no cartão todo
   assert.match(anual.closest('label').textContent, /indisponível/);
-  assert.ok(!doc.querySelector('input[name=plano][value=mensal]').disabled);
+  assert.ok(!doc.querySelector('input[name=plano][value=monthly]').disabled);
   // Plano escolhido sem estoque → aviso de estoque.
   const def = await dom(await app.request('/pix'));
   assert.equal(def.querySelector('.screen').dataset.state, 'plan_out_of_stock');

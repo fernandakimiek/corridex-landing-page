@@ -63,7 +63,7 @@ test('RedeemButton: link exato da App Store com ícone decorativo', async () => 
   const doc = await frag(RedeemButton({ appStoreId: '6756681755', code: 'EXEMP1L0CODIGO0000' }));
   const a = doc.querySelector('a.btn-primary');
   assert.equal(a.getAttribute('href'), 'https://apps.apple.com/redeem?ctx=offercodes&id=6756681755&code=EXEMP1L0CODIGO0000');
-  assert.equal(a.textContent, copy.code.redeemStore);
+  assert.equal(a.textContent, copy.code.redeem);
   assert.equal(a.querySelector('svg').getAttribute('aria-hidden'), 'true');
 });
 

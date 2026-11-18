@@ -17,6 +17,6 @@ test('vendas ligadas salvo "false"', () => {
 test('preços dos planos', () => {
   assert.deepEqual(
     Object.values(PLANS).map((p) => [p.id, p.amountCents]),
-    [['mensal', 990], ['trimestral', 2590], ['anual', 9990]],
+    [['monthly', 990], ['quarterly', 2590], ['annual', 9990]],
   );
 });
