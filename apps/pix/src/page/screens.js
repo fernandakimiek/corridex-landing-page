@@ -1,10 +1,11 @@
 import { html } from 'hono/html';
 import { copy, t } from './copy.pt-BR.js';
 import { page } from './layout.js';
-import { brl, maskEmail, dateBRFromMs } from './format.js';
+import { brl, maskEmail } from './format.js';
 import {
-  Brand, PlanSwitcher, EmailField, Notice, SubmitButton, LinkButton, planTitle, ActionBar, Hero, ctaLabel,
-  StateIcon, FooterLinks, PixPayment, PaymentStatus, PayHero, CopyButton, CopyToast, RefreshNoJs, CodeDelivery, CodeHelp, TrialRequest, TrialFields,
+  PlanSwitcher, EmailField, Notice, SubmitButton, LinkButton, planTitle, ActionBar, Hero, ResultHero, ctaLabel,
+  FooterLinks, PixPayment, PaymentStatus, PayHero, CopyButton, CopyToast, RefreshNoJs,
+  CodeCard, OrderSummary, HelpList, RedeemButton, TrialRequest, TrialFields,
 } from './components.js';
 
 // Telas completas (página inteira). Cada uma aceita `devBar` (Task 9) e repassa ao layout.
@@ -67,20 +68,23 @@ ${FooterLinks()}`;
   return page({ title: planTitle(selected), nav, body, bar, state, devBar });
 }
 
-// Venda pausada (PIX_SALES_ENABLED=false, sem provedor ou cenário "pausado").
+// Telas de resultado: bloco centralizado na vertical (layout 'result') e a ação, se houver,
+// na barra de ação. Barra de título: "Pagamento" no pedido, "Teste grátis" no teste e a
+// marca nas telas sem etapa (pausado, erro, não encontrado).
+const result = (opts) => page({ layout: 'result', ...opts });
+const plansBar = (label) => ActionBar({ primary: LinkButton({ label, href: '/pix' }) });
+
+// Venda pausada (PIX_SALES_ENABLED=false, sem provedor ou cenário "pausado"). Sem barra.
 export function pausedScreen({ devBar } = {}) {
-  const body = html`${Brand()}
-${Notice({ tone: 'info', title: copy.paused.title, body: copy.paused.body, heading: 'h1' })}`;
-  return page({ title: copy.paused.title, body, state: 'sales_paused', devBar });
+  const body = ResultHero({ tone: 'info', title: copy.paused.title, body: copy.paused.body });
+  return result({ title: copy.paused.title, nav: { brand: true }, body, state: 'sales_paused', devBar });
 }
 
-// Pix fora do ar para o plano escolhido.
+// Pix fora do ar para o plano escolhido (o plano fica no título da aba).
 export function errorScreen({ planName, retryHref = '/pix', devBar }) {
-  const title = planTitle({ name: planName });
-  const body = html`<h1>${title}</h1>
-${Notice({ tone: 'error', title: copy.down.title, body: copy.down.body })}
-${LinkButton({ label: copy.down.cta, href: retryHref })}`;
-  return page({ title, body, state: 'error', devBar });
+  const body = ResultHero({ tone: 'error', title: copy.down.title, body: copy.down.body });
+  const bar = ActionBar({ primary: LinkButton({ label: copy.down.cta, href: retryHref }) });
+  return result({ title: planTitle({ name: planName }), nav: { brand: true }, body, bar, state: 'error', devBar });
 }
 
 // Endereços do pedido.
@@ -110,61 +114,55 @@ ${PaymentStatus()}`;
   });
 }
 
-// Resumo do pedido: plano, preço e data do pagamento.
-function OrderSummary({ order, plan }) {
-  const paidOn = order.paidAt != null ? dateBRFromMs(order.paidAt) : null;
-  return html`<section class="card stack">
-<h2>${copy.order.title}</h2>
-<p>${planTitle(plan)} · ${brl(order.amountCents)}</p>
-${paidOn ? html`<p class="note">${t(copy.order.paidOn, { data: paidOn })}</p>` : ''}
-</section>`;
-}
-
-// Pago e entregue: código pronto para resgatar.
+// Pago e entregue: código pronto para resgatar; "Resgatar na App Store" e a ajuda na barra.
 export function deliveredScreen({ order, plan, appStoreId, devBar }) {
-  const body = html`${StateIcon({ tone: 'success' })}
-<div class="stack center"><h1>${copy.paid.title}</h1><p>${copy.paid.next}</p></div>
-${CodeDelivery({ code: order.code, email: order.email, appStoreId, helpHref: `${orderPath(order.token)}/ajuda` })}
+  const body = html`${ResultHero({ tone: 'success', title: copy.paid.title, body: copy.paid.next })}
+${CodeCard({ code: order.code, email: order.email })}
 ${OrderSummary({ order, plan })}`;
-  return page({ title: copy.paid.title, body, state: 'delivered', devBar });
+  const bar = ActionBar({
+    primary: RedeemButton({ appStoreId, code: order.code.value }),
+    secondary: LinkButton({ label: copy.code.help, href: `${orderPath(order.token)}/ajuda`, variant: 'plain' }),
+  });
+  return result({ title: copy.paid.title, nav: { title: copy.nav.payment }, body, bar, state: 'delivered', devBar });
 }
 
-// Ajuda quando o código não funciona.
+// Ajuda quando o código não funciona: título, dois itens em lista; suporte e voltar na barra.
 export function helpScreen({ supportUrl, backHref, devBar }) {
   const body = html`<h1>${copy.help.title}</h1>
-${CodeHelp({ supportUrl, backHref })}`;
-  return page({ title: copy.help.title, body, state: 'help', devBar });
+${HelpList()}
+<p class="note center">${copy.help.hint}</p>`;
+  const bar = ActionBar({
+    primary: LinkButton({ label: copy.help.cta, href: supportUrl, rel: 'noopener' }),
+    secondary: backHref ? LinkButton({ label: copy.help.back, href: backHref, variant: 'plain' }) : undefined,
+  });
+  return page({ title: copy.help.title, nav: { title: copy.nav.help }, body, bar, state: 'help', devBar });
 }
 
-// Pago, mas o código chega depois por e-mail.
+// Pago, mas o código chega depois por e-mail. Sem barra.
 export function pendingScreen({ order, devBar }) {
-  const body = html`${StateIcon({ tone: 'success' })}
-<h1 class="center">${copy.paid.title}</h1>
-${Notice({ tone: 'info', title: copy.pending.title, body: copy.pending.body })}
-<p class="note center">${t(copy.pending.sentTo, { email: maskEmail(order.email) })}</p>`;
-  return page({ title: copy.paid.title, body, state: 'pending', devBar });
+  const body = html`${ResultHero({ tone: 'success', title: copy.paid.title, body: [copy.pending.title, copy.pending.body] })}
+<p class="note">${t(copy.pending.sentTo, { email: maskEmail(order.email) })}</p>`;
+  return result({ title: copy.paid.title, nav: { title: copy.nav.payment }, body, state: 'pending', devBar });
 }
 
-// Pix vencido: gerar outro para o mesmo pedido. Se o pagamento cair depois,
-// o pedido vira "pago"; por isso o status continua consultável (data-status-url).
+// Pix vencido: gerar outro para o mesmo pedido ("Gerar novo Pix" na barra, form="renovar").
+// Se o pagamento cair depois, o pedido vira "pago"; por isso o status continua
+// consultável (data-status-url).
 export function expiredScreen({ order, plan, devBar }) {
   const path = orderPath(order.token);
-  const title = planTitle(plan);
-  const body = html`<h1 class="center">${title}</h1>
-${Notice({ tone: 'warning', title: copy.expired.title, body: copy.expired.body })}
-<form class="stack" method="post" action="${path}/renovar">
-${SubmitButton({ label: copy.expired.cta })}
-<p class="note center">${copy.expired.hint}</p>
-</form>`;
-  return page({ title, body, state: 'expired', data: { statusUrl: `${path}/status` }, devBar });
+  const body = html`${ResultHero({ tone: 'clock', title: copy.expired.title, body: copy.expired.body })}
+<p class="note">${copy.expired.hint}</p>
+<form id="renovar" method="post" action="${path}/renovar"></form>`;
+  const bar = ActionBar({ primary: SubmitButton({ label: copy.expired.cta, form: 'renovar' }) });
+  return result({
+    title: planTitle(plan), nav: { title: copy.nav.payment }, body, bar, state: 'expired', data: { statusUrl: `${path}/status` }, devBar,
+  });
 }
 
 // Pedido inexistente (link errado ou antigo).
 export function notFoundScreen({ devBar } = {}) {
-  const body = html`${StateIcon({ tone: 'error' })}
-<div class="stack center"><h1>${copy.notFound.title}</h1><p>${copy.notFound.body}</p></div>
-${LinkButton({ label: copy.notFound.cta, href: '/pix' })}`;
-  return page({ title: copy.notFound.title, body, state: 'not_found', devBar });
+  const body = ResultHero({ tone: 'info', title: copy.notFound.title, body: copy.notFound.body });
+  return result({ title: copy.notFound.title, nav: { brand: true }, body, bar: plansBar(copy.notFound.cta), state: 'not_found', devBar });
 }
 
 // Teste grátis: pedido do e-mail. Os tokens do app seguem em campos ocultos;
@@ -181,30 +179,32 @@ ${TrialRequest({ dcLer, dcMarcar, email, error, id: 'teste' })}`;
 
 // Mesma mensagem para qualquer motivo (sem token, aparelho já usado).
 export function trialUsedScreen({ devBar } = {}) {
-  const body = html`${Brand()}
-${Notice({ tone: 'info', title: copy.trial.used, body: copy.trial.usedBody, heading: 'h1' })}
-${LinkButton({ label: copy.trial.seePlans, href: '/pix' })}`;
-  return page({ title: copy.trial.used, body, state: 'trial_used', devBar });
+  const body = ResultHero({ tone: 'info', title: copy.trial.used, body: copy.trial.usedBody });
+  return result({
+    title: copy.trial.used, nav: { title: copy.nav.trial }, body, bar: plansBar(copy.trial.seePlans), state: 'trial_used', devBar,
+  });
 }
 
-// Teste liberado: reusa a entrega do código (sem pedido, então sem link de ajuda).
+// Teste liberado: cartão do código (sem pedido, então sem resumo nem link de ajuda).
 export function trialDeliveredScreen({ code, email, appStoreId, devBar }) {
-  const body = html`${StateIcon({ tone: 'success' })}
-<div class="stack center"><h1>${copy.trial.delivered}</h1><p>${copy.trial.after}</p></div>
-${CodeDelivery({ code, email, appStoreId })}`;
-  return page({ title: copy.trial.delivered, body, state: 'trial_delivered', devBar });
+  const body = html`${ResultHero({ tone: 'gift', title: copy.trial.delivered, body: copy.trial.after })}
+${CodeCard({ code, email })}`;
+  const bar = ActionBar({ primary: RedeemButton({ appStoreId, code: code.value }) });
+  return result({ title: copy.trial.delivered, nav: { title: copy.nav.trial }, body, bar, state: 'trial_delivered', devBar });
 }
 
 // Teste sem código em estoque, ou (`forCustomer`) sem oferta nova para este e-mail.
 export function trialStockScreen({ forCustomer = false, devBar } = {}) {
   const plano = copy.trial.planName;
-  const notice = forCustomer
+  const msg = forCustomer
     ? { title: t(copy.customer.unavailable, { plano }), body: copy.customer.unavailableBody }
     : { title: t(copy.stock.title, { plano }), body: copy.stock.body };
-  const body = html`${Brand()}
-${Notice({ tone: 'warning', ...notice, heading: 'h1' })}
-${LinkButton({ label: copy.trial.seePlans, href: '/pix' })}`;
-  return page({
-    title: plano, body, state: forCustomer ? 'trial_unavailable_for_customer' : 'trial_out_of_stock', devBar,
+  return result({
+    title: plano,
+    nav: { title: copy.nav.trial },
+    body: ResultHero({ tone: 'warning', ...msg }),
+    bar: plansBar(copy.trial.seePlans),
+    state: forCustomer ? 'trial_unavailable_for_customer' : 'trial_out_of_stock',
+    devBar,
   });
 }

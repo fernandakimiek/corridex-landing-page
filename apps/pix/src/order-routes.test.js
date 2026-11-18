@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { makeApp, dom } from './test/helpers.js';
+import { copy } from './page/copy.pt-BR.js';
 
 const T0 = Date.UTC(2026, 10, 17, 15, 0, 0); // 17/11/2026 12:00 em Brasília
 const EMAIL = 'motorista@email.com';
@@ -23,6 +24,16 @@ async function createOrder(ctx, fields = { plano: 'anual', email: EMAIL }) {
 }
 
 const lastTxid = (order) => order.txids.at(-1);
+
+// Tela de resultado: main.content.result, um único h1 com o texto esperado.
+function assertResult(doc, h1) {
+  assert.ok(doc.querySelector('.screen > main.content.result'));
+  const h1s = doc.querySelectorAll('h1');
+  assert.equal(h1s.length, 1);
+  assert.equal(h1s[0].textContent.trim(), h1);
+  assert.ok(h1s[0].closest('.result-hero'));
+}
+const bar = (doc) => doc.querySelector('.screen > .bar');
 
 test('POST válido → 303 para /pix/pedido/<token>', async () => {
   const ctx = setup();
@@ -146,28 +157,40 @@ test('paying: data-status-url e data-expires-at na .screen', async () => {
   assert.equal(screen.dataset.expiresAt, String(order().expiresAt));
 });
 
-test('após markPaid: delivered com "Resgatar código" → href apps.apple.com/redeem?ctx=offercodes&id=6756681755&code=…, código agrupado, e-mail mascarado, "Resgate até 16/05/2027"', async () => {
+test('após markPaid: delivered centralizado; cartão "Seu código" com prazo e e-mail; resumo em lista; barra "Resgatar na App Store" e ajuda', async () => {
   const ctx = setup();
   const { location, order } = await createOrder(ctx);
   ctx.provider.markPaid(lastTxid(order()));
   const doc = await dom(await ctx.app.request(location));
   assert.equal(doc.querySelector('.screen').dataset.state, 'delivered');
-  assert.equal(doc.querySelector('h1').textContent, 'Pagamento confirmado');
-  assert.ok(doc.querySelector('.hero-ic[data-tone=success]'));
+  assertResult(doc, 'Pagamento confirmado');
+  assert.equal(doc.querySelector('.nav').textContent.trim(), 'Pagamento');
+  const hero = doc.querySelector('.result-hero[data-tone=success]');
+  assert.ok(hero);
+  assert.equal(hero.querySelector('.sub').textContent.trim(), 'Falta um toque para ativar seu acesso.');
   const code = order().code.value;
-  const redeem = [...doc.querySelectorAll('a')].find((a) => a.textContent.trim() === 'Resgatar código');
-  assert.equal(redeem.getAttribute('href'), `https://apps.apple.com/redeem?ctx=offercodes&id=6756681755&code=${code}`);
-  assert.match(doc.querySelector('output.code').textContent, new RegExp(code.match(/.{1,6}/g).join(' ')));
+  // Cartão do código: rótulo, código agrupado (soletrado para leitor de tela) e linha de prazo/e-mail.
+  const out = doc.querySelector('main output.code');
+  const card = out.closest('.card');
+  assert.equal(doc.getElementById('code-label').textContent.trim(), 'Seu código');
+  assert.ok(card.contains(doc.getElementById('code-label')));
+  assert.equal(out.querySelector('[aria-hidden=true]').textContent, code.match(/.{1,6}/g).join(' '));
+  assert.equal(doc.getElementById('code-spelled').textContent, code.split('').join(' '));
+  assert.equal(card.querySelector('.note').textContent.trim(), 'Resgate até 16/05/2027 · enviado para m•••@email.com');
   const page = text(doc);
-  assert.match(page, /m•••@email\.com/);
-  assert.match(page, /Resgate até 16\/05\/2027/);
   assert.ok(!page.includes(EMAIL));
-  // Resumo do pedido.
-  assert.match(page, /Seu pedido/);
-  assert.match(page, /Corridex Anual/);
-  assert.match(page, /R\$ 99,90/);
-  assert.match(page, /Pago em 17\/11\/2026 por Pix/);
-  assert.ok(page.includes('O código não funcionou?'));
+  // Resumo em lista: plano — valor; Pago em — data · Pix.
+  const rows = [...doc.querySelectorAll('main dl.rows > div')].map((row) => [row.querySelector('dt').textContent.trim(), row.querySelector('dd').textContent.trim()]);
+  assert.deepEqual(rows, [['Corridex Anual', 'R$ 99,90'], ['Pago em', '17/11/2026 · Pix']]);
+  // Barra: resgate (link exato, ícone decorativo) e "O código não funcionou?".
+  const b = bar(doc);
+  const redeem = b.querySelector('a.btn-primary');
+  assert.equal(redeem.textContent.trim(), 'Resgatar na App Store');
+  assert.equal(redeem.getAttribute('href'), `https://apps.apple.com/redeem?ctx=offercodes&id=6756681755&code=${code}`);
+  assert.equal(redeem.querySelector('svg').getAttribute('aria-hidden'), 'true');
+  const help = [...b.querySelectorAll('a')].find((a) => a.textContent.trim() === 'O código não funcionou?');
+  assert.equal(help.getAttribute('href'), `${location}/ajuda`);
+  assert.equal(doc.querySelectorAll('main a.btn').length, 0);
 });
 
 test('status JSON acompanha: paying → delivered', async () => {
@@ -181,20 +204,29 @@ test('status JSON acompanha: paying → delivered', async () => {
   assert.deepEqual(await res.json(), { status: 'delivered' });
 });
 
-test('vencido: "Este Pix venceu", form renovar, sem campo de e-mail', async () => {
+test('vencido: relógio, "Este Pix venceu", barra "Gerar novo Pix" posta para /renovar, sem campo de e-mail', async () => {
   const ctx = setup();
   const { location } = await createOrder(ctx);
   ctx.clock.set(T0 + 1801 * 1000);
   const doc = await dom(await ctx.app.request(location));
-  assert.equal(doc.querySelector('.screen').dataset.state, 'expired');
-  assert.equal(doc.querySelector('h1').textContent, 'Corridex Anual');
-  assert.match(text(doc), /Este Pix venceu/);
+  const screen = doc.querySelector('.screen');
+  assert.equal(screen.dataset.state, 'expired');
+  assert.equal(screen.dataset.statusUrl, `${location}/status`);
+  assertResult(doc, 'Este Pix venceu');
+  assert.equal(doc.querySelector('.nav').textContent.trim(), 'Pagamento');
+  assert.equal(doc.querySelector('.result-hero').dataset.tone, 'warning');
+  assert.match(doc.querySelector('.result-hero .sub').textContent, /Gere outro, leva um segundo\./);
   assert.match(text(doc), /Se você já pagou, espere/);
-  assert.equal(doc.querySelector('.hero-ic'), null); // só o ícone do aviso
+  assert.match(doc.title, /Corridex Anual/);
   const form = doc.querySelector(`form[action="${location}/renovar"]`);
   assert.ok(form);
   assert.equal(form.getAttribute('method'), 'post');
-  assert.equal(form.querySelector('button').textContent.trim(), 'Gerar novo Pix');
+  assert.equal(form.id, 'renovar');
+  const button = bar(doc).querySelector('button[type=submit].btn-primary');
+  assert.equal(button.textContent.trim(), 'Gerar novo Pix');
+  assert.equal(button.getAttribute('form'), 'renovar');
+  assert.equal(button.closest('form'), null);
+  assert.equal(button.form, form);
   assert.equal(doc.querySelector('input[type=email]'), null);
 });
 
@@ -236,7 +268,7 @@ test('renovar sem código disponível → escolha com aviso de estoque e e-mail'
   assert.equal(doc.querySelector('input[type=email]').value, EMAIL);
 });
 
-test('pending: "Seu código está a caminho"', async () => {
+test('pending: centralizado, "Seu código está a caminho", para onde vai e sem barra', async () => {
   const ctx = setup();
   const { location, order } = await createOrder(ctx);
   ctx.provider.markPaid(lastTxid(order()));
@@ -245,9 +277,13 @@ test('pending: "Seu código está a caminho"', async () => {
   for (let i = 0; i < 6; i++) ctx.stores.codes.reserve('anual', `outro${i}@email.com`, `h${i}`);
   const doc = await dom(await ctx.app.request(location));
   assert.equal(doc.querySelector('.screen').dataset.state, 'pending');
-  assert.equal(doc.querySelector('h1').textContent, 'Pagamento confirmado');
+  assertResult(doc, 'Pagamento confirmado');
+  assert.equal(doc.querySelector('.nav').textContent.trim(), 'Pagamento');
+  assert.ok(doc.querySelector('.result-hero[data-tone=success]'));
   assert.match(text(doc), /Seu código está a caminho/);
+  assert.match(text(doc), /Ele chega por e-mail em até 2 horas/);
   assert.match(text(doc), /Enviaremos para m•••@email\.com\./);
+  assert.equal(bar(doc), null);
 });
 
 test('e-mail inválido volta à escolha com mensagem ligada por aria-describedby', async () => {
@@ -272,9 +308,11 @@ test('token inexistente → 404 com página amigável; /status → 404 JSON', as
   assert.equal(res.headers.get('referrer-policy'), 'no-referrer');
   assert.equal(res.headers.get('x-robots-tag'), 'noindex');
   const doc = await dom(res);
-  assert.equal(doc.querySelector('h1').textContent, 'Pedido não encontrado');
+  assertResult(doc, 'Pedido não encontrado');
+  assert.ok(doc.querySelector('.nav .brand'));
+  assert.ok(doc.querySelector('.result-hero[data-tone=info]'));
   assert.match(text(doc), /Confira o link do e-mail ou gere um novo Pix\./);
-  const back = doc.querySelector('main a.btn-primary');
+  const back = bar(doc).querySelector('a.btn-primary');
   assert.equal(back.getAttribute('href'), '/pix');
   assert.equal(back.textContent.trim(), 'Ver planos');
   const status = await ctx.app.request('/pix/pedido/naoexiste/status');
@@ -325,7 +363,10 @@ test('POST com venda pausada → tela de pausa, sem pedido', async () => {
   const ctx = setup({ config: { salesEnabled: false } });
   const res = await post(ctx.app, '/pix/pedidos', { plano: 'anual', email: EMAIL });
   assert.equal(res.status, 200);
-  assert.equal((await dom(res)).querySelector('.screen').dataset.state, 'sales_paused');
+  const doc = await dom(res);
+  assert.equal(doc.querySelector('.screen').dataset.state, 'sales_paused');
+  assertResult(doc, 'A venda por Pix está pausada');
+  assert.equal(bar(doc), null);
 });
 
 test('pedido já pago continua visível com a venda pausada', async () => {
@@ -344,8 +385,12 @@ test('Pix fora do ar ao criar → tela de erro 503', async () => {
   assert.equal(res.status, 503);
   const doc = await dom(res);
   assert.equal(doc.querySelector('.screen').dataset.state, 'error');
-  assert.equal(doc.querySelector('h1').textContent, 'Corridex Trimestral');
-  assert.match(text(doc), /O Pix está indisponível agora/);
+  assertResult(doc, 'O Pix está indisponível agora');
+  assert.ok(doc.querySelector('.result-hero[data-tone=error]'));
+  assert.match(doc.title, /Corridex Trimestral/);
+  const retry = bar(doc).querySelector('a.btn-primary');
+  assert.equal(retry.textContent.trim(), 'Tentar de novo');
+  assert.equal(retry.getAttribute('href'), '/pix?plano=trimestral&email=motorista%40email.com');
 });
 
 test('falha ao consultar o Pix → 503 (página e status), nunca 500', async () => {
@@ -358,7 +403,8 @@ test('falha ao consultar o Pix → 503 (página e status), nunca 500', async () 
   assert.equal(res.headers.get('x-robots-tag'), 'noindex');
   const doc = await dom(res);
   assert.equal(doc.querySelector('.screen').dataset.state, 'error');
-  assert.equal(doc.querySelector('h1').textContent, 'Corridex Anual');
+  assertResult(doc, 'O Pix está indisponível agora');
+  assert.equal(bar(doc).querySelector('a.btn-primary').getAttribute('href'), location);
   const status = await ctx.app.request(`${location}/status`);
   assert.equal(status.status, 503);
   assert.deepEqual(await status.json(), { error: 'unavailable' });
@@ -393,9 +439,37 @@ test('páginas do pedido sem palavras proibidas', async () => {
   ];
   ctx.provider.markPaid(lastTxid(order()));
   pages.push(await ctx.app.request(location));
+  pages.push(await ctx.app.request(`${location}/ajuda`));
   for (const res of pages) {
     const body = text(await dom(res));
     for (const word of [/token/i, /oferta/i, /geração/i, /Apple ID/i, /webhook/i]) assert.doesNotMatch(body, word);
+  }
+});
+
+// Todo texto visível das telas de resultado vem do copy (modelos com {x} aceitam qualquer valor);
+// fora dele, só valores: código, preço.
+const leaves = (o) => Object.values(o).flatMap((v) => (typeof v === 'string' ? [v] : leaves(v)));
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const templates = leaves(copy).map((tpl) => new RegExp(`^${tpl.split(/\{[^{}]+\}/).map(escapeRe).join('.+')}$`));
+const isValue = (s) => /^R\$ [\d.,]+$/.test(s) || /^[A-Z0-9]+( [A-Z0-9]+)*$/.test(s);
+
+test('telas de resultado: todo texto visível vem do copy', async () => {
+  const ctx = setup();
+  const { location, order } = await createOrder(ctx);
+  const urls = [`${location}?cenario=vencido`, `${location}?cenario=pendente`, '/pix/pedido/naoexiste', '/pix?cenario=pausado', '/pix?cenario=fora-do-ar'];
+  const docs = [];
+  for (const url of urls) docs.push(await dom(await ctx.app.request(url)));
+  ctx.provider.markPaid(lastTxid(order()));
+  docs.push(await dom(await ctx.app.request(location)), await dom(await ctx.app.request(`${location}/ajuda`)));
+  for (const doc of docs) {
+    for (const root of doc.querySelectorAll('.screen > .nav, .screen > main, .screen > .bar')) {
+      const walker = doc.createTreeWalker(root, 4 /* NodeFilter.SHOW_TEXT */);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        const s = n.textContent.replace(/\s+/g, ' ').trim();
+        if (!s) continue;
+        assert.ok(templates.some((re) => re.test(s)) || isValue(s), `texto fora do copy: "${s}" (${doc.querySelector('.screen').dataset.state})`);
+      }
+    }
   }
 });
 

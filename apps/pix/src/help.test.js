@@ -13,23 +13,29 @@ async function createOrder(ctx) {
   return res.headers.get('location');
 }
 
-test('ajuda: título, dois cartões, suporte, voltar, sem "mandar outro código"', async () => {
+test('ajuda: barra "Ajuda", título, dois itens em lista, barra com suporte e voltar, sem "mandar outro código"', async () => {
   const ctx = makeApp();
   const location = await createOrder(ctx);
   const res = await ctx.app.request(`${location}/ajuda`);
   assert.equal(res.status, 200);
   assert.equal(res.headers.get('cache-control'), 'no-store');
   const doc = await dom(res);
+  assert.equal(doc.querySelector('header.nav').textContent.trim(), 'Ajuda');
+  assert.ok(doc.querySelector('.screen > main.content:not(.result)'));
+  assert.equal(doc.querySelectorAll('h1').length, 1);
   assert.equal(doc.querySelector('h1').textContent.trim(), 'O código não funcionou?');
-  const headings = [...doc.querySelectorAll('h2')].map((h) => h.textContent.trim());
-  assert.ok(headings.includes('Confira a conta Apple'));
-  assert.ok(headings.includes('Novo código pode levar 1 hora'));
-  const links = [...doc.querySelectorAll('a')];
-  const support = links.find((a) => a.textContent.trim() === 'Falar com o suporte');
+  // Os dois cartões viram um grupo em lista (inset).
+  const group = doc.querySelector('main .card.rows');
+  const headings = [...group.querySelectorAll('h2')].map((h) => h.textContent.trim());
+  assert.deepEqual(headings, ['Confira a conta Apple', 'Novo código pode levar 1 hora']);
+  const bar = doc.querySelector('.screen > .bar');
+  const support = bar.querySelector('a.btn-primary');
+  assert.equal(support.textContent.trim(), 'Falar com o suporte');
   assert.equal(support.getAttribute('href'), SUPPORT);
   assert.equal(support.getAttribute('rel'), 'noopener');
-  const back = links.find((a) => a.textContent.trim() === 'Voltar ao pedido');
+  const back = [...bar.querySelectorAll('a')].find((a) => a.textContent.trim() === 'Voltar ao pedido');
   assert.equal(back.getAttribute('href'), location);
+  assert.equal(doc.querySelectorAll('main a.btn').length, 0);
   assert.equal(doc.querySelectorAll('button, form').length, 0);
   assert.doesNotMatch(doc.body.textContent, /outro código|novo código por/i);
 });
@@ -61,6 +67,6 @@ test('tela entregue tem o link "O código não funcionou?" para a ajuda', async 
   const location = await createOrder(ctx);
   ctx.provider.markPaid(ctx.stores.orders.get(location.split('/').pop()).txids.at(-1));
   const doc = await dom(await ctx.app.request(location));
-  const a = [...doc.querySelectorAll('a')].find((x) => x.textContent.trim() === 'O código não funcionou?');
+  const a = [...doc.querySelectorAll('.screen > .bar a')].find((x) => x.textContent.trim() === 'O código não funcionou?');
   assert.equal(a.getAttribute('href'), `${location}/ajuda`);
 });

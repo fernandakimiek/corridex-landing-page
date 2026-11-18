@@ -50,10 +50,8 @@ export const copy = {
   },
   code: {
     label: 'Seu código',
-    redeem: 'Resgatar código',
     redeemStore: 'Resgatar na App Store',
     meta: 'Resgate até {data} · enviado para {email}',
-    redeemHint: 'Abre a App Store com o código já preenchido.',
     sentTo: 'Também enviamos para {email}. O código vale uma vez só.',
     redeemBy: 'Resgate até {data}.',
     help: 'O código não funcionou?',
@@ -103,8 +101,6 @@ export const copy = {
     planName: 'Teste grátis',
   },
   order: {
-    title: 'Seu pedido',
-    paidOn: 'Pago em {data} por Pix',
     paidOnLabel: 'Pago em',
     paidOnValue: '{data} · Pix',
   },

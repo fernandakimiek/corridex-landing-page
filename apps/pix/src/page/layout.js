@@ -59,14 +59,12 @@ a{color:var(--info-text)}
 /* Cabeçalho de etapa (escolha, teste grátis): ícone 44 px tingido, título 22 px */
 .hero{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
 .hero .ic{width:44px;height:44px;color:var(--tone-text)}
-.hero-ic{display:flex;justify-content:center;color:var(--accent)}
-.hero-ic .ic{width:44px;height:44px}
 [data-tone=info]{--tone:var(--accent);--tone-text:var(--info-text)}
 [data-tone=success]{--tone:var(--success-text);--tone-text:var(--success-text)}
 [data-tone=warning]{--tone:var(--warning-icon);--tone-text:var(--warning-text)}
 [data-tone=error]{--tone:var(--error-icon);--tone-text:var(--error-text)}
-.hero-ic[data-tone]{color:var(--tone-text)}
-.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:50px;padding:.75rem 1.25rem;border:0;border-radius:999px;font:inherit;font-weight:600;text-align:center;text-decoration:none;cursor:pointer}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;padding:.75rem 1.25rem;border:0;border-radius:999px;font:inherit;font-weight:600;text-align:center;text-decoration:none;cursor:pointer}
+.btn .i{flex:none;width:18px;height:18px}
 .btn-primary{background:var(--accent-fill);color:var(--accent-ink)}
 /* app: fill translúcido; azul sobre fill dá 4,0:1, então fundo surface (5,6:1) */
 .btn-secondary{background:var(--surface);color:var(--info-text)}
@@ -100,9 +98,19 @@ a{color:var(--info-text)}
 .notice{display:grid;grid-template-columns:40px 1fr;gap:.25rem 12px;padding:1rem;border-radius:16px;background:var(--surface);background:color-mix(in srgb,var(--tone) 15%,var(--bg))}
 .notice>*{grid-column:2}
 .notice>.ic{grid-column:1;grid-row:1/span 2;width:28px;height:28px;color:var(--tone-text)}
-.notice>h1,.notice>h2{font-size:1.0625rem;font-weight:600;color:var(--tone-text)}
-.notice>.btn{grid-column:1/-1;margin-top:.75rem}
-output.code{display:block;padding:1rem;border-radius:16px;background:var(--surface);font:600 1.25rem/1.3 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.08em;font-variant-numeric:tabular-nums;text-align:center;word-break:break-all}
+.notice>h2{font-size:1.0625rem;font-weight:600;color:var(--tone-text)}
+/* Cartão "SEU CÓDIGO": rótulo em caixa alta, código monoespaçado 22 px, prazo e e-mail */
+.codecard{display:flex;flex-direction:column;gap:6px;padding:18px 16px;text-align:center}
+.cap{font-size:.8125rem;color:var(--label2);text-transform:uppercase;letter-spacing:.02em}
+output.code{display:block;font:600 1.375rem/1.3 ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.06em;font-variant-numeric:tabular-nums;word-break:break-all}
+.codecard .note{margin-top:2px}
+/* Grupo em lista (inset): linhas separadas por linha fina; no resumo, rótulo e valor lado a lado */
+.rows{margin:0;padding:0 16px;text-align:left}
+.rows>*{padding:12px 0;border-top:.5px solid var(--card-border)}
+.rows>:first-child{border-top:0}
+.rows>section{display:flex;flex-direction:column;gap:2px}
+dl.rows>div{display:flex;justify-content:space-between;gap:12px;font-size:.9375rem}
+dl.rows dd{margin:0;color:var(--label2);text-align:right;font-variant-numeric:tabular-nums}
 /* Pix gerado: topo com valor 34 px, cartão do código, passos, QR recolhido e status */
 .pay-hero{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .amount{font-size:2.125rem;font-weight:700;letter-spacing:-.01em}

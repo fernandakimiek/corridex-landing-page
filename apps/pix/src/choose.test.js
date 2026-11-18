@@ -145,6 +145,12 @@ test('?cenario=pausado → "A venda por Pix está pausada"; sem devTools o cená
   const doc = await dom(await get('/pix?cenario=pausado'));
   assert.match(text(doc), /A venda por Pix está pausada/);
   assert.equal(doc.querySelector('.screen').dataset.state, 'sales_paused');
+  assert.ok(doc.querySelector('.screen > main.content.result'));
+  assert.equal(doc.querySelectorAll('h1').length, 1);
+  assert.equal(doc.querySelector('h1').textContent.trim(), 'A venda por Pix está pausada');
+  assert.equal(doc.querySelector('h1').closest('.result-hero').dataset.tone, 'info');
+  assert.ok(doc.querySelector('header.nav .brand'));
+  assert.equal(doc.querySelector('.bar'), null);
   assert.equal(doc.querySelector('input[name=email]'), null);
   const off = await dom(await get('/pix?cenario=pausado', { config: { devTools: false } }));
   assert.doesNotMatch(text(off), /pausada/);
@@ -180,11 +186,16 @@ test('sem botão de envio, os outros planos viram links ?plano= (sem rádios sol
 
 test('?cenario=fora-do-ar → "O Pix está indisponível agora" e botão "Tentar de novo"', async () => {
   const doc = await dom(await get('/pix?cenario=fora-do-ar&plano=trimestral'));
-  assert.match(text(doc), /O Pix está indisponível agora/);
-  assert.match(doc.querySelector('h1').textContent, /Corridex Trimestral/);
-  assert.equal(doc.querySelector('[role=alert]').dataset.tone, 'error');
-  const retry = [...doc.querySelectorAll('a,button')].find((el) => el.textContent.trim() === 'Tentar de novo');
-  assert.ok(retry);
+  assert.ok(doc.querySelector('.screen > main.content.result'));
+  assert.equal(doc.querySelectorAll('h1').length, 1);
+  assert.equal(doc.querySelector('h1').textContent.trim(), 'O Pix está indisponível agora');
+  assert.equal(doc.querySelector('h1').closest('.result-hero').dataset.tone, 'error');
+  assert.match(text(doc), /Tente de novo em alguns minutos/);
+  assert.match(doc.title, /Corridex Trimestral/);
+  assert.ok(doc.querySelector('header.nav .brand'));
+  const retry = doc.querySelector('.screen > .bar a.btn-primary');
+  assert.equal(retry.textContent.trim(), 'Tentar de novo');
+  assert.equal(retry.getAttribute('href'), '/pix?plano=trimestral');
   assert.equal(doc.querySelector('.screen').dataset.state, 'error');
 });
 

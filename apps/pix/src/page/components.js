@@ -1,6 +1,6 @@
 import { html, raw } from 'hono/html';
 import { copy, t, links } from './copy.pt-BR.js';
-import { brl, perMonth, maskEmail, groupCode, dateBR, timeBR, redeemUrl } from './format.js';
+import { brl, perMonth, maskEmail, groupCode, dateBR, dateBRFromMs, timeBR, redeemUrl } from './format.js';
 
 // Blocos reutilizáveis das telas do Pix. Todo texto vem de copy.pt-BR.js.
 // Valores interpolados são escapados pelo hono/html; `raw` só para SVG/CSS nossos
@@ -53,14 +53,9 @@ export function Brand() {
   return html`<div class="brand"><i aria-hidden="true"></i><span>${copy.brand}</span></div>`;
 }
 
-// Ícone grande de estado (pago, venceu, erro, info), 44 px como o glifo do app.
-export function StateIcon({ tone = 'success' } = {}) {
-  return html`<div class="hero-ic" data-tone="${tone}">${raw(ICONS[tone] ?? ICONS.info)}</div>`;
-}
-
-// action: { label, href, variant?: 'primary'|'secondary'|'plain' }
-export function LinkButton({ label, href, variant = 'primary', rel }) {
-  return html`<a class="btn btn-${variant}" href="${href}"${rel ? html` rel="${rel}"` : ''}>${label}</a>`;
+// action: { label, href, variant?: 'primary'|'secondary'|'plain' }. `icon`: SVG nosso (aria-hidden) antes do texto.
+export function LinkButton({ label, href, variant = 'primary', rel, icon }) {
+  return html`<a class="btn btn-${variant}" href="${href}"${rel ? html` rel="${rel}"` : ''}>${icon ? raw(icon) : ''}${label}</a>`;
 }
 
 // `form`: id do formulário quando o botão fica fora dele (ex.: na barra de ação).
@@ -74,10 +69,11 @@ export function ActionBar({ primary, secondary, note } = {}) {
   return html`<div class="bar">${primary ?? ''}${secondary ?? ''}${note ? html`<p class="fine">${note}</p>` : ''}</div>`;
 }
 
-// Bloco de resultado: ícone de 64 px, título (h1) e texto secundário.
+// Bloco de resultado: ícone de 64 px, título (h1) e texto secundário (uma linha ou várias).
 export function ResultHero({ tone = 'success', title, body }) {
   const icon = TINTED[tone] ?? ICONS[tone] ?? ICONS.info;
-  return html`<div class="result-hero" data-tone="${HERO_TONE[tone] ?? tone}">${raw(icon)}<h1>${title}</h1>${body ? html`<p class="sub">${body}</p>` : ''}</div>`;
+  const lines = [body ?? []].flat();
+  return html`<div class="result-hero" data-tone="${HERO_TONE[tone] ?? tone}">${raw(icon)}<h1>${title}</h1>${lines.map((line) => html`<p class="sub">${line}</p>`)}</div>`;
 }
 
 // Cabeçalho de etapa (escolha, teste grátis): ícone de 44 px tingido, título e subtítulo.
@@ -145,12 +141,10 @@ ${errorText ? html`<p class="err" id="${id}-error">${errorText}</p>` : ''}
 
 // Aviso (InlineNoticeCard do app): fundo no tom a 15%, ícone + título na cor do tom.
 // Tom nunca só por cor: ícone e texto. Erro com role=alert.
-export function Notice({ tone = 'info', title, body, action, heading = 'h2' }) {
-  const h = heading === 'h1' ? html`<h1>${title}</h1>` : html`<h2>${title}</h2>`;
+export function Notice({ tone = 'info', title, body }) {
   return html`<section class="notice" data-tone="${tone}"${tone === 'error' ? raw(' role="alert"') : ''}>
-${raw(ICONS[tone] ?? ICONS.info)}${h}
+${raw(ICONS[tone] ?? ICONS.info)}<h2>${title}</h2>
 ${body ? html`<p>${body}</p>` : ''}
-${action ? LinkButton({ variant: 'secondary', ...action }) : ''}
 </section>`;
 }
 
@@ -225,30 +219,50 @@ export const RefreshNoJs = ({ href }) => html`<noscript>${LinkButton({ label: co
 
 const spelled = (value) => value.split('').join(' ');
 
-// Entrega do código: botão de resgate, código em <output> (soletrado para leitor de tela),
-// prazo, e-mail mascarado e, se houver, link de ajuda.
-export function CodeDelivery({ code, email, appStoreId, helpHref }) {
-  return html`<div class="stack">
-${LinkButton({ label: copy.code.redeem, href: redeemUrl(appStoreId, code.value) })}
-<p class="note center">${copy.code.redeemHint}</p>
-</div>
-<div class="stack">
-<p id="code-label"><strong>${copy.code.label}</strong></p>
-<output class="code" aria-labelledby="code-label code-spelled"><span aria-hidden="true">${groupCode(code.value)}</span><span id="code-spelled" hidden>${spelled(code.value)}</span></output>
-<p class="note">${code.redeemBy ? html`${t(copy.code.redeemBy, { data: dateBR(code.redeemBy) })} ` : ''}${email ? t(copy.code.sentTo, { email: maskEmail(email) }) : ''}</p>
-</div>
-${helpHref ? LinkButton({ label: copy.code.help, href: helpHref, variant: 'plain' }) : ''}`;
+// square.and.arrow.down: ícone do botão de resgate.
+const DOWNLOAD = svg('i', '<path d="M9 2v9M5.5 7.5 9 11l3.5-3.5M3 13v2h12v-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>', 18);
+
+// "Resgatar na App Store": abre a App Store com o código já preenchido.
+export const RedeemButton = ({ appStoreId, code }) => LinkButton({
+  label: copy.code.redeemStore, href: redeemUrl(appStoreId, code), icon: DOWNLOAD,
+});
+
+// Linha do cartão do código: prazo e e-mail mascarado (ou só o que existir).
+function codeMeta(code, email) {
+  const data = code.redeemBy ? dateBR(code.redeemBy) : null;
+  const masked = email ? maskEmail(email) : null;
+  if (data && masked) return t(copy.code.meta, { data, email: masked });
+  if (data) return t(copy.code.redeemBy, { data });
+  if (masked) return t(copy.code.sentTo, { email: masked });
+  return null;
 }
 
-// Ajuda quando o código não funciona: dois cartões + suporte.
-export function CodeHelp({ supportUrl, backHref }) {
-  return html`<section class="card stack"><h2>${copy.help.account}</h2><p>${copy.help.accountBody}</p></section>
-<section class="card stack"><h2>${copy.help.wait}</h2><p>${copy.help.waitBody}</p></section>
-<div class="stack">
-${LinkButton({ label: copy.help.cta, href: supportUrl, rel: 'noopener' })}
-<p class="note center">${copy.help.hint}</p>
-</div>
-${backHref ? LinkButton({ label: copy.help.back, href: backHref, variant: 'plain' }) : ''}`;
+// Cartão "SEU CÓDIGO": código agrupado em <output> (soletrado para leitor de tela)
+// e "Resgate até … · enviado para …".
+export function CodeCard({ code, email }) {
+  const meta = codeMeta(code, email);
+  return html`<div class="card codecard">
+<p class="cap" id="code-label">${copy.code.label}</p>
+<output class="code" aria-labelledby="code-label code-spelled"><span aria-hidden="true">${groupCode(code.value)}</span><span id="code-spelled" hidden>${spelled(code.value)}</span></output>
+${meta ? html`<p class="note">${meta}</p>` : ''}
+</div>`;
+}
+
+// Resumo do pedido em lista: "Corridex Anual — R$ 99,90" e "Pago em — 17/11/2026 · Pix".
+export function OrderSummary({ order, plan }) {
+  const paidOn = order.paidAt != null ? dateBRFromMs(order.paidAt) : null;
+  return html`<dl class="card rows">
+<div><dt>${planTitle(plan)}</dt><dd>${brl(order.amountCents)}</dd></div>
+${paidOn ? html`<div><dt>${copy.order.paidOnLabel}</dt><dd>${t(copy.order.paidOnValue, { data: paidOn })}</dd></div>` : ''}
+</dl>`;
+}
+
+// Ajuda quando o código não funciona: os dois itens num grupo em lista.
+export function HelpList() {
+  return html`<div class="card rows">
+<section><h2>${copy.help.account}</h2><p class="note">${copy.help.accountBody}</p></section>
+<section><h2>${copy.help.wait}</h2><p class="note">${copy.help.waitBody}</p></section>
+</div>`;
 }
 
 // Sessão do teste grátis em campos ocultos: se o formulário voltar à escolha, o link continua.

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { PixPayment, PayHero, PaymentStatus, CodeDelivery, CodeHelp, TrialRequest, Notice, EmailField } from './components.js';
+import { PixPayment, PayHero, PaymentStatus, CodeCard, OrderSummary, HelpList, RedeemButton, TrialRequest, Notice, EmailField } from './components.js';
 import { copy } from './copy.pt-BR.js';
 
 const frag = async (h) => new JSDOM(`<body>${await h}</body>`).window.document;
@@ -39,25 +39,47 @@ test('PaymentStatus: aria-live polite com o ponto de status', async () => {
   assert.ok(doc.querySelector('[aria-live=polite] .dot'));
 });
 
-test('CodeDelivery: link de resgate, código agrupado e soletrado, e-mail mascarado', async () => {
-  const doc = await frag(CodeDelivery({
-    code: { value: 'EXEMP1L0CODIGO0000', redeemBy: '2027-05-16' },
-    email: 'motorista@email.com', appStoreId: '6756681755', helpHref: '/pix/pedido/x/ajuda',
+test('CodeCard: rótulo, código agrupado e soletrado, "Resgate até … · enviado para …"', async () => {
+  const doc = await frag(CodeCard({
+    code: { value: 'EXEMP1L0CODIGO0000', redeemBy: '2027-05-16' }, email: 'motorista@email.com',
   }));
-  assert.equal(
-    doc.querySelector('a.btn-primary').getAttribute('href'),
-    'https://apps.apple.com/redeem?ctx=offercodes&id=6756681755&code=EXEMP1L0CODIGO0000',
-  );
-  const out = doc.querySelector('output');
-  assert.match(out.textContent, /EXEMP1 L0CODI GO0000/);
+  const card = doc.querySelector('.card');
+  assert.equal(card.querySelector('#code-label').textContent, copy.code.label);
+  const out = card.querySelector('output.code');
+  assert.equal(out.getAttribute('aria-labelledby'), 'code-label code-spelled');
+  assert.equal(out.querySelector('[aria-hidden=true]').textContent, 'EXEMP1 L0CODI GO0000');
   assert.equal(doc.getElementById('code-spelled').textContent, 'E X E M P 1 L 0 C O D I G O 0 0 0 0');
-  assert.match(doc.body.textContent, /Resgate até 16\/05\/2027\. Também enviamos para m•••@email\.com/);
-  assert.ok([...doc.querySelectorAll('a')].some((a) => a.textContent === copy.code.help));
+  assert.equal(card.querySelector('.note').textContent, 'Resgate até 16/05/2027 · enviado para m•••@email.com');
+  // Sem prazo ou sem e-mail: só o que existir.
+  const noDate = await frag(CodeCard({ code: { value: 'ABC' }, email: 'motorista@email.com' }));
+  assert.equal(noDate.querySelector('.note').textContent, 'Também enviamos para m•••@email.com. O código vale uma vez só.');
+  const noEmail = await frag(CodeCard({ code: { value: 'ABC', redeemBy: '2027-05-16' } }));
+  assert.equal(noEmail.querySelector('.note').textContent, 'Resgate até 16/05/2027.');
+  const none = await frag(CodeCard({ code: { value: 'ABC' } }));
+  assert.equal(none.querySelector('.note'), null);
 });
 
-test('CodeHelp e TrialRequest', async () => {
-  const help = await frag(CodeHelp({ supportUrl: 'https://wa.me/message/ON3GNOTDII42F1' }));
-  assert.equal(help.querySelector('a').getAttribute('href'), 'https://wa.me/message/ON3GNOTDII42F1');
+test('RedeemButton: link exato da App Store com ícone decorativo', async () => {
+  const doc = await frag(RedeemButton({ appStoreId: '6756681755', code: 'EXEMP1L0CODIGO0000' }));
+  const a = doc.querySelector('a.btn-primary');
+  assert.equal(a.getAttribute('href'), 'https://apps.apple.com/redeem?ctx=offercodes&id=6756681755&code=EXEMP1L0CODIGO0000');
+  assert.equal(a.textContent, copy.code.redeemStore);
+  assert.equal(a.querySelector('svg').getAttribute('aria-hidden'), 'true');
+});
+
+test('OrderSummary: lista plano — valor e "Pago em" — data · Pix', async () => {
+  const plan = { name: 'Anual' };
+  const doc = await frag(OrderSummary({ order: { amountCents: 9990, paidAt: Date.UTC(2026, 10, 17, 15) }, plan }));
+  const rows = [...doc.querySelectorAll('dl.card.rows > div')].map((r) => [r.querySelector('dt').textContent, r.querySelector('dd').textContent]);
+  assert.deepEqual(rows, [['Corridex Anual', 'R$ 99,90'], ['Pago em', '17/11/2026 · Pix']]);
+  const unpaid = await frag(OrderSummary({ order: { amountCents: 9990, paidAt: null }, plan }));
+  assert.equal(unpaid.querySelectorAll('dl > div').length, 1);
+});
+
+test('HelpList e TrialRequest', async () => {
+  const help = await frag(HelpList());
+  assert.deepEqual([...help.querySelectorAll('.card.rows h2')].map((h) => h.textContent), [copy.help.account, copy.help.wait]);
+  assert.equal(help.querySelector('a, button'), null);
   const trial = await frag(TrialRequest({ dcLer: 'a"b', dcMarcar: 'c', email: '' }));
   assert.equal(trial.querySelector('[name=dc_ler]').value, 'a"b');
   // O botão fica na barra de ação (form="teste"), fora do formulário.
@@ -108,6 +130,9 @@ test('ResultHero: ícone aria-hidden, h1 e .sub', async () => {
     assert.equal(doc.querySelector('p.sub').textContent, 'Texto');
     assert.ok(svg.compareDocumentPosition(doc.querySelector('h1')) & 4);
   }
+  // Várias linhas de texto secundário, na ordem.
+  const lines = await frag(ResultHero({ tone: 'success', title: 'T', body: ['Um', 'Dois'] }));
+  assert.deepEqual([...lines.querySelectorAll('p.sub')].map((p) => p.textContent), ['Um', 'Dois']);
   const noBody = await frag(ResultHero({ tone: 'info', title: 'T' }));
   assert.equal(noBody.querySelector('.sub'), null);
 });
