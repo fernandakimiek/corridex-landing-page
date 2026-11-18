@@ -1,6 +1,5 @@
-// Cliente da página do Pix. Sem dependências; a página funciona sem ele.
-// Consulta o status do pedido, troca a .screen quando muda, atualiza os minutos
-// e copia o código. Só toca o DOM no navegador (importável no Node para testes).
+// Cliente do Pix: status do pedido, troca da .screen, minutos e cópia do código.
+// Sem dependências; só toca o DOM no navegador (importável no Node para testes).
 
 // 3 s nos 2 primeiros minutos, 10 s até 30 min, depois para.
 export const nextDelay = (elapsedMs) => (elapsedMs < 120_000 ? 3000 : elapsedMs < 1_800_000 ? 10000 : null);
@@ -32,6 +31,7 @@ if (typeof document !== 'undefined') {
   let tick = null;
   let active = false; // consultando o status desta .screen
   let busy = false;
+  let toastTimer; // timer único do aviso de cópia
 
   const stop = () => { clearTimeout(timer); timer = null; };
   const schedule = () => {
@@ -40,7 +40,7 @@ if (typeof document !== 'undefined') {
     if (active && delay != null && !document.hidden) timer = setTimeout(poll, delay);
   };
 
-  // Rede fora ou 503: tenta de novo no ritmo normal. 404: para.
+  // Rede fora ou 503: repete. 404: para.
   async function poll() {
     stop();
     if (!active || busy || document.hidden) return;
@@ -52,13 +52,13 @@ if (typeof document !== 'undefined') {
         const { status } = await res.json();
         if (status && status !== screen.dataset.state) return await swap();
       }
-    } catch { /* tenta de novo */ } finally {
+    } catch { /* de novo */ } finally {
       busy = false;
     }
     schedule();
   }
 
-  // Busca a página de novo e troca a .screen inteira; foco vai para o h1.
+  // Troca a .screen inteira; foco no h1.
   async function swap() {
     const res = await fetch(location.href, { cache: 'no-store' });
     if (!res.ok) throw new Error(res.status);
@@ -106,9 +106,12 @@ if (typeof document !== 'undefined') {
     try {
       await navigator.clipboard.writeText(btn.dataset.copy);
       if (toast) {
+        clearTimeout(toastTimer);
         toast.textContent = '';
-        setTimeout(() => { toast.textContent = btn.dataset.copied; }, 100);
-        setTimeout(() => { toast.textContent = ''; }, 4000);
+        toastTimer = setTimeout(() => {
+          toast.textContent = btn.dataset.copied;
+          toastTimer = setTimeout(() => { toast.textContent = ''; }, 4000);
+        }, 100);
       }
     } catch {
       const field = screen.querySelector('#pix-code');
@@ -125,7 +128,7 @@ if (typeof document !== 'undefined') {
   document.addEventListener('change', (e) => {
     if (e.target.matches && e.target.matches('input[name=plano]')) syncCta(e.target);
   });
-  // Voltar no navegador pode restaurar outro rádio marcado.
+  // Voltar pode restaurar outro rádio.
   window.addEventListener('pageshow', () => syncCta(document.querySelector('input[name=plano]:checked')));
 
   if (screen) init(screen, true);
