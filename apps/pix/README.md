@@ -21,6 +21,24 @@ npm test -w apps/pix
 npm run deploy -w apps/pix   # publica no Cloudflare (requer login: npx wrangler login)
 ```
 
+## Link do app
+
+O app iOS abre o site assim:
+
+```
+/pix?plano=<id>&t=<token da Apple>[&teste=1&dcq=<consulta>&dcm=<marcação>]
+```
+
+- **Planos:** `monthly` (Mensal), `quarterly` (Trimestral) e `annual` (Anual). Plano desconhecido ou ausente abre o Anual. O teste grátis usa o plano interno `teste`.
+- **`t`:** token da compra externa da Apple (base64 ou base64url de um JSON). O servidor confere `bundleId` (`br.com.bdk.CorridexApp`), `appAppleId` (`6756681755`) e a validade. Token válido é guardado no servidor; inválido é ignorado, sem erro.
+- **`teste=1`, `dcq`, `dcm`:** teste grátis. Se o aparelho (chave = `dcq`) nunca usou o teste, o servidor abre uma sessão de teste e guarda o `dcm`.
+- **Cookies:** a primeira visita grava só ids, `pix_tok` (token da Apple, 7 dias) e `pix_trial` (sessão do teste, 30 min). Os dois são `HttpOnly`, `Secure`, `SameSite=Lax` e `Path=/pix`.
+- **Redirect:** com qualquer um de `t`, `teste`, `dcq` ou `dcm`, a resposta é 302 para `/pix?plano=<id>`, sem tokens na URL.
+- **Pedido:** nasce com `origin` `app` (há token da Apple) ou `site` (não há), ligado ao token guardado.
+- **Teste grátis:** `/pix/teste` lê só o cookie `pix_trial`. Sessão inválida, vencida ou aparelho que já usou mostra "Este aparelho já usou o teste grátis". Ao entregar o código, o aparelho é marcado com o `dcm` e a sessão e o cookie são apagados.
+- **DeviceCheck simulado:** ainda não há DeviceCheck real. Em desenvolvimento a chave do aparelho é o próprio `dcq`, e marcar usa essa chave.
+- **E-mail nunca na URL:** `GET /pix` ignora `?email=`. Quem precisa reabrir a escolha com o e-mail preenchido (trocar e-mail, outro plano no aviso, tentar de novo) usa `POST /pix` com `plano` e `email`.
+
 ## Simulação
 
 Para ver e testar todas as telas sem Banco Inter nem banco de dados, ligue as ferramentas de simulação. Crie `apps/pix/.dev.vars` (já ignorado pelo git) com:
@@ -35,7 +53,7 @@ Depois, com Node 22 (`nvm use 22`; o `wrangler` não roda no Node 20):
 npm run dev -w apps/pix
 ```
 
-Abra `http://localhost:8787/pix/dev`. O catálogo tem links para cada tela e cenário (`?cenario=sem-estoque`, `indisponivel-email`, `pausado`, `fora-do-ar`, `vencido`, `pendente`, `teste-usado`) e um botão para criar um pedido de exemplo. Nas páginas aparece a barra "Simulação"; na página do Pix, "Simular pagamento" marca o pedido como pago, e a página aberta em outra aba muda sozinha para "Pagamento confirmado".
+Abra `http://localhost:8787/pix/dev`. O catálogo tem links para cada tela (inclusive o link do app do teste grátis) e cenário (`?cenario=sem-estoque`, `indisponivel-email`, `pausado`, `fora-do-ar`, `vencido`, `pendente`, `teste-usado`) e um botão para criar um pedido de exemplo. Nas páginas aparece a barra "Simulação"; na página do Pix, "Simular pagamento" marca o pedido como pago, e a página aberta em outra aba muda sozinha para "Pagamento confirmado".
 
 Sem `PIX_DEV_TOOLS=true` (produção), `/pix/dev` e as rotas `/pix/dev/*` respondem 404, `?cenario=` é ignorado e a barra não aparece.
 
