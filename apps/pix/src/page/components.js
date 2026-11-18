@@ -99,8 +99,10 @@ export const ctaLabel = (plan) => t(copy.pix.ctaWithPrice, { valor: brl(plan.amo
 // Cada rádio leva em data-cta o rótulo do botão da barra (o pix.js troca ao mudar).
 // Modo link (`linkTo(id) → href`): usado quando não há botão de envio (avisos);
 // cada plano disponível vira um link para ?plano=<id>.
+// Modo envio (`submit`): igual ao link, mas cada plano disponível vira
+// <button name="plano" value="<id>"> do form em volta (avisos com e-mail: POST /pix).
 // Indisponível: nome riscado + selo "indisponível" (nunca só cor), sem interação.
-export function PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds = [], linkTo }) {
+export function PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds = [], linkTo, submit }) {
   const card = (plan, off) => {
     const month = perMonth(plan);
     const detail = month ? t(copy.plan.perMonth, { 'duração': plan.durationLabel, valor: month }) : plan.durationLabel;
@@ -110,12 +112,14 @@ export function PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds = [], l
     return html`<span class="pc">${raw(PICK)}<span class="pt"><span class="pn">${name}</span><span class="pd">${detail}</span></span><span class="pp">${brl(plan.amountCents)}</span></span>`;
   };
   const list = Object.values(plans);
-  if (linkTo) {
+  if (linkTo || submit) {
     const items = list.map((plan) => {
       const off = unavailablePlanIds.includes(plan.id);
       if (off) return html`<li class="plan off">${card(plan, true)}</li>`;
       if (plan.id === selectedPlanId) return html`<li class="plan cur" aria-current="true">${card(plan, false)}</li>`;
-      return html`<li><a class="plan" href="${linkTo(plan.id)}">${card(plan, false)}</a></li>`;
+      return submit
+        ? html`<li><button type="submit" class="plan" name="plano" value="${plan.id}">${card(plan, false)}</button></li>`
+        : html`<li><a class="plan" href="${linkTo(plan.id)}">${card(plan, false)}</a></li>`;
     });
     return html`<ul class="plans" aria-label="${copy.plan.legend}">${items}</ul>`;
   }

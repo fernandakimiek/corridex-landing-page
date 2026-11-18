@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 import { createApp } from '../app.js';
 import { PLANS } from '../plans.js';
@@ -33,4 +34,15 @@ export function makeApp(overrides = {}) {
 
 export async function dom(res) {
   return new JSDOM(await res.text()).window.document;
+}
+
+// Todo link e todo formulário GET (ação e campos) da página, sem e-mail.
+export function assertNoEmailInUrls(doc, label) {
+  for (const a of doc.querySelectorAll('a[href]')) assert.doesNotMatch(a.getAttribute('href'), /email=/, `${label}: ${a.getAttribute('href')}`);
+  for (const form of doc.querySelectorAll('form')) {
+    if ((form.getAttribute('method') ?? 'get').toLowerCase() === 'post') continue;
+    assert.doesNotMatch(form.getAttribute('action') ?? '', /email=/, label);
+    // form.elements inclui campos de fora ligados por form="id".
+    assert.ok(![...form.elements].some((el) => el.name === 'email' || /email=/.test(el.value ?? '')), label);
+  }
 }

@@ -137,3 +137,14 @@ test('ResultHero: ícone aria-hidden, h1 e .sub', async () => {
   const noBody = await frag(ResultHero({ tone: 'info', title: 'T' }));
   assert.equal(noBody.querySelector('.sub'), null);
 });
+
+test('PlanSwitcher com submit: outros planos são <button name=plano> (sem links); atual e indisponível sem interação', async () => {
+  const { PlanSwitcher } = await import('./components.js');
+  const { PLANS } = await import('../plans.js');
+  const doc = await frag(PlanSwitcher({ plans: PLANS, selectedPlanId: 'monthly', unavailablePlanIds: ['annual'], submit: true }));
+  const buttons = [...doc.querySelectorAll('ul.plans button.plan')];
+  assert.deepEqual(buttons.map((b) => [b.getAttribute('type'), b.name, b.value]), [['submit', 'plano', 'quarterly']]);
+  assert.equal(doc.querySelectorAll('a').length, 0);
+  assert.equal(doc.querySelector('.plan[aria-current=true] button'), null);
+  assert.equal(doc.querySelector('.plan.off button'), null);
+});

@@ -1,8 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { makeApp, dom } from './test/helpers.js';
+import { makeApp, dom, assertNoEmailInUrls } from './test/helpers.js';
 
 const get = (path, overrides) => makeApp(overrides).app.request(path);
+const postForm = (app, path, fields, headers = {}) => app.request(path, { method: 'POST', body: new URLSearchParams(fields), headers });
+const post = (path, fields, overrides) => postForm(makeApp(overrides).app, path, fields);
 const text = (doc) => doc.body.textContent.replace(/\s+/g, ' ');
 
 const barButton = (doc) => doc.querySelector('.bar button[form=pedido]');
@@ -91,7 +93,7 @@ test('Termos, Privacidade e Ajuda no conteúdo (sem o texto do banco); link do t
 
 test('envio do formulário completo (rádio, e-mail, nonce) com sessão do teste → 303 para o pedido', async () => {
   const { app } = makeApp();
-  const doc = await dom(await app.request('/pix?email=m%40email.com', { headers: await trialHeaders(app) }));
+  const doc = await dom(await postForm(app, '/pix', { email: 'm@email.com' }, await trialHeaders(app)));
   const form = doc.getElementById('pedido');
   const fields = [...doc.querySelectorAll('input, button, select, textarea')]
     .filter((el) => el.form === form && el.name && !el.disabled)
@@ -124,7 +126,7 @@ test('?plano=xyz cai no Anual', async () => {
 });
 
 test('email: type=email, autocomplete=email, inputmode=email', async () => {
-  const doc = await dom(await get('/pix?email=a%40b.com%22%3E%3Cscript%3E'));
+  const doc = await dom(await post('/pix', { email: 'a@b.com"><script>' }));
   const input = doc.querySelector('input[name=email]');
   assert.equal(input.getAttribute('type'), 'email');
   assert.equal(input.getAttribute('autocomplete'), 'email');
@@ -203,25 +205,32 @@ test('?cenario=fora-do-ar → "O Pix está indisponível agora" e botão "Tentar
 });
 
 test('?cenario=indisponivel-email&plano=monthly → mensagem e botão "Ver Trimestral"', async () => {
-  const doc = await dom(await get('/pix?cenario=indisponivel-email&plano=monthly&email=m%40email.com'));
+  const doc = await dom(await post('/pix?cenario=indisponivel-email', { plano: 'monthly', email: 'm@email.com' }));
   assert.match(text(doc), /Para este e-mail, o Mensal fica disponível em algumas horas/);
-  const see = doc.querySelector('.bar a.btn-primary');
+  const see = doc.querySelector('.bar button.btn-primary');
   assert.equal(see.textContent.trim(), 'Ver Trimestral');
-  assert.equal(see.getAttribute('href'), '/pix?plano=quarterly&email=m%40email.com');
+  assert.equal(see.name, 'plano');
+  assert.equal(see.value, 'quarterly');
   assert.ok(doc.querySelector('.notice').previousElementSibling.classList.contains('hero'));
   assert.equal(doc.querySelector('h1').textContent.trim(), 'Assine o Corridex com Pix');
   assert.match(doc.title, /Corridex Mensal/);
   assert.equal([...doc.querySelectorAll('button')].filter((b) => /Gerar Pix/.test(b.textContent)).length, 0);
   assert.equal(doc.querySelector('.screen').dataset.state, 'unavailable_for_customer');
-  // Plano atual marcado; os outros são links que mantêm o e-mail; nada gera Pix.
+  // Plano atual marcado; os outros são botões de POST /pix que mantêm o e-mail; nada gera Pix.
   assert.match(doc.querySelector('.plan[aria-current=true]').textContent, /Mensal/);
-  const hrefs = [...doc.querySelectorAll('ul.plans a.plan')].map((a) => a.getAttribute('href'));
-  assert.deepEqual(hrefs, ['/pix?plano=quarterly&email=m%40email.com', '/pix?plano=annual&email=m%40email.com']);
+  const cards = [...doc.querySelectorAll('ul.plans button.plan')];
+  assert.deepEqual(cards.map((b) => [b.name, b.value]), [['plano', 'quarterly'], ['plano', 'annual']]);
+  assert.equal(doc.querySelectorAll('ul.plans a').length, 0);
+  for (const b of cards) {
+    assert.equal(b.form.getAttribute('method'), 'post');
+    assert.equal(b.form.getAttribute('action'), '/pix');
+  }
   assert.equal(doc.querySelectorAll('input[type=radio]').length, 0);
   assert.equal(doc.querySelector('form[action="/pix/pedidos"]'), null);
-  const input = doc.querySelector('input[name=email]');
+  const input = doc.querySelector('input[name=email]:not([type=hidden])');
   assert.equal(input.value, 'm@email.com');
-  assert.equal(input.form.getAttribute('method'), 'get');
+  assert.equal(input.form.getAttribute('method'), 'post');
+  assert.equal(input.form.getAttribute('action'), '/pix');
 });
 
 test('sem estoque real no armazenamento marca o plano indisponível', async () => {
@@ -238,9 +247,9 @@ test('sem estoque real no armazenamento marca o plano indisponível', async () =
   assert.equal(def.querySelector('.screen').dataset.state, 'plan_out_of_stock');
 });
 
-test('?email= pré-preenchido é cortado em 254 caracteres', async () => {
+test('POST /pix: e-mail do formulário é cortado em 254 caracteres', async () => {
   const long = 'a'.repeat(300) + '@email.com';
-  const doc = await dom(await get('/pix?email=' + encodeURIComponent(long)));
+  const doc = await dom(await post('/pix', { email: long }));
   assert.equal(doc.querySelector('input[name=email]').value, 'a'.repeat(254));
 });
 
@@ -258,4 +267,92 @@ test('texto visível sem palavras proibidas', async () => {
     const doc = await dom(res);
     assert.doesNotMatch(text(doc), /token|oferta|geração|Apple ID|webhook/i);
   }
+});
+
+
+test('POST /pix com plano=quarterly&email=a@b.com → 200, cartão Trimestral marcado, campo com a@b.com', async () => {
+  const res = await post('/pix', { plano: 'quarterly', email: 'a@b.com' });
+  assert.equal(res.status, 200);
+  const doc = await dom(res);
+  assert.equal(doc.querySelector('.screen').dataset.state, 'choose');
+  assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'quarterly');
+  assert.equal(doc.querySelector('input[name=email]').value, 'a@b.com');
+  assert.equal(barButton(doc).textContent.trim(), 'Gerar Pix · R$ 25,90');
+});
+
+test('POST /pix: plano inválido cai no Anual; venda pausada → tela pausada', async () => {
+  const doc = await dom(await post('/pix', { plano: 'xyz', email: 'a@b.com' }));
+  assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'annual');
+  const paused = await dom(await post('/pix', { plano: 'annual', email: 'a@b.com' }, { config: { salesEnabled: false } }));
+  assert.equal(paused.querySelector('.screen').dataset.state, 'sales_paused');
+  const scenario = await dom(await post('/pix?cenario=pausado', { plano: 'annual' }));
+  assert.equal(scenario.querySelector('.screen').dataset.state, 'sales_paused');
+});
+
+test('POST /pix: cenario só pela query e só com devTools', async () => {
+  const body = await dom(await post('/pix', { plano: 'annual', email: 'a@b.com', cenario: 'sem-estoque' }));
+  assert.equal(body.querySelector('.screen').dataset.state, 'choose');
+  const off = await dom(await post('/pix?cenario=sem-estoque', { plano: 'annual' }, { config: { devTools: false } }));
+  assert.equal(off.querySelector('.screen').dataset.state, 'choose');
+});
+
+test('POST /pix mantém o link do teste grátis com a sessão do cookie', async () => {
+  const { app } = makeApp();
+  const doc = await dom(await postForm(app, '/pix', { plano: 'annual', email: 'a@b.com' }, await trialHeaders(app)));
+  assert.ok(doc.querySelector('main a[href="/pix/teste"]'));
+  const plain = await dom(await postForm(app, '/pix', { plano: 'annual', email: 'a@b.com' }));
+  assert.equal(plain.querySelector('a[href="/pix/teste"]'), null);
+});
+
+test('GET /pix?email=a@b.com ignora o e-mail', async () => {
+  const doc = await dom(await get('/pix?email=a%40b.com'));
+  assert.equal(doc.querySelector('input[name=email]').value, '');
+  const notice = await dom(await get('/pix?cenario=indisponivel-email&plano=monthly&email=a%40b.com'));
+  assert.equal(notice.querySelector('input[name=email]').value, '');
+  assertNoEmailInUrls(notice, 'indisponivel-email GET');
+});
+
+test('aviso Ver Trimestral com e-mail é botão de POST com email oculto', async () => {
+  const doc = await dom(await post('/pix?cenario=sem-estoque', { plano: 'annual', email: 'a@b.com' }));
+  const see = doc.querySelector('.bar button.btn-primary');
+  assert.equal(see.textContent.trim(), 'Ver Mensal');
+  assert.equal(see.getAttribute('type'), 'submit');
+  assert.equal(see.closest('form'), null);
+  assert.equal(see.name, 'plano');
+  assert.equal(see.value, 'monthly');
+  const form = see.form;
+  assert.equal(form.getAttribute('method'), 'post');
+  assert.equal(form.getAttribute('action'), '/pix');
+  const hidden = form.querySelector('input[type=hidden][name=email]');
+  assert.equal(hidden.value, 'a@b.com');
+  assert.equal(doc.querySelectorAll('a.btn').length, 0);
+  // Sem e-mail, continuam links.
+  const plain = await dom(await get('/pix?cenario=sem-estoque'));
+  assert.equal(plain.querySelector('.bar a.btn-primary').getAttribute('href'), '/pix?plano=monthly');
+});
+
+test('Tentar de novo com e-mail é POST /pix', async () => {
+  const doc = await dom(await post('/pix?cenario=fora-do-ar', { plano: 'quarterly', email: 'a@b.com' }));
+  assert.equal(doc.querySelector('.screen').dataset.state, 'error');
+  assert.match(doc.title, /Corridex Trimestral/);
+  const retry = doc.querySelector('.screen > .bar button.btn-primary');
+  assert.equal(retry.textContent.trim(), 'Tentar de novo');
+  assert.equal(retry.closest('form'), null);
+  const form = retry.form;
+  assert.equal(form.getAttribute('method'), 'post');
+  assert.equal(form.getAttribute('action'), '/pix');
+  assert.equal(form.querySelector('input[name=plano]').value, 'quarterly');
+  assert.equal(form.querySelector('input[name=email]').value, 'a@b.com');
+});
+
+test('nenhum href nem form GET de nenhuma tela contém email=', async () => {
+  const { app } = makeApp();
+  const pages = {
+    escolha: await postForm(app, '/pix', { plano: 'annual', email: 'a@b.com' }),
+    'sem-estoque': await postForm(app, '/pix?cenario=sem-estoque', { plano: 'annual', email: 'a@b.com' }),
+    'indisponivel-email': await postForm(app, '/pix?cenario=indisponivel-email', { plano: 'monthly', email: 'a@b.com' }),
+    'fora-do-ar': await postForm(app, '/pix?cenario=fora-do-ar', { plano: 'monthly', email: 'a@b.com' }),
+    'GET indisponivel-email': await app.request('/pix?cenario=indisponivel-email&email=a%40b.com'),
+  };
+  for (const [label, res] of Object.entries(pages)) assertNoEmailInUrls(await dom(res), label);
 });

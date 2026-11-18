@@ -13,7 +13,7 @@ import {
   trialRequestScreen, trialUsedScreen, trialDeliveredScreen, trialStockScreen,
 } from './page/screens.js';
 
-// Tamanho máximo de um endereço de e-mail (RFC 5321); corta o ?email= pré-preenchido.
+// Tamanho máximo de um endereço de e-mail (RFC 5321).
 const MAX_EMAIL = 254;
 // Validade de cada Pix (30 min).
 const PIX_TTL_SECONDS = 1800;
@@ -120,7 +120,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     let state = 'choose';
     const seeNext = () => {
       const next = nextPlanId(selectedPlanId, unavailablePlanIds);
-      return next ? { label: t(copy.seeOther, { plano: plans[next].name }), href: choosePath(next, email) } : undefined;
+      return next ? { label: t(copy.seeOther, { plano: plans[next].name }), planId: next } : undefined;
     };
     if (unavailablePlanIds.includes(selectedPlanId)) {
       state = 'plan_out_of_stock';
@@ -173,6 +173,22 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     setCookie(c, TRIAL_COOKIE, id, TRIAL_COOKIE_OPTIONS);
   }
 
+  // "Tentar de novo" da escolha: com e-mail, POST /pix (plano + e-mail); sem, link.
+  const retryTo = (planId, email) => ({
+    planName: plans[planId].name, retryHref: choosePath(planId), retryPlanId: planId, retryEmail: email || undefined,
+  });
+
+  // Escolha (GET e POST /pix): pausa, cenários de simulação e a tela de escolha.
+  function chooseRoute(c, { planId, email }) {
+    const cenario = scenario(c);
+    if (salesPaused() || cenario === 'pausado') return c.html(pausedScreen({ devBar: devBarFor(c) }));
+    const selectedPlanId = validPlanId(planId);
+    if (cenario === 'fora-do-ar') return c.html(errorScreen({ devBar: devBarFor(c), ...retryTo(selectedPlanId, email) }));
+    return chooseView(c, {
+      selectedPlanId, email, outOfStock: cenario === 'sem-estoque', customerUnavailable: cenario === 'indisponivel-email',
+    });
+  }
+
   app.get('/', async (c) => {
     // Primeira visita do app (t, teste, dcq ou dcm): processa e redireciona sempre
     // (a URL limpa mostra a pausa, se houver). Os dois cookies saem no mesmo 302.
@@ -183,18 +199,15 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
       return linkRedirect(c, validPlanId(c.req.query('plano')));
     }
 
-    const cenario = scenario(c);
-    if (salesPaused() || cenario === 'pausado') return c.html(pausedScreen({ devBar: devBarFor(c) }));
+    // O e-mail nunca vem da URL (?email= é ignorado); só do POST abaixo.
+    return chooseRoute(c, { planId: c.req.query('plano'), email: '' });
+  });
 
-    const selectedPlanId = validPlanId(c.req.query('plano'));
-    const email = (c.req.query('email') ?? '').slice(0, MAX_EMAIL);
-
-    if (cenario === 'fora-do-ar') {
-      return c.html(errorScreen({ devBar: devBarFor(c), planName: plans[selectedPlanId].name, retryHref: choosePath(selectedPlanId, email) }));
-    }
-    return chooseView(c, {
-      selectedPlanId, email, outOfStock: cenario === 'sem-estoque', customerUnavailable: cenario === 'indisponivel-email',
-    });
+  // Escolha com e-mail já digitado (Trocar e-mail, outro plano no aviso, Tentar de novo):
+  // mesma tela do GET, com o e-mail vindo do formulário e não da URL.
+  app.post('/', async (c) => {
+    const form = await readForm(c);
+    return chooseRoute(c, { planId: formString(form, 'plano', 32), email: formString(form, 'email', MAX_EMAIL) });
   });
 
   // Pedidos: só com provedor e lojas. A venda pausada bloqueia novas cobranças,
@@ -210,7 +223,7 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     if (reason === 'plan_out_of_stock') return chooseView(c, { ...base, outOfStock: true });
     if (reason === 'unavailable_for_customer') return chooseView(c, { ...base, customerUnavailable: true });
     if (reason === 'invalid_plan') return chooseView(c, { ...base, selectedPlanId: DEFAULT_PLAN_ID });
-    return c.html(errorScreen({ devBar: devBarFor(c), planName: plans[planId].name, retryHref: choosePath(planId, email) }), 503);
+    return c.html(errorScreen({ devBar: devBarFor(c), ...retryTo(planId, email) }), 503);
   }
 
   app.post('/pedidos', async (c) => {

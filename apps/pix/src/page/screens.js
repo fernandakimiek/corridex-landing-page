@@ -10,19 +10,17 @@ import {
 
 // Telas completas (página inteira). Cada uma aceita `devBar` (Task 9) e repassa ao layout.
 
-// Endereço da escolha com um plano (e o e-mail, se houver).
-export function choosePath(planId, email) {
-  const q = new URLSearchParams({ plano: planId });
-  if (email) q.set('email', email);
-  return `/pix?${q}`;
-}
+// Endereço da escolha com um plano. O e-mail nunca vai na URL: quem já tem e-mail
+// volta à escolha por POST /pix (campos plano e email).
+export const choosePath = (planId) => `/pix?${new URLSearchParams({ plano: planId })}`;
 
 // Escolha do plano (paywall do app): cabeçalho, cartões, grupo do e-mail e links;
 // o botão "Gerar Pix · R$ X" fica na barra de ação (form="pedido", fora do form).
 // state: 'choose' | 'plan_out_of_stock' | 'unavailable_for_customer'
 // Com `notice` não há botão "Gerar Pix": os planos viram links para ?plano=<id>
 // (a página continua utilizável sem JS), o aviso fica logo abaixo do cabeçalho e a
-// barra traz "Ver {outro plano}" (notice.action), se houver outro.
+// barra traz "Ver {outro plano}" (notice.action = { label, planId }), se houver outro.
+// Com e-mail, planos e "Ver …" são botões de POST /pix (form="planos", e-mail oculto).
 export function chooseScreen({
   plans, selectedPlanId, email = '', notice, unavailablePlanIds = [], trialHref, emailError,
   state = 'choose', nonce = '', devBar,
@@ -34,10 +32,10 @@ export function chooseScreen({
 
   if (notice) {
     const { action, ...info } = notice;
-    // Trocar o e-mail recarrega a escolha deste plano (GET), sem gerar Pix.
+    // Trocar o e-mail recarrega a escolha deste plano (POST /pix), sem gerar Pix.
     // Sem estoque, o campo só aparece se já há e-mail (ex.: pedido vencido que não renovou).
     const emailForm = state === 'unavailable_for_customer' || (state === 'plan_out_of_stock' && email)
-      ? html`<form class="stack" method="get" action="/pix">
+      ? html`<form class="stack" method="post" action="/pix">
 <input type="hidden" name="plano" value="${selectedPlanId}">
 ${EmailField({ value: email, error: emailError })}
 ${SubmitButton({ label: copy.email.change, variant: 'secondary' })}
@@ -45,11 +43,16 @@ ${SubmitButton({ label: copy.email.change, variant: 'secondary' })}
       : '';
     const body = html`${hero}
 ${Notice({ ...info, tone: info.tone ?? 'warning' })}
-${PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds, linkTo: (id) => choosePath(id, email) })}
+${email
+    ? html`<form id="planos" method="post" action="/pix"><input type="hidden" name="email" value="${email}">${PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds, submit: true })}</form>`
+    : PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds, linkTo: choosePath })}
 ${emailForm}
 ${trial}
 ${FooterLinks()}`;
-    const bar = action ? ActionBar({ primary: LinkButton(action) }) : undefined;
+    const see = action && (email
+      ? SubmitButton({ label: action.label, name: 'plano', value: action.planId, form: 'planos' })
+      : LinkButton({ label: action.label, href: choosePath(action.planId) }));
+    const bar = see ? ActionBar({ primary: see }) : undefined;
     return page({ title: planTitle(selected), nav, body, bar, state, devBar });
   }
 
@@ -81,9 +84,18 @@ export function pausedScreen({ devBar } = {}) {
 }
 
 // Pix fora do ar para o plano escolhido (o plano fica no título da aba).
-export function errorScreen({ planName, retryHref = '/pix', devBar }) {
-  const body = ResultHero({ tone: 'error', title: copy.down.title, body: copy.down.body });
-  const bar = ActionBar({ primary: LinkButton({ label: copy.down.cta, href: retryHref }) });
+// Com `retryEmail`, "Tentar de novo" volta à escolha por POST /pix (plano `retryPlanId`
+// e e-mail em campos ocultos, form="tentar"); sem, é um link para `retryHref`.
+export function errorScreen({ planName, retryHref = '/pix', retryPlanId, retryEmail, devBar }) {
+  const hero = ResultHero({ tone: 'error', title: copy.down.title, body: copy.down.body });
+  const body = retryEmail
+    ? html`${hero}
+<form id="tentar" method="post" action="/pix"><input type="hidden" name="plano" value="${retryPlanId}"><input type="hidden" name="email" value="${retryEmail}"></form>`
+    : hero;
+  const retry = retryEmail
+    ? SubmitButton({ label: copy.down.cta, form: 'tentar' })
+    : LinkButton({ label: copy.down.cta, href: retryHref });
+  const bar = ActionBar({ primary: retry });
   return result({ title: planTitle({ name: planName }), nav: { brand: true }, body, bar, state: 'error', devBar });
 }
 

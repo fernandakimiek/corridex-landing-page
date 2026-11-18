@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { makeApp, dom } from './test/helpers.js';
+import { makeApp, dom, assertNoEmailInUrls } from './test/helpers.js';
 import { copy } from './page/copy.pt-BR.js';
 
 const T0 = Date.UTC(2026, 10, 17, 15, 0, 0); // 17/11/2026 12:00 em Brasília
@@ -271,8 +271,12 @@ test('renovar sem código disponível → escolha com aviso de estoque e e-mail'
   const doc = await dom(res);
   assert.equal(doc.querySelector('.screen').dataset.state, 'plan_out_of_stock');
   assert.match(text(doc), /O Anual está indisponível no Pix agora/);
-  assert.ok([...doc.querySelectorAll('a')].some((a) => a.getAttribute('href').includes(`email=${encodeURIComponent(EMAIL)}`)));
+  // Os outros planos são botões de POST /pix que levam o e-mail num campo oculto, nunca na URL.
+  const card = doc.querySelector('ul.plans button.plan[value=monthly]');
+  assert.equal(card.form.getAttribute('action'), '/pix');
+  assert.equal(card.form.querySelector('input[type=hidden][name=email]').value, EMAIL);
   assert.equal(doc.querySelector('input[type=email]').value, EMAIL);
+  assertNoEmailInUrls(doc, 'renovar recusado');
 });
 
 test('pending: centralizado, "Seu código está a caminho", para onde vai e sem barra', async () => {
@@ -330,6 +334,13 @@ test('token inexistente → 404 com página amigável; /status → 404 JSON', as
   assert.equal(renew.status, 404);
   // Cenário não cria pedido.
   assert.equal((await ctx.app.request('/pix/pedido/naoexiste?cenario=vencido')).status, 404);
+});
+
+test('recusas de estoque e e-mail do POST /pix/pedidos sem email= em links ou forms GET', async () => {
+  const ctx = setup();
+  for (let i = 0; i < 6; i++) ctx.stores.codes.reserve('monthly', `outro${i}@email.com`, `h${i}`);
+  assertNoEmailInUrls(await dom(await post(ctx.app, '/pix/pedidos', { plano: 'monthly', email: EMAIL })), 'sem estoque');
+  assertNoEmailInUrls(await dom(await post(ctx.app, '/pix/pedidos', { plano: 'annual', email: 'sem-arroba' })), 'e-mail inválido');
 });
 
 test('POST com plano sem estoque → escolha com aviso', async () => {
@@ -396,9 +407,13 @@ test('Pix fora do ar ao criar → tela de erro 503', async () => {
   assertResult(doc, 'O Pix está indisponível agora');
   assert.ok(doc.querySelector('.result-hero[data-tone=error]'));
   assert.match(doc.title, /Corridex Trimestral/);
-  const retry = bar(doc).querySelector('a.btn-primary');
+  const retry = bar(doc).querySelector('button.btn-primary');
   assert.equal(retry.textContent.trim(), 'Tentar de novo');
-  assert.equal(retry.getAttribute('href'), '/pix?plano=quarterly&email=motorista%40email.com');
+  assert.equal(retry.form.getAttribute('method'), 'post');
+  assert.equal(retry.form.getAttribute('action'), '/pix');
+  assert.equal(retry.form.querySelector('input[name=plano]').value, 'quarterly');
+  assert.equal(retry.form.querySelector('input[name=email]').value, EMAIL);
+  assertNoEmailInUrls(doc, 'fora do ar ao criar');
 });
 
 test('falha ao consultar o Pix → 503 (página e status), nunca 500', async () => {
@@ -564,10 +579,12 @@ test('escolha reexibida após recusa mantém o nonce enviado', async () => {
 test('aviso com campo de e-mail tem botão "Usar este e-mail" e mantém o teste grátis', async () => {
   const ctx = setup();
   const headers = await trialHeaders(ctx.app);
-  for (const q of ['cenario=indisponivel-email&plano=monthly', 'cenario=sem-estoque&plano=monthly&email=m%40email.com']) {
-    const doc = await dom(await ctx.app.request(`/pix?${q}`, { headers }));
-    const form = doc.querySelector('input[name=email]').form;
-    assert.equal(form.getAttribute('method'), 'get', q);
+  for (const q of ['indisponivel-email', 'sem-estoque']) {
+    const doc = await dom(await post(ctx.app, `/pix?cenario=${q}`, { plano: 'monthly', email: 'm@email.com' }, headers));
+    const form = doc.querySelector('input[type=email]').form;
+    assert.equal(form.getAttribute('method'), 'post', q);
+    assert.equal(form.getAttribute('action'), '/pix', q);
+    assert.equal(form.querySelector('input[type=hidden][name=plano]').value, 'monthly', q);
     const button = form.querySelector('button[type=submit]');
     assert.equal(button.textContent.trim(), 'Usar este e-mail', q);
     assert.ok(button.classList.contains('btn-secondary'), q);

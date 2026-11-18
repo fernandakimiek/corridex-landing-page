@@ -71,6 +71,7 @@ a{color:var(--info-text)}
 .btn-plain{min-height:44px;background:none;color:var(--info-text);font-size:.9375rem;font-weight:400}
 .plans{position:relative;display:flex;flex-direction:column;gap:.75rem;min-width:0;margin:0;padding:0;border:0;list-style:none}
 .plan{position:relative;display:block;color:inherit;text-decoration:none;cursor:pointer}
+button.plan{width:100%;margin:0;padding:0;border:0;background:none;font:inherit;text-align:inherit}
 .plan input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:inherit}
 .pc{display:flex;align-items:center;gap:1rem;min-height:2.75rem;padding:1rem;border:2px solid var(--card-border);border-radius:16px;background:var(--surface)}
 .pc svg{flex:none;width:22px;height:22px}
