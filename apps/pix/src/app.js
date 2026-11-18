@@ -1,10 +1,12 @@
 import { Hono } from 'hono';
 import { html } from 'hono/html';
+import { getCookie, setCookie } from 'hono/cookie';
 import { PLANS, DEFAULT_PLAN_ID } from './plans.js';
 import { copy, t, dev } from './page/copy.pt-BR.js';
 import { devBarView, page } from './page/layout.js';
 import { renderSVG } from 'uqr';
 import { createOrderService, normalizeEmail, randomId } from './orders.js';
+import { decodePurchaseToken, APPLE_APP } from './apple/purchase-token.js';
 import {
   chooseScreen, pausedScreen, errorScreen, choosePath, orderPath,
   payingScreen, deliveredScreen, pendingScreen, expiredScreen, notFoundScreen, helpScreen,
@@ -17,6 +19,9 @@ const MAX_EMAIL = 254;
 const PIX_TTL_SECONDS = 1800;
 // Nonce do formulário: 22 caracteres; folga para não cortar um válido.
 const MAX_NONCE = 64;
+// Cookie com o id do token da Apple (7 dias, a validade padrão do token).
+const TOKEN_COOKIE = 'pix_tok';
+const TOKEN_COOKIE_OPTIONS = { httpOnly: true, secure: true, sameSite: 'Lax', path: '/pix', maxAge: 604800 };
 // Só recursos do próprio domínio; CSS inline (o layout embute o estilo) e SVG inline.
 const CSP = "default-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 
@@ -132,7 +137,30 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
 
   const validPlanId = (id) => (id && Object.hasOwn(plans, id) ? id : DEFAULT_PLAN_ID);
 
+  // URL limpa da escolha depois da primeira visita do app (sem t= e afins).
+  function linkRedirect(c, planId) {
+    const cenario = scenario(c);
+    const extra = cenario ? `&cenario=${encodeURIComponent(cenario)}` : '';
+    return c.redirect(`/pix?plano=${encodeURIComponent(planId)}${extra}`, 302);
+  }
+
+  // Token da Apple válido: guardado no servidor, o cookie leva só o id. Inválido é ignorado.
+  function rememberPurchaseToken(c, raw) {
+    if (!stores) return;
+    const decoded = decodePurchaseToken(raw, APPLE_APP, now());
+    if (!decoded) return;
+    const { id } = stores.tokens.remember(decoded);
+    setCookie(c, TOKEN_COOKIE, id, TOKEN_COOKIE_OPTIONS);
+  }
+
   app.get('/', (c) => {
+    // Primeira visita do app: processa e redireciona sempre (a URL limpa mostra a pausa, se houver).
+    const rawToken = c.req.query('t');
+    if (rawToken !== undefined) {
+      rememberPurchaseToken(c, rawToken);
+      return linkRedirect(c, validPlanId(c.req.query('plano')));
+    }
+
     const cenario = scenario(c);
     if (salesPaused() || cenario === 'pausado') return c.html(pausedScreen({ devBar: devBarFor(c) }));
 
@@ -172,9 +200,12 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     const trial = trialSession((k) => form[k]);
     if (!Object.hasOwn(plans, rawPlan)) return chooseView(c, { selectedPlanId: DEFAULT_PLAN_ID, email, trial, nonce });
 
+    // Só um id que o servidor conhece liga o pedido ao app; cookie forjado vira pedido do site.
+    const tokenId = getCookie(c, TOKEN_COOKIE);
+    const purchaseTokenId = tokenId && stores.tokens.byId(tokenId) ? tokenId : null;
     let result;
     try {
-      result = await orders.create({ planId: rawPlan, email, nonce });
+      result = await orders.create({ planId: rawPlan, email, nonce, purchaseTokenId });
     } catch {
       result = { ok: false, reason: 'pix_unavailable' };
     }

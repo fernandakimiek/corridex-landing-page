@@ -1,9 +1,13 @@
-// Lojas em memória (pedidos, códigos, testes grátis). Estado vive só enquanto o processo vive.
+import { randomId } from '../orders.js';
+
+// Lojas em memória (pedidos, códigos, testes grátis, tokens da Apple). Estado vive só enquanto o processo vive.
 export function createMemoryStores({ codes: seed }) {
   const orders = new Map();
   const slots = seed.map((code) => ({ code: { ...code }, state: 'free', holderId: null, email: null }));
   const received = new Map(); // email -> Set<offerId>
   const trialKeys = new Set();
+  const tokensById = new Map();
+  const tokenIdByPurchase = new Map(); // externalPurchaseId -> id
 
   const receivedBy = (email) => received.get(email) ?? new Set();
   const forHolder = (holderId) => slots.find((s) => s.holderId === holderId && s.state !== 'free');
@@ -87,6 +91,19 @@ export function createMemoryStores({ codes: seed }) {
     trials: {
       used: (deviceKey) => trialKeys.has(deviceKey),
       mark: (deviceKey) => void trialKeys.add(deviceKey),
+    },
+    // Token da Apple já decodificado; o cookie guarda só o `id`.
+    tokens: {
+      remember(decoded) {
+        let id = tokenIdByPurchase.get(decoded.externalPurchaseId);
+        if (!id) {
+          id = randomId();
+          tokenIdByPurchase.set(decoded.externalPurchaseId, id);
+          tokensById.set(id, { ...decoded, id });
+        }
+        return { id };
+      },
+      byId: (id) => tokensById.get(id) ?? null,
     },
   };
 }

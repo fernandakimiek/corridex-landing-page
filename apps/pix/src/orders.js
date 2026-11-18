@@ -76,7 +76,8 @@ export function createOrderService({ provider, stores, plans, now, pixTtlSeconds
   return {
     // `nonce` vem do formulário de escolha. Só o mesmo formulário (duplo envio)
     // reaproveita o pedido ativo: saber o e-mail de alguém não leva ao pedido dele.
-    async create({ planId, email: rawEmail, nonce = '' }) {
+    // `purchaseTokenId`: token da Apple guardado (pedido vindo do app).
+    async create({ planId, email: rawEmail, nonce = '', purchaseTokenId = null }) {
       const plan = Object.hasOwn(plans, planId) ? plans[planId] : null;
       if (!plan) return { ok: false, reason: 'invalid_plan' };
       const email = normalizeEmail(rawEmail);
@@ -95,6 +96,8 @@ export function createOrderService({ provider, stores, plans, now, pixTtlSeconds
         planId,
         email,
         nonce,
+        purchaseTokenId,
+        origin: purchaseTokenId ? 'app' : 'site',
         amountCents: plan.amountCents,
         txids: [r.txid],
         copiaECola: r.copiaECola,

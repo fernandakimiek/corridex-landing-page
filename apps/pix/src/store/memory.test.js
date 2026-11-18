@@ -97,3 +97,24 @@ test('reserva de um e-mail + oferta já recebida → nenhuma oferta elegível', 
   assert.equal(codes.reserve('monthly', 'a@x.com', 'h3'), null);
   assert.equal(codes.availability('monthly', 'a@x.com'), 'unavailable_for_customer');
 });
+
+const decodedToken = (externalPurchaseId) => ({
+  externalPurchaseId, tokenType: 'ACQUISITION', environment: 'Production', creationDate: 1, expirationDate: 2,
+});
+
+test('tokens.remember é idempotente por externalPurchaseId', () => {
+  const { tokens } = stores();
+  const a = tokens.remember(decodedToken('compra-1'));
+  const again = tokens.remember(decodedToken('compra-1'));
+  const b = tokens.remember(decodedToken('compra-2'));
+  assert.match(a.id, /^[A-Za-z0-9_-]{22}$/);
+  assert.equal(again.id, a.id);
+  assert.notEqual(b.id, a.id);
+  assert.deepEqual(tokens.byId(a.id), { ...decodedToken('compra-1'), id: a.id });
+});
+
+test('byId desconhecido → null', () => {
+  const { tokens } = stores();
+  assert.equal(tokens.byId('nao-existe'), null);
+  assert.equal(tokens.byId(undefined), null);
+});

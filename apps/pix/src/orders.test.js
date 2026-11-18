@@ -260,3 +260,18 @@ test('provedor falha → pix_unavailable e libera reserva', async () => {
   assert.equal(freeCount(stores, 'annual'), 6);
   assert.equal(stores.orders.findActive('a@x.com', 'annual'), null);
 });
+
+test('pedido com purchaseTokenId tem origin app', async () => {
+  const { service, stores } = setup();
+  const r = await service.create({ planId: 'annual', email: 'a@x.com', purchaseTokenId: 'tok-1' });
+  assert.equal(r.ok, true);
+  assert.equal(stores.orders.get(r.order.token).purchaseTokenId, 'tok-1');
+  assert.equal(stores.orders.get(r.order.token).origin, 'app');
+});
+
+test('sem token tem origin site e purchaseTokenId null', async () => {
+  const { service, stores } = setup();
+  const r = await service.create({ planId: 'annual', email: 'a@x.com' });
+  assert.equal(stores.orders.get(r.order.token).purchaseTokenId, null);
+  assert.equal(stores.orders.get(r.order.token).origin, 'site');
+});
