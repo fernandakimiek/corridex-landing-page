@@ -183,6 +183,19 @@ test('segundo link do mesmo dcq não cria sessão', async () => {
   assert.ok((await openLink(ctx, '/pix?teste=1&dcq=DCQ2&dcm=MAR2')).Cookie);
 });
 
+test('duas sessões do mesmo aparelho: depois da entrega pela primeira, a segunda → já usou', async (t) => {
+  const ctx = makeApp();
+  const mark = t.mock.method(ctx.deviceCheck, 'mark');
+  const first = await openLink(ctx);
+  const second = await openLink(ctx);
+  assert.ok(first.Cookie && second.Cookie);
+  assert.notEqual(first.Cookie, second.Cookie);
+  assert.equal(h1(await dom(await post(ctx, first, ok))), '7 dias grátis liberados');
+  assert.equal(h1(await dom(await getTrial(ctx, second))), 'Este aparelho já usou o teste grátis');
+  assert.equal(h1(await dom(await post(ctx, second, { email: 'outro@email.com' }))), 'Este aparelho já usou o teste grátis');
+  assert.equal(mark.mock.callCount(), 1);
+});
+
 test('sessão vencida (clock + 31 min) → Este aparelho já usou o teste grátis', async () => {
   const ctx = makeApp();
   const T0 = Date.UTC(2026, 10, 18, 15, 0, 0);

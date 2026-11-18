@@ -98,6 +98,12 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
     const session = id ? stores.trialSessions.get(id, now()) : null;
     return session ? { ...session, id } : null;
   }
+  // Sessão que ainda vale: o aparelho pode ter usado o teste por outra sessão aberta antes.
+  async function usableTrialSession(c) {
+    const session = trialSession(c);
+    if (!session || await deviceCheck.isUsed(session.deviceKey)) return null;
+    return session;
+  }
 
   app.get('/health', (c) => c.json({ ok: true }));
 
@@ -309,15 +315,15 @@ export function createApp({ config, provider, stores, plans = PLANS, now = Date.
   });
 
   // Teste grátis: não depende do Pix, só das lojas e do DeviceCheck. A sessão vem do cookie.
-  app.get('/teste', (c) => {
+  app.get('/teste', async (c) => {
     if (!stores || !config.salesEnabled) return c.html(pausedScreen({ devBar: devBarFor(c) }));
-    if (scenario(c) === 'teste-usado' || !trialSession(c)) return c.html(trialUsedScreen({ devBar: devBarFor(c) }));
+    if (scenario(c) === 'teste-usado' || !(await usableTrialSession(c))) return c.html(trialUsedScreen({ devBar: devBarFor(c) }));
     return c.html(trialRequestScreen({ devBar: devBarFor(c) }));
   });
 
   app.post('/teste', async (c) => {
     if (!stores || !config.salesEnabled) return c.html(pausedScreen({ devBar: devBarFor(c) }));
-    const session = trialSession(c);
+    const session = await usableTrialSession(c);
     if (!session) return c.html(trialUsedScreen({ devBar: devBarFor(c) }));
     const form = await readForm(c);
     const rawEmail = formString(form, 'email', MAX_EMAIL);
