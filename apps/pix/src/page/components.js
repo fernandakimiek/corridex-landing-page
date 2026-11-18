@@ -1,5 +1,5 @@
 import { html, raw } from 'hono/html';
-import { copy, t } from './copy.pt-BR.js';
+import { copy, t, links } from './copy.pt-BR.js';
 import { brl, maskEmail, groupCode, dateBR, timeBR, redeemUrl } from './format.js';
 
 // Blocos reutilizáveis das telas do Pix. Todo texto vem de copy.pt-BR.js.
@@ -21,6 +21,16 @@ const ICONS = {
   error: svg('ic', DOT + GLYPH.xmark), // xmark.circle.fill
   success: svg('ic', DOT + GLYPH.check), // checkmark.circle.fill
 };
+// Ícones de resultado em fundo tingido (cor do glifo = --tone-text, para contraste).
+const TINT = (opacity) => `<circle cx="14" cy="14" r="14" fill="currentColor" opacity="${opacity}"/>`;
+const TINTED = {
+  // clock: Pix vencido
+  clock: svg('ic tint', `${TINT(0.15)}<circle cx="14" cy="14" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M14 9.6v4.8l3 1.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`),
+  // gift: teste grátis
+  gift: svg('ic tint', `${TINT(0.12)}<rect x="7.5" y="11" width="13" height="3" rx=".8" fill="currentColor"/><rect x="8.5" y="14.6" width="11" height="6.4" rx=".8" fill="currentColor"/><rect x="13.2" y="11" width="1.6" height="10" fill="#FFF"/><path d="M14 11c-1-2.6-4.2-3.2-4.2-1.2 0 1.2 2.2 1.2 4.2 1.2Zm0 0c1-2.6 4.2-3.2 4.2-1.2 0 1.2-2.2 1.2-4.2 1.2Z" fill="none" stroke="currentColor" stroke-width="1.3"/>`),
+};
+// Tom (cores) de cada ícone de resultado.
+const HERO_TONE = { clock: 'warning', gift: 'info' };
 // Indicador de seleção do cartão de plano: circle / checkmark.circle.fill (22 px).
 const PICK = svg('i-off', '<circle cx="11" cy="11" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/>', 22)
   + svg('i-on', '<circle cx="11" cy="11" r="11" fill="currentColor"/><path d="m6.5 11.5 3 3 6-6.8" fill="none" stroke="#FFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>', 22);
@@ -51,8 +61,26 @@ export function LinkButton({ label, href, variant = 'primary', rel }) {
   return html`<a class="btn btn-${variant}" href="${href}"${rel ? html` rel="${rel}"` : ''}>${label}</a>`;
 }
 
-export function SubmitButton({ label, variant = 'primary', name, value }) {
-  return html`<button type="submit" class="btn btn-${variant}"${name ? html` name="${name}" value="${value}"` : ''}>${label}</button>`;
+// `form`: id do formulário quando o botão fica fora dele (ex.: na barra de ação).
+export function SubmitButton({ label, variant = 'primary', name, value, form }) {
+  return html`<button type="submit" class="btn btn-${variant}"${form ? html` form="${form}"` : ''}${name ? html` name="${name}" value="${value}"` : ''}>${label}</button>`;
+}
+
+// Barra de ação presa embaixo (PinnedBar do app): botão principal, ações secundárias
+// (um ou vários botões já renderizados) e nota pequena.
+export function ActionBar({ primary, secondary, note } = {}) {
+  return html`<div class="bar">${primary ?? ''}${secondary ?? ''}${note ? html`<p class="fine">${note}</p>` : ''}</div>`;
+}
+
+// Bloco de resultado: ícone de 64 px, título (h1) e texto secundário.
+export function ResultHero({ tone = 'success', title, body }) {
+  const icon = TINTED[tone] ?? ICONS[tone] ?? ICONS.info;
+  return html`<div class="result-hero" data-tone="${HERO_TONE[tone] ?? tone}">${raw(icon)}<h1>${title}</h1>${body ? html`<p class="sub">${body}</p>` : ''}</div>`;
+}
+
+// Termos, Privacidade e Ajuda (fim do conteúdo da escolha).
+export function FooterLinks() {
+  return html`<footer class="links"><p>${copy.footer.bank} · <a href="${links.terms}">${copy.footer.terms}</a> · <a href="${links.privacy}">${copy.footer.privacy}</a> · <a href="${links.help}">${copy.footer.help}</a></p></footer>`;
 }
 
 // Seletor de plano: cartões empilhados como no app (indicador + nome + preço, borda 2 px).

@@ -57,10 +57,10 @@ test('paying: botão "Copiar código Pix" antes do QR, SVG com aria-label, "Agua
   assert.equal(refresh.getAttribute('href'), location);
 });
 
-test('paying: data-status-url e data-expires-at no main', async () => {
+test('paying: data-status-url e data-expires-at na .screen', async () => {
   const ctx = setup();
   const { location, order } = await createOrder(ctx);
-  const main = (await dom(await ctx.app.request(location))).querySelector('main');
+  const main = (await dom(await ctx.app.request(location))).querySelector('.screen');
   assert.equal(main.dataset.state, 'paying');
   assert.equal(main.dataset.statusUrl, `${location}/status`);
   assert.equal(main.dataset.expiresAt, String(order().expiresAt));
@@ -71,7 +71,7 @@ test('após markPaid: delivered com "Resgatar código" → href apps.apple.com/r
   const { location, order } = await createOrder(ctx);
   ctx.provider.markPaid(lastTxid(order()));
   const doc = await dom(await ctx.app.request(location));
-  assert.equal(doc.querySelector('main').dataset.state, 'delivered');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'delivered');
   assert.equal(doc.querySelector('h1').textContent, 'Pagamento confirmado');
   assert.ok(doc.querySelector('.hero-ic[data-tone=success]'));
   const code = order().code.value;
@@ -106,7 +106,7 @@ test('vencido: "Este Pix venceu", form renovar, sem campo de e-mail', async () =
   const { location } = await createOrder(ctx);
   ctx.clock.set(T0 + 1801 * 1000);
   const doc = await dom(await ctx.app.request(location));
-  assert.equal(doc.querySelector('main').dataset.state, 'expired');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'expired');
   assert.equal(doc.querySelector('h1').textContent, 'Corridex Anual');
   assert.match(text(doc), /Este Pix venceu/);
   assert.match(text(doc), /Se você já pagou, espere/);
@@ -128,7 +128,7 @@ test('renovar → 303 e volta a paying', async () => {
   assert.equal(res.status, 303);
   assert.equal(res.headers.get('location'), location);
   const doc = await dom(await ctx.app.request(location));
-  assert.equal(doc.querySelector('main').dataset.state, 'paying');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'paying');
   assert.notEqual(lastTxid(order()), firstTxid);
 });
 
@@ -150,7 +150,7 @@ test('renovar sem código disponível → escolha com aviso de estoque e e-mail'
   const res = await post(ctx.app, `${location}/renovar`);
   assert.equal(res.status, 200);
   const doc = await dom(res);
-  assert.equal(doc.querySelector('main').dataset.state, 'plan_out_of_stock');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'plan_out_of_stock');
   assert.match(text(doc), /O Anual está indisponível no Pix agora/);
   assert.ok([...doc.querySelectorAll('a')].some((a) => a.getAttribute('href').includes(`email=${encodeURIComponent(EMAIL)}`)));
   assert.equal(doc.querySelector('input[type=email]').value, EMAIL);
@@ -164,7 +164,7 @@ test('pending: "Seu código está a caminho"', async () => {
   ctx.stores.codes.release(order().token);
   for (let i = 0; i < 6; i++) ctx.stores.codes.reserve('anual', `outro${i}@email.com`, `h${i}`);
   const doc = await dom(await ctx.app.request(location));
-  assert.equal(doc.querySelector('main').dataset.state, 'pending');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'pending');
   assert.equal(doc.querySelector('h1').textContent, 'Pagamento confirmado');
   assert.match(text(doc), /Seu código está a caminho/);
   assert.match(text(doc), /Enviaremos para m•••@email\.com\./);
@@ -175,7 +175,7 @@ test('e-mail inválido volta à escolha com mensagem ligada por aria-describedby
   const res = await post(ctx.app, '/pix/pedidos', { plano: 'mensal', email: 'sem-arroba' });
   assert.equal(res.status, 200);
   const doc = await dom(res);
-  assert.equal(doc.querySelector('main').dataset.state, 'choose');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'choose');
   const input = doc.querySelector('input[type=email]');
   assert.equal(input.value, 'sem-arroba');
   assert.equal(input.getAttribute('aria-invalid'), 'true');
@@ -212,7 +212,7 @@ test('POST com plano sem estoque → escolha com aviso', async () => {
   const res = await post(ctx.app, '/pix/pedidos', { plano: 'mensal', email: EMAIL });
   assert.equal(res.status, 200);
   const doc = await dom(res);
-  assert.equal(doc.querySelector('main').dataset.state, 'plan_out_of_stock');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'plan_out_of_stock');
   assert.match(text(doc), /O Mensal está indisponível no Pix agora/);
 });
 
@@ -224,7 +224,7 @@ test('POST para quem já recebeu os códigos do plano → aviso por e-mail', asy
   const res = await post(ctx.app, '/pix/pedidos', { plano: 'mensal', email: EMAIL });
   assert.equal(res.status, 200);
   const doc = await dom(res);
-  assert.equal(doc.querySelector('main').dataset.state, 'unavailable_for_customer');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'unavailable_for_customer');
   assert.match(text(doc), /Para este e-mail, o Mensal fica disponível em algumas horas/);
   assert.equal(doc.querySelector('input[type=email]').value, EMAIL);
 });
@@ -235,7 +235,7 @@ test('POST com plano desconhecido ou ausente → escolha com o plano padrão', a
     const res = await post(ctx.app, '/pix/pedidos', fields);
     assert.equal(res.status, 200);
     const doc = await dom(res);
-    assert.equal(doc.querySelector('main').dataset.state, 'choose');
+    assert.equal(doc.querySelector('.screen').dataset.state, 'choose');
     assert.equal(doc.querySelector('[role=radiogroup] input:checked').value, 'anual');
     assert.equal(doc.querySelector('input[type=email]').value, EMAIL);
   }
@@ -245,7 +245,7 @@ test('POST com venda pausada → tela de pausa, sem pedido', async () => {
   const ctx = setup({ config: { salesEnabled: false } });
   const res = await post(ctx.app, '/pix/pedidos', { plano: 'anual', email: EMAIL });
   assert.equal(res.status, 200);
-  assert.equal((await dom(res)).querySelector('main').dataset.state, 'sales_paused');
+  assert.equal((await dom(res)).querySelector('.screen').dataset.state, 'sales_paused');
 });
 
 test('pedido já pago continua visível com a venda pausada', async () => {
@@ -255,7 +255,7 @@ test('pedido já pago continua visível com a venda pausada', async () => {
   ctx.provider.markPaid(lastTxid(order()));
   const paused = makeApp({ config: { salesEnabled: false }, provider: ctx.provider, stores: ctx.stores });
   const doc = await dom(await paused.app.request(location));
-  assert.equal(doc.querySelector('main').dataset.state, 'delivered');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'delivered');
 });
 
 test('Pix fora do ar ao criar → tela de erro 503', async () => {
@@ -263,7 +263,7 @@ test('Pix fora do ar ao criar → tela de erro 503', async () => {
   const res = await post(ctx.app, '/pix/pedidos', { plano: 'trimestral', email: EMAIL });
   assert.equal(res.status, 503);
   const doc = await dom(res);
-  assert.equal(doc.querySelector('main').dataset.state, 'error');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'error');
   assert.equal(doc.querySelector('h1').textContent, 'Corridex Trimestral');
   assert.match(text(doc), /O Pix está indisponível agora/);
 });
@@ -277,7 +277,7 @@ test('falha ao consultar o Pix → 503 (página e status), nunca 500', async () 
   assert.equal(res.headers.get('referrer-policy'), 'no-referrer');
   assert.equal(res.headers.get('x-robots-tag'), 'noindex');
   const doc = await dom(res);
-  assert.equal(doc.querySelector('main').dataset.state, 'error');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'error');
   assert.equal(doc.querySelector('h1').textContent, 'Corridex Anual');
   const status = await ctx.app.request(`${location}/status`);
   assert.equal(status.status, 503);
@@ -290,16 +290,16 @@ test('cenários no pedido: vencido e pendente (só com ferramentas de simulaçã
   const ctx = setup();
   const { location } = await createOrder(ctx);
   let doc = await dom(await ctx.app.request(`${location}?cenario=vencido`));
-  assert.equal(doc.querySelector('main').dataset.state, 'expired');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'expired');
   assert.match(text(doc), /Este Pix venceu/);
   doc = await dom(await ctx.app.request(`${location}?cenario=pendente`));
-  assert.equal(doc.querySelector('main').dataset.state, 'pending');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'pending');
   assert.match(text(doc), /Seu código está a caminho/);
 
   const prod = setup({ config: { devTools: false } });
   const { location: loc2 } = await createOrder(prod);
   doc = await dom(await prod.app.request(`${loc2}?cenario=vencido`));
-  assert.equal(doc.querySelector('main').dataset.state, 'paying');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'paying');
 });
 
 test('páginas do pedido sem palavras proibidas', async () => {
@@ -349,7 +349,7 @@ test('renovar sem provedor configurado → venda pausada, sem erro', async () =>
   const ctx = setup({ provider: null });
   const res = await post(ctx.app, '/pix/pedido/qualquer/renovar');
   assert.equal(res.status, 200);
-  assert.equal((await dom(res)).querySelector('main').dataset.state, 'sales_paused');
+  assert.equal((await dom(res)).querySelector('.screen').dataset.state, 'sales_paused');
 });
 
 // Corpo multipart com boundary quebrado: parseBody lança; a rota não pode dar 500.
@@ -364,7 +364,7 @@ test('POST /pix/pedidos com multipart malformado → escolha, nunca 500', async 
   const res = await badMultipart(ctx.app, '/pix/pedidos');
   assert.notEqual(res.status, 500);
   assert.equal(res.status, 200);
-  assert.equal((await dom(res)).querySelector('main').dataset.state, 'choose');
+  assert.equal((await dom(res)).querySelector('.screen').dataset.state, 'choose');
 });
 
 test('erro inesperado → tela "Pix indisponível" 503 (onError), com log', async (t) => {
@@ -375,7 +375,7 @@ test('erro inesperado → tela "Pix indisponível" 503 (onError), com log', asyn
   assert.equal(res.status, 503);
   assert.equal(res.headers.get('cache-control'), 'no-store');
   const doc = await dom(res);
-  assert.equal(doc.querySelector('main').dataset.state, 'error');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'error');
   assert.match(text(doc), /O Pix está indisponível agora/);
   assert.equal(errors.mock.callCount(), 1);
 });
@@ -432,7 +432,7 @@ test('rota inexistente → tela amigável 404 com barra de simulação', async (
   const res = await ctx.app.request('/pix/nada');
   assert.equal(res.status, 404);
   const doc = await dom(res);
-  assert.equal(doc.querySelector('main').dataset.state, 'not_found');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'not_found');
   assert.match(doc.body.textContent, /Simulação/);
 });
 

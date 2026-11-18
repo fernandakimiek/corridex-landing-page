@@ -32,7 +32,7 @@ test('GET /pix mostra Anual selecionado com R$ 99,90', async () => {
   assert.ok(form.contains(group));
   assert.match(doc.querySelector('footer').textContent, /Pagamento pelo Banco Inter/);
   assert.equal(doc.documentElement.getAttribute('lang'), 'pt-BR');
-  assert.equal(doc.querySelector('main').dataset.state, 'choose');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'choose');
 });
 
 test('?plano=mensal seleciona Mensal R$ 9,90', async () => {
@@ -83,16 +83,16 @@ test('link do teste só com teste=1 e dois tokens', async () => {
 test('?cenario=pausado → "A venda por Pix está pausada"; sem devTools o cenário é ignorado', async () => {
   const doc = await dom(await get('/pix?cenario=pausado'));
   assert.match(text(doc), /A venda por Pix está pausada/);
-  assert.equal(doc.querySelector('main').dataset.state, 'sales_paused');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'sales_paused');
   assert.equal(doc.querySelector('input[name=email]'), null);
   const off = await dom(await get('/pix?cenario=pausado', { config: { devTools: false } }));
   assert.doesNotMatch(text(off), /pausada/);
-  assert.equal(off.querySelector('main').dataset.state, 'choose');
+  assert.equal(off.querySelector('.screen').dataset.state, 'choose');
 });
 
 test('?cenario=sem-estoque → Anual riscado com texto "indisponível" e Notice warning', async () => {
   const doc = await dom(await get('/pix?cenario=sem-estoque'));
-  assert.equal(doc.querySelector('main').dataset.state, 'plan_out_of_stock');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'plan_out_of_stock');
   const off = doc.querySelector('.plan.off');
   assert.equal(off.querySelector('s').textContent, 'Anual');
   assert.match(off.textContent, /indisponível/);
@@ -120,7 +120,7 @@ test('?cenario=fora-do-ar → "O Pix está indisponível agora" e botão "Tentar
   assert.equal(doc.querySelector('[role=alert]').dataset.tone, 'error');
   const retry = [...doc.querySelectorAll('a,button')].find((el) => el.textContent.trim() === 'Tentar de novo');
   assert.ok(retry);
-  assert.equal(doc.querySelector('main').dataset.state, 'error');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'error');
 });
 
 test('?cenario=indisponivel-email&plano=mensal → mensagem e botão "Ver Trimestral"', async () => {
@@ -130,7 +130,7 @@ test('?cenario=indisponivel-email&plano=mensal → mensagem e botão "Ver Trimes
   assert.ok(see);
   assert.equal(see.getAttribute('href'), '/pix?plano=trimestral&email=m%40email.com');
   assert.equal(doc.querySelector('h1').textContent, 'Corridex Mensal');
-  assert.equal(doc.querySelector('main').dataset.state, 'unavailable_for_customer');
+  assert.equal(doc.querySelector('.screen').dataset.state, 'unavailable_for_customer');
   // Plano atual marcado; os outros são links que mantêm o e-mail; nada gera Pix.
   assert.match(doc.querySelector('.plan[aria-current=true]').textContent, /Mensal/);
   const hrefs = [...doc.querySelectorAll('ul.plans a.plan')].map((a) => a.getAttribute('href'));
@@ -153,7 +153,7 @@ test('sem estoque real no armazenamento marca o plano indisponível', async () =
   assert.ok(!doc.querySelector('input[name=plano][value=mensal]').disabled);
   // Plano escolhido sem estoque → aviso de estoque.
   const def = await dom(await app.request('/pix'));
-  assert.equal(def.querySelector('main').dataset.state, 'plan_out_of_stock');
+  assert.equal(def.querySelector('.screen').dataset.state, 'plan_out_of_stock');
 });
 
 test('?email= pré-preenchido é cortado em 254 caracteres', async () => {

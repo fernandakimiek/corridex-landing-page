@@ -4,7 +4,7 @@ import { page } from './layout.js';
 import { brl, maskEmail, dateBRFromMs } from './format.js';
 import {
   Brand, PlanSwitcher, PlanSummary, EmailField, Notice, SubmitButton, LinkButton, planTitle,
-  StateIcon, PixPayment, PaymentStatus, CodeDelivery, CodeHelp, TrialRequest, TrialFields,
+  StateIcon, FooterLinks, PixPayment, PaymentStatus, CodeDelivery, CodeHelp, TrialRequest, TrialFields,
 } from './components.js';
 
 // Telas completas (página inteira). Cada uma aceita `devBar` (Task 9) e repassa ao layout.
@@ -42,7 +42,8 @@ ${SubmitButton({ label: copy.email.change, variant: 'secondary' })}
 ${PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds, linkTo: (id) => choosePath(id, email) })}
 ${Notice({ ...notice, tone: notice.tone ?? 'warning' })}
 ${emailForm}
-${trial}`;
+${trial}
+${FooterLinks()}`;
     return page({ title: planTitle(selected), body, state, devBar });
   }
 
@@ -59,7 +60,8 @@ ${PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds })}
 ${EmailField({ value: email, error: emailError })}
 ${SubmitButton({ label: copy.pix.cta })}
 </form>
-${trial}`;
+${trial}
+${FooterLinks()}`;
   return page({ title: planTitle(selected), body, state, devBar });
 }
 

@@ -1,5 +1,6 @@
 import { html, raw } from 'hono/html';
-import { copy, links, dev } from './copy.pt-BR.js';
+import { copy, dev } from './copy.pt-BR.js';
+import { Brand } from './components.js';
 import { PLANS } from '../plans.js';
 
 // Sem JS, o resumo do plano acompanha o rádio marcado via :has().
@@ -21,17 +22,33 @@ const CSS = `
 --info-text:#005FC7;
 --card-border:#3C3C434A;--field-border:#C6C6C8;--fill:#78788033;
 --success-text:#0E6B2B;--warning-text:#8C5000;--warning-icon:#FF9500;--error-text:#B00020;--error-icon:#FF3B30;
---brand:#275BBC}
+--brand:#275BBC;
+/* barra de ação translúcida (PinnedBar); sem backdrop-filter usa --surface */
+--bar-bg:#F9F9F9F0}
 @media (prefers-color-scheme:dark){:root{
 --bg:#000;--surface:#1C1C1E;--label:#FFF;--label2:#EBEBF599;--label3:#EBEBF54D;
 --accent:#0A84FF;--info-text:#2A94FF;
 --card-border:#545458A6;--field-border:#38383A;--fill:#7878805C;
 --success-text:#30D158;--warning-text:#FF9F0A;--warning-icon:#FF9F0A;--error-text:#FF7A70;--error-icon:#FF453A;
---brand:#2757A9}}
+--brand:#2757A9;--bar-bg:#161618F0}}
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg);color:var(--label);font:400 1.0625rem/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;padding:max(1rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left))}
-main{flex:1;width:100%;max-width:30rem;margin:0 auto;display:flex;flex-direction:column;gap:1.5rem}
+body{margin:0;background:var(--bg);color:var(--label);font:400 1.0625rem/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+/* Tela: barra de título, conteúdo que rola e barra de ação presa embaixo */
+.screen{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.nav{display:flex;align-items:center;justify-content:center;min-height:calc(44px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 20px 0;font-weight:600}
+.devbar+.screen .nav{min-height:44px;padding-top:0}
+.content{flex:1;width:100%;max-width:calc(30rem + 40px);margin:0 auto;display:flex;flex-direction:column;gap:24px;padding:8px max(20px,env(safe-area-inset-right)) 24px max(20px,env(safe-area-inset-left))}
+.content.result{justify-content:center;text-align:center}
+.bar{position:sticky;bottom:0;z-index:1;display:flex;flex-direction:column;gap:8px;padding:16px max(20px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 24px) max(20px,env(safe-area-inset-left));background:var(--surface);border-top:.5px solid var(--card-border)}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.bar{background:var(--bar-bg);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}}
+.bar>*{width:100%;max-width:30rem;margin-inline:auto}
+.fine{font-size:.75rem;color:var(--label2);text-align:center}
+.result-hero{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.result-hero h1{font-size:1.75rem;font-weight:700}
+.result-hero .ic{width:64px;height:64px;margin-bottom:4px;color:var(--tone)}
+.result-hero .ic.tint{color:var(--tone-text)}
+.sub{font-size:.9375rem;color:var(--label2)}
 h1,h2{margin:0;line-height:1.25}
 h1{font-size:1.375rem;font-weight:700}
 h2{font-size:1.0625rem;font-weight:600}
@@ -97,10 +114,10 @@ a{color:var(--info-text)}
 .spin{width:1rem;height:1rem;border:2px solid var(--fill);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(1turn)}}
 .toast{min-height:1.4em;text-align:center;color:var(--success-text);font-weight:600}
-footer{width:100%;max-width:30rem;margin:1.5rem auto 0;text-align:center;font-size:.8125rem;color:var(--label2)}
-footer a{display:inline-block;padding:.75rem .25rem;min-height:44px;color:var(--info-text)}
-body:has(.devbar){padding-bottom:calc(3.25rem + env(safe-area-inset-bottom))}
-.devbar{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.25rem .75rem;padding:.375rem 1rem calc(.375rem + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--card-border);font-size:.75rem;color:var(--label2)}
+.links{text-align:center;font-size:.8125rem;color:var(--label2)}
+.links a{display:inline-block;padding:.75rem .25rem;min-height:44px;color:var(--info-text)}
+/* Barra de dev: faixa estática no topo, fora do fluxo da barra de ação */
+.devbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.25rem .75rem;padding:calc(.25rem + env(safe-area-inset-top)) 1rem .25rem;background:var(--surface);border-bottom:1px solid var(--card-border);font-size:.75rem;color:var(--label2)}
 .devbar a{color:var(--info-text)}
 .devbar form{margin:0}
 .devbar button{min-height:32px;padding:0 .75rem;border:1px solid var(--field-border);border-radius:999px;background:none;color:var(--info-text);font:inherit;cursor:pointer}
@@ -118,7 +135,14 @@ function dataAttrs(data = {}) {
   });
 }
 
-export function page({ title, body, state, data, devBar }) {
+// Barra de título (44 px): marca na escolha, título da etapa nas demais. Não é o <h1>.
+function NavBar({ brand, title } = {}) {
+  return html`<header class="nav">${brand || !title ? Brand() : html`<span>${title}</span>`}</header>`;
+}
+
+// `bar`: ActionBar já renderizada (ou nada). `layout: 'result'` centraliza o conteúdo na vertical.
+// data-state/data-* ficam em .screen, o bloco que o pix.js troca.
+export function page({ title, nav = { brand: true }, body, bar, layout = 'flow', state, data, devBar }) {
   return html`<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -134,13 +158,12 @@ export function page({ title, body, state, data, devBar }) {
 <script type="module" src="/pix/assets/pix.js"></script>
 </head>
 <body>
-<main data-state="${state}"${dataAttrs(data)}>
+${devBar ?? ''}<div class="screen" data-state="${state}"${dataAttrs(data)}>
+${NavBar(nav)}
+<main class="content${layout === 'result' ? ' result' : ''}">
 ${body}
 </main>
-<footer>
-<p>${copy.footer.bank} · <a href="${links.terms}">${copy.footer.terms}</a> · <a href="${links.privacy}">${copy.footer.privacy}</a> · <a href="${links.help}">${copy.footer.help}</a></p>
-</footer>
-${devBar ?? ''}
+${bar ?? ''}</div>
 </body>
 </html>`;
 }

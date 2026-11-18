@@ -59,3 +59,38 @@ test('Notice error tem role=alert; EmailField liga o erro por aria-describedby',
   const err = f.getElementById(input.getAttribute('aria-describedby').split(' ')[0]);
   assert.equal(err.textContent, copy.email.invalid);
 });
+
+test('ActionBar: principal, secundárias e nota, nessa ordem', async () => {
+  const { ActionBar, LinkButton, SubmitButton } = await import('./components.js');
+  const doc = await frag(ActionBar({
+    primary: SubmitButton({ label: 'Gerar', form: 'f1' }),
+    secondary: LinkButton({ label: 'Voltar', href: '/pix', variant: 'plain' }),
+    note: 'Pagamento pelo Banco Inter',
+  }));
+  const bar = doc.querySelector('div.bar');
+  assert.ok(bar);
+  const kids = [...bar.children];
+  assert.equal(kids.length, 3);
+  assert.equal(kids[0].tagName, 'BUTTON');
+  assert.equal(kids[0].getAttribute('form'), 'f1');
+  assert.equal(kids[1].textContent, 'Voltar');
+  assert.equal(kids[2].textContent, 'Pagamento pelo Banco Inter');
+  assert.ok(kids[2].classList.contains('fine'));
+  const only = await frag(ActionBar({ primary: SubmitButton({ label: 'X' }) }));
+  assert.equal(only.querySelector('.bar').children.length, 1);
+});
+
+test('ResultHero: ícone aria-hidden, h1 e .sub', async () => {
+  const { ResultHero } = await import('./components.js');
+  for (const tone of ['success', 'warning', 'error', 'info', 'clock', 'gift']) {
+    const doc = await frag(ResultHero({ tone, title: 'Título', body: 'Texto' }));
+    const svg = doc.querySelector('svg');
+    assert.ok(svg, tone);
+    assert.equal(svg.getAttribute('aria-hidden'), 'true');
+    assert.equal(doc.querySelector('h1').textContent, 'Título');
+    assert.equal(doc.querySelector('p.sub').textContent, 'Texto');
+    assert.ok(svg.compareDocumentPosition(doc.querySelector('h1')) & 4);
+  }
+  const noBody = await frag(ResultHero({ tone: 'info', title: 'T' }));
+  assert.equal(noBody.querySelector('.sub'), null);
+});

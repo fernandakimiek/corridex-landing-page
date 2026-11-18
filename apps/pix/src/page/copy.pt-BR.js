@@ -4,11 +4,23 @@
 
 export const copy = {
   brand: 'Corridex',
+  // Barra de título das etapas (a escolha mostra a marca).
+  nav: {
+    payment: 'Pagamento',
+    trial: 'Teste grátis',
+    help: 'Ajuda',
+  },
+  choose: {
+    title: 'Assine o Corridex com Pix',
+    sub: 'Pagamento único. Não renova sozinho.',
+  },
   plan: {
     title: 'Corridex {plano}',
     legend: 'Plano',
     summary: '{duração} de monitoramento. Não renova sozinho.',
     payOnce: 'Pix, pagamento único',
+    perMonth: '{duração} · {valor}/mês',
+    best: 'Mais vantajoso',
   },
   email: {
     label: 'Seu e-mail',
@@ -18,6 +30,14 @@ export const copy = {
   },
   pix: {
     cta: 'Gerar Pix',
+    ctaWithPrice: 'Gerar Pix · {valor}',
+    copyShort: 'Copiar',
+    step1: 'Copie o código acima',
+    step2: 'Abra o app do seu banco',
+    step3: 'Escolha Pix Copia e Cola e cole',
+    showQr: 'Mostrar QR Code',
+    waitingLong: 'Aguardando pagamento. Esta tela muda sozinha.',
+    validShort: 'Vale até {hora} · {minutos} min',
     copy: 'Copiar código Pix',
     payTitle: 'Pague {valor} com Pix',
     copied: 'Código copiado. Cole no app do seu banco.',
@@ -35,6 +55,8 @@ export const copy = {
   code: {
     label: 'Seu código',
     redeem: 'Resgatar código',
+    redeemStore: 'Resgatar na App Store',
+    meta: 'Resgate até {data} · enviado para {email}',
     redeemHint: 'Abre a App Store com o código já preenchido.',
     sentTo: 'Também enviamos para {email}. O código vale uma vez só.',
     redeemBy: 'Resgate até {data}.',
@@ -87,6 +109,8 @@ export const copy = {
   order: {
     title: 'Seu pedido',
     paidOn: 'Pago em {data} por Pix',
+    paidOnLabel: 'Pago em',
+    paidOnValue: '{data} · Pix',
   },
   help: {
     title: 'O código não funcionou?',
