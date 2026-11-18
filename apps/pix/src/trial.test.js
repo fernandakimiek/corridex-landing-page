@@ -19,6 +19,38 @@ test('GET com tokens: pedido do e-mail com campos ocultos', async () => {
   assert.equal(doc.querySelector('input[name=teste]').value, '1');
 });
 
+test('GET com tokens: cabeçalho, barra com "Liberar 7 dias grátis" (form) e "Voltar aos planos"', async () => {
+  const ctx = makeApp();
+  const doc = await dom(await ctx.app.request(`/pix/teste${Q}`));
+  assert.equal(doc.querySelector('header.nav').textContent.trim(), 'Teste grátis');
+  const hero = doc.querySelector('main .hero');
+  assert.ok(hero.querySelector('svg[aria-hidden=true]'));
+  assert.equal(hero.querySelector('h1').textContent.trim(), 'Testar 7 dias grátis');
+  assert.equal(hero.querySelector('.sub').textContent.trim(), 'Sem pagamento. Não renova sozinho.');
+  const form = doc.getElementById('teste');
+  assert.equal(form.getAttribute('action'), '/pix/teste');
+  assert.ok(form.contains(doc.querySelector('input[name=email]')));
+  const bar = doc.querySelector('.screen > .bar');
+  const button = bar.querySelector('button[form=teste]');
+  assert.equal(button.textContent.trim(), 'Liberar 7 dias grátis');
+  assert.equal(button.closest('form'), null);
+  assert.equal(button.form, form);
+  const back = [...bar.querySelectorAll('a')].find((a) => a.textContent.trim() === 'Voltar aos planos');
+  assert.ok(back);
+  assert.equal(back.getAttribute('href'), '/pix?teste=1&dc_ler=LER1&dc_marcar=MAR1');
+});
+
+test('envio do formulário completo do teste → código liberado', async () => {
+  const ctx = makeApp();
+  const doc = await dom(await ctx.app.request(`/pix/teste${Q}&email=a%40b.com`));
+  const form = doc.getElementById('teste');
+  const fields = [...doc.querySelectorAll('input')].filter((el) => el.form === form && el.name);
+  const body = new URLSearchParams(fields.map((el) => [el.name, el.value]));
+  body.set('email', 'motorista@email.com');
+  const res = await ctx.app.request(form.getAttribute('action'), { method: 'POST', body });
+  assert.equal((await dom(res)).querySelector('h1').textContent.trim(), '7 dias grátis liberados');
+});
+
 test('GET sem token, token parcial, cenário e aparelho usado: mesma tela "já usou"', async () => {
   const ctx = makeApp();
   ctx.stores.trials.mark('USADO');

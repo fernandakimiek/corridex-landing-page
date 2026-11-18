@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { brl, maskEmail, groupCode, dateBR, dateBRFromMs, timeBR, redeemUrl } from './format.js';
+import { brl, perMonth, maskEmail, groupCode, dateBR, dateBRFromMs, timeBR, redeemUrl } from './format.js';
+import { PLANS } from '../plans.js';
 import { t } from './copy.pt-BR.js';
 
 test('brl', () => {
@@ -42,4 +43,11 @@ test('dateBRFromMs usa o fuso de Brasília', () => {
   assert.equal(dateBRFromMs(Date.UTC(2026, 10, 17, 15, 0, 0)), '17/11/2026');
   // 01:30 UTC de 18/11 ainda é 17/11 em Brasília (UTC-3).
   assert.equal(dateBRFromMs(Date.UTC(2026, 10, 18, 1, 30, 0)), '17/11/2026');
+});
+
+test('perMonth: preço por mês dos planos de mais de 1 mês', () => {
+  assert.equal(perMonth(PLANS.mensal), null);
+  assert.equal(perMonth(PLANS.trimestral), 'R$ 8,63');
+  assert.equal(perMonth(PLANS.anual), 'R$ 8,33');
+  assert.deepEqual(Object.values(PLANS).map((p) => p.months), [1, 3, 12]);
 });

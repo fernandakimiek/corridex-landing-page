@@ -45,7 +45,9 @@ test('CodeHelp e TrialRequest', async () => {
   assert.equal(help.querySelector('a').getAttribute('href'), 'https://wa.me/message/ON3GNOTDII42F1');
   const trial = await frag(TrialRequest({ dcLer: 'a"b', dcMarcar: 'c', email: '' }));
   assert.equal(trial.querySelector('[name=dc_ler]').value, 'a"b');
-  assert.equal(trial.querySelector('button').textContent, copy.trial.cta);
+  // O botão fica na barra de ação (form="teste"), fora do formulário.
+  assert.equal(trial.querySelector('form').id, 'teste');
+  assert.equal(trial.querySelector('button'), null);
 });
 
 test('Notice error tem role=alert; EmailField liga o erro por aria-describedby', async () => {

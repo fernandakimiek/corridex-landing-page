@@ -10,6 +10,9 @@ export function remaining(expiresAtMs, nowMs) {
   return { minutes: Math.max(0, Math.ceil(ms / 60_000)), expired: ms <= 0 };
 }
 
+// Rótulo do botão da barra da escolha ("Gerar Pix · R$ X") para o rádio de plano.
+export const ctaLabelFor = (radio) => radio?.dataset?.cta ?? null;
+
 if (typeof document !== 'undefined') {
   const start = Date.now();
   let screen = document.querySelector('.screen');
@@ -103,6 +106,18 @@ if (typeof document !== 'undefined') {
       if (field) { field.focus(); field.select(); }
     }
   });
+
+  // Escolha: o botão da barra acompanha o plano marcado (sem JS, mostra o do servidor).
+  const syncCta = (radio) => {
+    const label = ctaLabelFor(radio);
+    const btn = document.querySelector('button[form=pedido]');
+    if (label && btn) btn.textContent = label;
+  };
+  document.addEventListener('change', (e) => {
+    if (e.target.matches && e.target.matches('input[name=plano]')) syncCta(e.target);
+  });
+  // Voltar no navegador pode restaurar outro rádio marcado.
+  window.addEventListener('pageshow', () => syncCta(document.querySelector('input[name=plano]:checked')));
 
   if (screen) init(screen, true);
 }

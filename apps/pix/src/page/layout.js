@@ -1,13 +1,6 @@
 import { html, raw } from 'hono/html';
 import { copy, dev } from './copy.pt-BR.js';
 import { Brand } from './components.js';
-import { PLANS } from '../plans.js';
-
-// Sem JS, o resumo do plano acompanha o rádio marcado via :has().
-// Sem suporte a :has(), fica o resumo do plano que veio do servidor.
-const planRules = Object.keys(PLANS)
-  .map((id) => `main:has([name=plano][value=${id}]:checked) .sum[data-plan=${id}]`)
-  .join(',');
 
 // Visual do app iPhone (app-design.md): cores de sistema, cartões 16 px, botões cápsula.
 // Contraste: todo texto ≥ 4,5:1 sobre o fundo onde aparece, nos dois temas.
@@ -63,8 +56,9 @@ a{color:var(--info-text)}
 .brand{display:flex;align-items:center;gap:.5rem;font-weight:600}
 .brand i{width:22px;height:22px;border-radius:6px;background:var(--brand)}
 .card{background:var(--surface);border-radius:16px;padding:1rem}
-.hero{flex-direction:column;gap:.5rem;text-align:center}
-.hero p:first-of-type{font-size:.9375rem;color:var(--label2)}
+/* Cabeçalho de etapa (escolha, teste grátis): ícone 44 px tingido, título 22 px */
+.hero{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.hero .ic{width:44px;height:44px;color:var(--tone-text)}
 .hero-ic{display:flex;justify-content:center;color:var(--accent)}
 .hero-ic .ic{width:44px;height:44px}
 [data-tone=info]{--tone:var(--accent);--tone-text:var(--info-text)}
@@ -87,16 +81,19 @@ a{color:var(--info-text)}
 :checked+.pc .i-on,.cur .i-on{display:block}
 :checked+.pc .i-off,.cur .i-off{display:none}
 :focus-visible+.pc{outline:3px solid var(--accent);outline-offset:2px}
-.pn{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
+.pt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.pn{font-weight:600;overflow-wrap:anywhere}
+.pd{font-size:.8125rem;color:var(--label2)}
+/* selo "Mais vantajoso": branco sobre #8C5000 (6,6:1), igual nos dois temas */
+.badge{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#8C5000;color:#FFF;font-size:.6875rem;font-weight:700;vertical-align:2px}
 .pp{font-weight:600;font-variant-numeric:tabular-nums}
 .plan.off{cursor:not-allowed}.off .pc{color:var(--label2)}
 .tag{display:inline-block;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--warning-icon) 15%,var(--surface));color:var(--warning-text);font-size:.75rem;font-weight:700}
-.sum{display:none}.sum.on{display:flex}
-@supports selector(:has(a)){main:has([name=plano]:checked) .sum{display:none}${planRules}{display:flex}}
-.price{font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
 .field{display:flex;flex-direction:column;gap:.375rem}
-.field label{font-weight:600}
-.field input{width:100%;min-height:2.75rem;padding:.625rem .75rem;border:1px solid var(--field-border);border-radius:10px;background:var(--surface);color:var(--label);font:inherit}
+/* Grupo inset do iOS: rótulo em caixa alta pequena, campo surface raio 12, nota embaixo */
+.field label{padding-left:16px;font-size:.8125rem;color:var(--label2);text-transform:uppercase;letter-spacing:.02em}
+.field input{width:100%;min-height:2.75rem;padding:.8125rem 1rem;border:1px solid transparent;border-radius:12px;background:var(--surface);color:var(--label);font:inherit}
+.field .note,.field .err{padding-left:16px}
 .field input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
 .field [aria-invalid=true]{border-color:var(--error-icon)}
 .err{color:var(--error-text);font-size:.9375rem}
@@ -115,7 +112,7 @@ a{color:var(--info-text)}
 @keyframes spin{to{transform:rotate(1turn)}}
 .toast{min-height:1.4em;text-align:center;color:var(--success-text);font-weight:600}
 .links{text-align:center;font-size:.8125rem;color:var(--label2)}
-.links a{display:inline-block;padding:.75rem .25rem;min-height:44px;color:var(--info-text)}
+.links a{display:inline-block;padding:.75rem .5rem;min-height:44px;color:var(--info-text);text-decoration:none}
 /* Barra de dev: faixa estática no topo, fora do fluxo da barra de ação */
 .devbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.25rem .75rem;padding:calc(.25rem + env(safe-area-inset-top)) 1rem .25rem;background:var(--surface);border-bottom:1px solid var(--card-border);font-size:.75rem;color:var(--label2)}
 .devbar a{color:var(--info-text)}

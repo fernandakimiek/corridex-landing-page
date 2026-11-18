@@ -7,6 +7,14 @@ export function brl(cents) {
   return `R$ ${String(reais).replace(/\B(?=(\d{3})+(?!\d))/g, '.')},${centavos}`;
 }
 
+// Preço por mês dos planos de mais de 1 mês ('R$ 8,63'); null no plano de 1 mês.
+// Arredonda ao centavo mais próximo: o Anual (9990 / 12 = 832,5) mostra R$ 8,33,
+// como na maquete aprovada (para baixo daria R$ 8,32).
+export function perMonth(plan) {
+  if (!plan.months || plan.months <= 1) return null;
+  return brl(Math.round(plan.amountCents / plan.months));
+}
+
 // 'motorista@email.com' → 'm•••@email.com'
 export function maskEmail(email) {
   const at = email.lastIndexOf('@');

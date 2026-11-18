@@ -24,3 +24,15 @@ test('remaining: minutos arredondados para cima, mínimo 0', async () => {
   assert.deepEqual(remaining(0, 0), { minutes: 0, expired: true });
   assert.deepEqual(remaining(0, 1), { minutes: 0, expired: true });
 });
+
+test('ctaLabelFor: rótulo do botão da barra vem do data-cta do rádio', async () => {
+  const { ctaLabelFor } = await load();
+  assert.equal(ctaLabelFor({ dataset: { cta: 'Gerar Pix · R$ 9,90' } }), 'Gerar Pix · R$ 9,90');
+  assert.equal(ctaLabelFor({ dataset: {} }), null);
+  assert.equal(ctaLabelFor(null), null);
+});
+
+test('pix.js continua abaixo de 5 KB', async () => {
+  const { statSync } = await import('node:fs');
+  assert.ok(statSync(new URL('../public/pix/assets/pix.js', import.meta.url)).size < 5000);
+});

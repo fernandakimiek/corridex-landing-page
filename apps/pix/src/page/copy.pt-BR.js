@@ -17,8 +17,6 @@ export const copy = {
   plan: {
     title: 'Corridex {plano}',
     legend: 'Plano',
-    summary: '{duração} de monitoramento. Não renova sozinho.',
-    payOnce: 'Pix, pagamento único',
     perMonth: '{duração} · {valor}/mês',
     best: 'Mais vantajoso',
   },
@@ -29,7 +27,6 @@ export const copy = {
     change: 'Usar este e-mail',
   },
   pix: {
-    cta: 'Gerar Pix',
     ctaWithPrice: 'Gerar Pix · {valor}',
     copyShort: 'Copiar',
     step1: 'Copie o código acima',

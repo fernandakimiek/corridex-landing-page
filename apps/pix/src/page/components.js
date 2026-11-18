@@ -1,6 +1,6 @@
 import { html, raw } from 'hono/html';
 import { copy, t, links } from './copy.pt-BR.js';
-import { brl, maskEmail, groupCode, dateBR, timeBR, redeemUrl } from './format.js';
+import { brl, perMonth, maskEmail, groupCode, dateBR, timeBR, redeemUrl } from './format.js';
 
 // Blocos reutilizáveis das telas do Pix. Todo texto vem de copy.pt-BR.js.
 // Valores interpolados são escapados pelo hono/html; `raw` só para SVG/CSS nossos
@@ -28,9 +28,11 @@ const TINTED = {
   clock: svg('ic tint', `${TINT(0.15)}<circle cx="14" cy="14" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M14 9.6v4.8l3 1.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`),
   // gift: teste grátis
   gift: svg('ic tint', `${TINT(0.12)}<rect x="7.5" y="11" width="13" height="3" rx=".8" fill="currentColor"/><rect x="8.5" y="14.6" width="11" height="6.4" rx=".8" fill="currentColor"/><rect x="13.2" y="11" width="1.6" height="10" fill="#FFF"/><path d="M14 11c-1-2.6-4.2-3.2-4.2-1.2 0 1.2 2.2 1.2 4.2 1.2Zm0 0c1-2.6 4.2-3.2 4.2-1.2 0 1.2-2.2 1.2-4.2 1.2Z" fill="none" stroke="currentColor" stroke-width="1.3"/>`),
+  // bolt.fill: cabeçalho da escolha
+  bolt: svg('ic tint', `${TINT(0.12)}<path d="M15.3 5.7 8.3 15.3h5.1l-1.3 7 7-9.6h-5.1Z" fill="currentColor"/>`),
 };
 // Tom (cores) de cada ícone de resultado.
-const HERO_TONE = { clock: 'warning', gift: 'info' };
+const HERO_TONE = { clock: 'warning', gift: 'info', bolt: 'info' };
 // Indicador de seleção do cartão de plano: circle / checkmark.circle.fill (22 px).
 const PICK = svg('i-off', '<circle cx="11" cy="11" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/>', 22)
   + svg('i-on', '<circle cx="11" cy="11" r="11" fill="currentColor"/><path d="m6.5 11.5 3 3 6-6.8" fill="none" stroke="#FFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>', 22);
@@ -78,20 +80,39 @@ export function ResultHero({ tone = 'success', title, body }) {
   return html`<div class="result-hero" data-tone="${HERO_TONE[tone] ?? tone}">${raw(icon)}<h1>${title}</h1>${body ? html`<p class="sub">${body}</p>` : ''}</div>`;
 }
 
-// Termos, Privacidade e Ajuda (fim do conteúdo da escolha).
-export function FooterLinks() {
-  return html`<footer class="links"><p>${copy.footer.bank} · <a href="${links.terms}">${copy.footer.terms}</a> · <a href="${links.privacy}">${copy.footer.privacy}</a> · <a href="${links.help}">${copy.footer.help}</a></p></footer>`;
+// Cabeçalho de etapa (escolha, teste grátis): ícone de 44 px tingido, título e subtítulo.
+export function Hero({ icon, title, sub }) {
+  return html`<div class="hero" data-tone="${HERO_TONE[icon] ?? 'info'}">${raw(TINTED[icon] ?? '')}<h1>${title}</h1>${sub ? html`<p class="sub">${sub}</p>` : ''}</div>`;
 }
 
-// Seletor de plano: cartões empilhados como no app (indicador + nome + preço, borda 2 px).
+// Termos, Privacidade e Ajuda: links discretos no fim do conteúdo da escolha.
+export function FooterLinks() {
+  return html`<footer class="links"><a href="${links.terms}">${copy.footer.terms}</a> · <a href="${links.privacy}">${copy.footer.privacy}</a> · <a href="${links.help}">${copy.footer.help}</a></footer>`;
+}
+
+// Plano com o selo "Mais vantajoso" (menor preço por mês).
+const BEST_PLAN_ID = 'anual';
+
+// Rótulo do botão da barra da escolha com o preço do plano.
+export const ctaLabel = (plan) => t(copy.pix.ctaWithPrice, { valor: brl(plan.amountCents) });
+
+// Seletor de plano: cartões empilhados como no paywall do app (indicador, nome em negrito
+// com a duração e o preço por mês embaixo, preço total à direita, borda 2 px).
+// O Anual leva o selo "Mais vantajoso".
 // Modo rádio (padrão): rádios reais dentro do form, funciona sem JS e com setas.
+// Cada rádio leva em data-cta o rótulo do botão da barra (o pix.js troca ao mudar).
 // Modo link (`linkTo(id) → href`): usado quando não há botão de envio (avisos);
 // cada plano disponível vira um link para ?plano=<id>.
 // Indisponível: nome riscado + selo "indisponível" (nunca só cor), sem interação.
 export function PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds = [], linkTo }) {
-  const card = (plan, off) => html`<span class="pc">${raw(PICK)}<span class="pn">${
-    off ? html`<s>${plan.name}</s> <span class="tag">${copy.stock.unavailableTag}</span>` : plan.name
-  }</span><span class="pp">${brl(plan.amountCents)}</span></span>`;
+  const card = (plan, off) => {
+    const month = perMonth(plan);
+    const detail = month ? t(copy.plan.perMonth, { 'duração': plan.durationLabel, valor: month }) : plan.durationLabel;
+    const name = off
+      ? html`<s>${plan.name}</s> <span class="tag">${copy.stock.unavailableTag}</span>`
+      : html`${plan.name}${plan.id === BEST_PLAN_ID ? html` <span class="badge">${copy.plan.best}</span>` : ''}`;
+    return html`<span class="pc">${raw(PICK)}<span class="pt"><span class="pn">${name}</span><span class="pd">${detail}</span></span><span class="pp">${brl(plan.amountCents)}</span></span>`;
+  };
   const list = Object.values(plans);
   if (linkTo) {
     const items = list.map((plan) => {
@@ -105,22 +126,10 @@ export function PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds = [], l
   const items = list.map((plan) => {
     const off = unavailablePlanIds.includes(plan.id);
     const checked = plan.id === selectedPlanId && !off;
-    return html`<label class="plan${off ? ' off' : ''}"><input type="radio" name="plano" value="${plan.id}"${checked ? raw(' checked') : ''}${off ? raw(' disabled') : ''}>${card(plan, off)}</label>`;
+    return html`<label class="plan${off ? ' off' : ''}"><input type="radio" name="plano" value="${plan.id}" data-cta="${ctaLabel(plan)}"${checked ? raw(' checked') : ''}${off ? raw(' disabled') : ''}>${card(plan, off)}</label>`;
   });
   return html`<fieldset class="plans" role="radiogroup"><legend class="vh">${copy.plan.legend}</legend>${items}</fieldset>`;
 }
-
-// Cartão do plano. `on` = visível sem depender de :has() (plano escolhido no servidor).
-export function PlanSummary({ plan, on = true, heading = 'h2' }) {
-  const h = heading === 'h1' ? html`<h1>${planTitle(plan)}</h1>` : html`<h2>${planTitle(plan)}</h2>`;
-  return html`<section class="sum hero${on ? ' on' : ''}" data-plan="${plan.id}">
-${h}
-<p>${t(copy.plan.summary, { 'duração': capitalize(plan.durationLabel) })}</p>
-<p><span class="price">${brl(plan.amountCents)}</span><br><span class="note">${copy.plan.payOnce}</span></p>
-</section>`;
-}
-
-const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // error: true (usa email.invalid) ou um texto. Erro ligado por aria-describedby.
 export function EmailField({ value = '', error, id = 'email' }) {
@@ -206,13 +215,12 @@ export function TrialFields(trial) {
   return html`<input type="hidden" name="teste" value="1"><input type="hidden" name="dc_ler" value="${trial.dcLer}"><input type="hidden" name="dc_marcar" value="${trial.dcMarcar}">`;
 }
 
-// Pedido do teste grátis: tokens do app em campos ocultos.
-export function TrialRequest({ dcLer, dcMarcar, email = '', error, action = '/pix/teste', backHref = '/pix' }) {
-  return html`<form class="stack" method="post" action="${action}">
+// Pedido do teste grátis: tokens do app em campos ocultos. O botão de envio fica na
+// barra de ação (SubmitButton com form="teste"), fora do formulário.
+export function TrialRequest({ dcLer, dcMarcar, email = '', error, action = '/pix/teste', id = 'teste' }) {
+  return html`<form class="stack" id="${id}" method="post" action="${action}">
 ${TrialFields({ dcLer, dcMarcar })}
 ${EmailField({ value: email, error })}
-${SubmitButton({ label: copy.trial.cta })}
-<p class="note center">${copy.trial.help}</p>
-</form>
-${LinkButton({ label: copy.trial.back, href: backHref, variant: 'plain' })}`;
+<p class="note">${copy.trial.help}</p>
+</form>`;
 }

@@ -3,7 +3,7 @@ import { copy, t } from './copy.pt-BR.js';
 import { page } from './layout.js';
 import { brl, maskEmail, dateBRFromMs } from './format.js';
 import {
-  Brand, PlanSwitcher, PlanSummary, EmailField, Notice, SubmitButton, LinkButton, planTitle,
+  Brand, PlanSwitcher, EmailField, Notice, SubmitButton, LinkButton, planTitle, ActionBar, Hero, ctaLabel,
   StateIcon, FooterLinks, PixPayment, PaymentStatus, CodeDelivery, CodeHelp, TrialRequest, TrialFields,
 } from './components.js';
 
@@ -16,18 +16,23 @@ export function choosePath(planId, email) {
   return `/pix?${q}`;
 }
 
-// Escolha do plano.
+// Escolha do plano (paywall do app): cabeçalho, cartões, grupo do e-mail e links;
+// o botão "Gerar Pix · R$ X" fica na barra de ação (form="pedido", fora do form).
 // state: 'choose' | 'plan_out_of_stock' | 'unavailable_for_customer'
 // Com `notice` não há botão "Gerar Pix": os planos viram links para ?plano=<id>
-// (a página continua utilizável sem JS) e o aviso traz "Ver {outro plano}".
+// (a página continua utilizável sem JS), o aviso fica logo abaixo do cabeçalho e a
+// barra traz "Ver {outro plano}" (notice.action), se houver outro.
 export function chooseScreen({
   plans, selectedPlanId, email = '', notice, unavailablePlanIds = [], trialHref, trialSession, emailError,
   state = 'choose', nonce = '', devBar,
 }) {
   const selected = plans[selectedPlanId];
+  const hero = Hero({ icon: 'bolt', title: copy.choose.title, sub: copy.choose.sub });
   const trial = trialHref ? LinkButton({ label: copy.trial.link, href: trialHref, variant: 'plain' }) : '';
+  const nav = { brand: true };
 
   if (notice) {
+    const { action, ...info } = notice;
     // Trocar o e-mail recarrega a escolha deste plano (GET), sem gerar Pix.
     // Sem estoque, o campo só aparece se já há e-mail (ex.: pedido vencido que não renovou).
     const emailForm = state === 'unavailable_for_customer' || (state === 'plan_out_of_stock' && email)
@@ -37,32 +42,29 @@ ${EmailField({ value: email, error: emailError })}
 ${SubmitButton({ label: copy.email.change, variant: 'secondary' })}
 </form>`
       : '';
-    const body = html`${Brand()}
-<h1>${planTitle(selected)}</h1>
+    const body = html`${hero}
+${Notice({ ...info, tone: info.tone ?? 'warning' })}
 ${PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds, linkTo: (id) => choosePath(id, email) })}
-${Notice({ ...notice, tone: notice.tone ?? 'warning' })}
 ${emailForm}
 ${trial}
 ${FooterLinks()}`;
-    return page({ title: planTitle(selected), body, state, devBar });
+    const bar = action ? ActionBar({ primary: LinkButton(action) }) : undefined;
+    return page({ title: planTitle(selected), nav, body, bar, state, devBar });
   }
 
-  // Um resumo por plano disponível; o h1 de cada um é "Corridex {Plano}".
-  // Só o do plano marcado aparece (CSS :has; sem :has, o escolhido no servidor).
-  const summaries = Object.values(plans)
-    .filter((plan) => !unavailablePlanIds.includes(plan.id))
-    .map((plan) => PlanSummary({ plan, on: plan.id === selectedPlanId, heading: 'h1' }));
-  const body = html`${Brand()}
-${summaries}
-<form class="stack" method="post" action="/pix/pedidos" novalidate>
+  const body = html`${hero}
+<form class="stack" id="pedido" method="post" action="/pix/pedidos" novalidate>
 <input type="hidden" name="nonce" value="${nonce}">${TrialFields(trialSession)}
 ${PlanSwitcher({ plans, selectedPlanId, unavailablePlanIds })}
 ${EmailField({ value: email, error: emailError })}
-${SubmitButton({ label: copy.pix.cta })}
 </form>
 ${trial}
 ${FooterLinks()}`;
-  return page({ title: planTitle(selected), body, state, devBar });
+  const bar = ActionBar({
+    primary: SubmitButton({ label: ctaLabel(selected), form: 'pedido' }),
+    note: copy.footer.bank,
+  });
+  return page({ title: planTitle(selected), nav, body, bar, state, devBar });
 }
 
 // Venda pausada (PIX_SALES_ENABLED=false, sem provedor ou cenário "pausado").
@@ -154,11 +156,16 @@ ${LinkButton({ label: copy.notFound.cta, href: '/pix' })}`;
   return page({ title: copy.notFound.title, body, state: 'not_found', devBar });
 }
 
-// Teste grátis: pedido do e-mail. Os tokens do app seguem em campos ocultos.
+// Teste grátis: pedido do e-mail. Os tokens do app seguem em campos ocultos;
+// "Liberar 7 dias grátis" fica na barra (form="teste") com "Voltar aos planos".
 export function trialRequestScreen({ dcLer, dcMarcar, email = '', error, backHref = '/pix', devBar }) {
-  const body = html`<div class="stack"><h1>${copy.trial.title}</h1><p>${copy.trial.sub}</p></div>
-${TrialRequest({ dcLer, dcMarcar, email, error, backHref })}`;
-  return page({ title: copy.trial.title, body, state: 'trial', devBar });
+  const body = html`${Hero({ icon: 'gift', title: copy.trial.title, sub: copy.trial.sub })}
+${TrialRequest({ dcLer, dcMarcar, email, error, id: 'teste' })}`;
+  const bar = ActionBar({
+    primary: SubmitButton({ label: copy.trial.cta, form: 'teste' }),
+    secondary: LinkButton({ label: copy.trial.back, href: backHref, variant: 'plain' }),
+  });
+  return page({ title: copy.trial.title, nav: { title: copy.nav.trial }, body, bar, state: 'trial', devBar });
 }
 
 // Mesma mensagem para qualquer motivo (sem token, aparelho já usado).
